@@ -1,0 +1,507 @@
+﻿@model MippPortalWebAPI.Models.Workorder
+
+@{
+    ViewData["Title"] = "Edit";
+    var workorderId = ViewBag.Id;
+    var clientId = ViewBag.clientId;
+    Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
+
+}
+
+@*<h1>Edit</h1>
+*@
+<style>
+    p {
+    margin: 0 0 1em;
+}
+
+.comment {
+    overflow: hidden;
+    padding: 0 0 1em;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 1em;
+    *zoom: 1;
+}
+
+.comment-img {
+    float: left;
+    margin-right: 33px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.comment-img img {
+    display: block;
+}
+
+.comment-body {
+    overflow: hidden;
+}
+
+.comment .text {
+    padding: 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.comment .text p:last-child {
+    margin: 0;
+}
+
+.comment .attribution {
+    margin: 0.5em 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Decoration */
+
+.comments,
+.comment {
+    position: relative;
+}
+
+.comments:before,
+.comment:before,
+.comment .text:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 65px;
+}
+
+.comments:before {
+    width: 3px;
+    top: -20px;
+    bottom: -20px;
+    background: rgba(0,0,0,0.1);
+}
+
+.comment:before {
+    width: 9px;
+    height: 9px;
+    border: 3px solid #fff;
+    border-radius: 100px;
+    margin: 16px 0 0 -6px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2), inset 0 1px 1px rgba(0,0,0,0.1);
+    background: #ccc;
+}
+
+.comment:hover:before {
+    background: orange;
+}
+
+.comment .text:before {
+    top: 18px;
+    left: 78px;
+    width: 9px;
+    height: 9px;
+    border-width: 0 0 1px 1px;
+    border-style: solid;
+    border-color: #e5e5e5;
+    background: #fff;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+}​
+</style>
+
+<div class="card card-default">
+
+<div class="card-header">
+<h3 class="card-title">Workorder Details</h3>
+<button class="btn btn-secondary" id="commentsSection" style="float:right">Comments</button>
+@*<div class="card-tools">
+<button type="button" class="btn btn-tool" data-card-widget="collapse">
+<i class="fas fa-minus"></i>
+</button>
+<button type="button" class="btn btn-tool" data-card-widget="remove">
+<i class="fas fa-times"></i>
+</button>
+</div>*@
+        <div id="overlay" style="position: fixed;
+                                top: 50%;
+    left: 60%;
+    width: 25%;
+    height: 70%;
+                        transform: translate(-50%, -50%);
+                        background-color: #fff;
+                        border: 1px solid #ccc;
+                        padding: 20px;
+                        display: none;
+z-index: 1;"></div>
+</div>
+
+    <form asp-action="Edit">
+<div class="card-body">
+        <div id='title' align="center" style=" background-color: lightblue;
+    height: 20%;
+    text-align: center;
+    overflow:auto;">
+            <h2>replace sink in the unit</h2>
+        </div>
+            <div class="form-horizontal" style="display: flex;
+    width: 36vw;
+    justify-content: space-between;">
+
+            <div class="col-sm-6">
+              
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="col-sm-12" style="
+    margin-top: 6%;
+">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ClientId" />
+                    <input type="hidden" asp-for="VendorId" />
+                    <p>Assigned To:</p>
+                    <div class="form-group" style="width: max-content;">
+                        <label asp-for="AssignedTo" class="control-label">Name: </label>
+                            <input asp-for="AssignedTo" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="AssignedTo" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" style="width: max-content;">
+                        <label asp-for="AssignedToCompany" class="control-label">Company: </label>
+                            <input asp-for="AssignedToCompany" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="AssignedToCompany" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" style="width: max-content;">
+                        <label asp-for="AssignedToAddress" class="control-label">Location: </label>
+                            <input asp-for="AssignedToAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="AssignedToAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" style="width: max-content;">
+                        <label asp-for="AssignedToPhone" class="control-label">Phone: </label>
+                        <input asp-for="AssignedToPhone" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="AssignedToPhone" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" style="width: max-content;">
+                        <label asp-for="AssignedToEmailAddress" class="control-label">Email: </label>
+                            <input asp-for="AssignedToEmailAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline; width: 16vw;" />
+                        <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
+                    </div>
+
+                   
+                    <div class="form-inline" style="width: max-content;">
+                        <label asp-for="Status" class="control-label">Status: &nbsp; </label>
+@*                            <input list="@ViewBag.Statuses" class="form-inline">
+                            *@                           
+                            <select id="statuses" style="width: 82%;
+    max-inline-size: max-content;" asp-for="Status" class="form-control">
+                            @foreach (var person in ViewBag.Statuses)
+                            {
+                                if (ViewBag.Status == person)
+                                    {
+                                        <option asp-for="Status" selected="selected" class="form-control">@person</option>
+                                    }
+                                else
+                                    {
+                                        <option asp-for="Status" class="form-control">@person</option>
+                                    }
+
+                            }
+                            </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                    
+
+                    </div>
+                    <div class="col-sm-12" style="
+        margin-left: 45vw;
+    margin-top: -125%;
+">
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="OrderNumber" class="control-label">Order Number: </label>
+                            <input asp-for="OrderNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="OrderDate" class="control-label"> Order Date: </label>
+                            <input asp-for="OrderDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="OrderDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="ExpectedStartDate" class="control-label">Expected Start Date: </label>
+                            <input asp-for="ExpectedStartDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="ExpectedStartDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="ExpectedEndDate" class="control-label">Expected End Date: </label>
+                            <input asp-for="ExpectedEndDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="ExpectedEndDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="ServiceRequestNumber" class="control-label">Service Request Number: </label>
+                            <input asp-for="ServiceRequestNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="ServiceRequestNumber" class="text-danger"></span>
+                        </div>
+
+                     </div>
+                    
+                
+            </div>
+        </div>
+
+</div>
+
+    <div class="card-body">
+        <div id='title' align="center" style=" background-color: lightblue;
+    height: 20%;
+    text-align: center;
+    overflow:auto;">
+            <h2>Tenant & Unit Information</h2>
+        </div>
+            <div class="form-horizontal" style="display: flex;
+    width: 36vw;
+    justify-content: space-between;">
+
+            <div class="col-sm-6">
+               
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="col-sm-12" style="
+    margin-top: 6%;
+">
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="TenantName" class="control-label">Tenant Name: </label>
+                            <input asp-for="TenantName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="TenantName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="TenantEmailAddress" class="control-label">Email: </label>
+                            <input asp-for="TenantEmailAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="TenantEmailAddress" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="TenantPhoneNumber" class="control-label">Phone: </label>
+                            <input asp-for="TenantPhoneNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="TenantPhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="UnitName" class="control-label">Unit: </label>
+                            <input asp-for="UnitName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="UnitName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="UnitAddress" class="control-label">Location: </label>
+                            <input asp-for="UnitAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="UnitAddress" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="Note" class="control-label">Note: </label>
+                            <input asp-for="Note" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="Note" class="text-danger"></span>
+                        </div>
+                       
+                    </div>
+                    <div class="col-sm-12" style="
+         margin-left: 45vw;
+    margin-top: -124%;
+">
+                         <div class="form-group" style="width: max-content;">
+                            <label asp-for="PreferredTime" class="control-label">Preferred Time: </label>
+                            <input asp-for="PreferredTime" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                            <span asp-validation-for="PreferredTime" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label style="font-weight:inherit">
+                                Anytime
+                                <input id="catswitch1" type="checkbox" checked="checked" />
+                                <label for="thing" style="cursor: pointer"></label>
+                            </label>
+                            <br />
+                            <label style="font-weight:inherit">
+                                By Appointment
+                                <input id="catswitch1" type="checkbox" />
+                                <label for="thing" style="cursor: pointer"></label>
+                            </label>
+                            @*<span><input class="form-inline" type="checkbox" name="Anytime" value="Anytime" />Anytime</span>
+                            <span><input class="form-inline" type="checkbox" name="By Appointment" value="By Appointment" />By Appointment</span>
+                            *@                        <span asp-validation-for="EnterCondition" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="PermissionNote" class="control-label">Permission Note: </label>
+                            <input asp-for="PermissionNote" type="textarea" class="form-control" style="background-color:white; display:inline" />
+                            <span asp-validation-for="PermissionNote" class="text-danger"></span>
+                        </div>
+
+                    </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card-body">
+        <div id='title' align="center" style="background-color: lightblue;
+    height: 20%;
+    text-align: center;
+    overflow:auto;">
+            <h2>Work Description</h2>
+        </div>
+            <div class="form-horizontal" style="display: flex;
+    width: 36vw;
+    justify-content: space-between;">
+
+            <div class="col-sm-6">
+              
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="col-sm-12" style="
+    margin-top: 6%;
+">
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="Description" class="control-label">Requested Work Description: </label>
+                            <input asp-for="Description" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="AdditionalComments" class="control-label">Additional Comments: </label>
+                            <input asp-for="AdditionalComments" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 91%;" />
+                            <span asp-validation-for="AdditionalComments" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="ExpectedNoOfHoursToComplete" class="control-label">Expected Number Of Hours To Complete: </label>
+                            <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 67%;" />
+                            <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
+                        </div>
+                         
+                    </div>
+                    <div class="col-sm-12" style="
+             margin-left: 40vw;
+    margin-top: -119%;">
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="WorkPerformedBy" class="control-label">Work Perfomed By: </label>
+                            <input asp-for="WorkPerformedBy" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
+                            <span asp-validation-for="WorkPerformedBy" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
+                            <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+                            <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="TotalHoursSpent" class="control-label">Total hours spent: </label>
+                            <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+                            <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                    
+
+            </div>
+        </div>
+
+    </div>
+
+        <div class="card-body">
+            <div id='title' align="center" style="background-color: lightblue;
+    height: 20%;
+    text-align: center;
+    overflow:auto;">
+                <h2>Comments Section</h2>
+                <section class="comments">
+                    <article class="comment">
+                        <a class="comment-img" href="#non">
+                            <img src="https://pbs.twimg.com/profile_images/444197466133385216/UA08zh-B.jpeg" alt="" width="50" height="50">
+                        </a>
+                        <div class="comment-body">
+                            <div class="text">
+                                <p>Hello, this is an example from me</p>
+                            </div>
+                            <p class="attribution">by <a href="#non">Besnik Hetemi</a> at 14:23pm, 4 Dec 2015</p>
+                        </div>
+                    </article>
+                    <article class="comment">
+                        <a class="comment-img" href="#non">
+                            <img src="https://pbs.twimg.com/profile_images/444197466133385216/UA08zh-B.jpeg" alt="" width="50" height="50">
+                        </a>
+                        <div class="comment-body">
+                            <div class="text">
+                                <p>if you are interested for  more about me visited my profile on social page</p>
+                                <p>To visit me you can click my name  <a target="_blank" href="http://www.facebook.com/besnik.hetemii">Besnik Hetemi</a> and send me frends request or send me a message in inbox</p>
+                            </div>
+                            <p class="attribution">by <a href="#non">Besnik Hetemi</a> at 14:23pm, 4 Dec 2015</p>
+                        </div>
+                    </article>
+                </section>
+        </div>
+<div class="card-footer">
+    <input type="submit" value="Save" class="btn btn-primary" style="display: inline-block;" />
+    </div>
+@*Visit <a href="https://select2.github.io/">Select2 documentation</a> for more examples and information about
+the plugin.*@
+</div>
+    </form>
+
+</div>
+
+
+
+
+@*<div>
+    <a asp-action="Index">Back to List</a>
+</div>*@
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+}
+    
+    <script type="text/javascript">
+        var id = @ViewBag.Id;
+        $("#check").click(function () {
+            debugger;
+            if (id !== 0){
+            $.ajax({
+                type: "POST",
+                url: "Settings/Index",
+                data: {
+                    "id": workorderId,
+                },
+
+                success: function (result) {
+                    
+                }
+            });
+
+
+        }
+            else {
+            alert("Couldn't fetch details, please try again..")
+        }
+
+
+            });
+
+    </script>
+    <script>
+
+        window.onload = function () {
+            var popup = document.getElementById('overlay');
+            var overlay = document.getElementsByClassName('detailBox');
+            document.onclick = function (e) {
+                console.log(e);
+                if (e.target.className != 'close' || e.target.id != 'overlay') {
+                    popup.style.display = 'none';
+                    overlay.style.display = 'none';
+                }
+               
+            };
+        };
+        $('#commentsSection').click(function () {
+            $.ajax({
+                url: '/BillSettings/OverlayPartial',
+                type: 'GET',
+                success: function (response) {
+                    $('#overlay').html(response);
+                    $('#overlay').fadeIn();
+                },
+                error: function (error) {
+                    // Handle error response if needed
+                }
+            });
+        });
+    </script>
+}

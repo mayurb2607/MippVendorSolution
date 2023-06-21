@@ -1,0 +1,521 @@
+﻿@model IEnumerable<MippVendorPortal.ViewModel.SettingViewModel>
+
+@{
+    Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
+    ViewBag.Subtotal = "";
+    ViewBag.Tax = "";
+    ViewBag.Total = "";
+    int tax = 0;
+    var divCounter = 1;
+}
+
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="callout callout-info">
+                <h5><i class="fas fa-info"></i> Note:</h5>
+                This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
+            </div>
+
+            <div class="invoice p-3 mb-3" id="invoice">
+                <div id="overlay" style="position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background-color: #fff;
+                        border: 1px solid #ccc;
+                        padding: 20px;
+                        display: none;"></div>
+                @foreach (var item in Model)
+                {
+
+                    <div class="row invoice-info" id="invoice-table">
+                        <form style="width: 65%; margin-left: auto;">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Title:</label>
+                                    <input type="text" class="form-control" value="@item.Title" id="billTitle">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Summary(optional):</label>
+                                    <input type="text" class="form-control" value="@item.Summary" id="summary">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="@item.BusinessName">Bill To:</label>
+                                    <input type="text" class="form-control" value="@item.BusinessName" id="billTo">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="@item.CareOf">Care Of:</label>
+                                    <input type="text" class="form-control" value="@item.CareOf" id="careOf">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="@item.AddressLine1">Address</label>
+                                <input type="text" class="form-control" value="@item.AddressLine1" id="inputAddress">
+                            </div>
+                            <div class="form-group">
+                                <label for="@item.AddressLine2">Address 2</label>
+                                <input type="text" class="form-control" value="@item.AddressLine2" id="inputAddress2">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="inputCity">City</label>
+                                    <input type="text" class="form-control" value="@item.City" id="city">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputState">Province</label>
+                                    <input type="text" class="form-control" value="@item.Province" id="province">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputZip">Zip</label>
+                                    <input type="text" class="form-control" value="@item.Zip" id="zip">
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="col-sm-4 invoice-col">
+                            <form>
+
+                                <div class="form-group">
+                                    <label>Invoice:</label>
+                                    <input type="text" class="form-control" value=" #007612" id="invoice">
+                                </div>
+                                <div class="form-group">
+                                    <label>Workorder ID:</label>
+                                    <input type="text" class="form-control" value="@item.Id" id="woId">
+                                </div>
+                                <div class="form-group">
+                                    <label for="@item.BillDate">Bill Date:</label>
+                                    <input type="date" class="form-control" value="@item.BillDate" id="billDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="@item.DueDate">Due Date:</label>
+                                    <input type="date" class="form-control" value="@item.DueDate" id="dueDate">
+                                </div>
+
+                            </form>
+                        </div>
+
+                    </div>
+
+                }
+
+                <div id="billItems">
+                    <div style="border:solid 2px gray; padding: 1%;" id="billItem">
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <label>Item</label>
+                                <input type="text" class="form-control" id="item">
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label>Unit</label>
+                                <input type="text" class="form-control" id="unit">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label>Quantity</label>
+                                <input type="number" class="form-control" id="quantity">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Price</label>
+                                <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(event)">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label>Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="amount">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <label>Description</label>
+                                <textarea class="form-control" id="description"></textarea>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label></label>
+                                <select class="form-control" id="taxOptions" onchange="CalculateTax(event)">
+                                    <option>Select Tax rate</option>
+                                    @foreach (var item in ViewBag.taxList)
+                                    {
+                                        <option>@item</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label></label>
+                                <input type="number" step="0.01" class="form-control" id="taxedAmount">
+                            </div>
+                        </div>
+                        <button id="add-row-btn" class="btn btn-primary">Add</button>
+                        <button id="remove-btn" class="btn btn-primary">Delete</button>
+                        @*                    <button id="btnNotify" class="btn btn-primary">Show Notification</button>
+                        *@
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea class="form-control" id="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Footer:</label>
+                    <textarea class="form-control" id="description"></textarea>
+                </div>
+                <div class="row">
+
+                    <div class="col-6">
+                        <p class="lead">Payment Methods:</p>
+                        <img src="../../dist/img/credit/visa.png" alt="Visa">
+                        <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
+                        <img src="../../dist/img/credit/american-express.png" alt="American Express">
+                        <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
+                        <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                            All cards are accepted.
+                        </p>
+                    </div>
+
+                    <div class="col-6">
+                        <p class="lead">Amount Due </p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:50%">Subtotal:</th>
+                                        <td id="subtotals"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tax</th>
+                                        <td id="taxes"></td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Total:</th>
+                                        <td id="totals"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <br />
+                <label id="document">Upload Document</label>
+
+                <form asp-controller="BillSettings" asp-action="Upload" class="dropzone" id="myDropzone"></form>
+                <button asp-controller="BillSettings" asp-action="Upload" class="btn btn-primary" id="myDropzone">Remove</button>
+
+                <br /><br />
+
+                <button id="save-btn" class="btn btn-primary">Save</button>
+
+
+
+
+
+                <div class="row no-print">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success float-right">
+                            <i class="far fa-credit-card"></i> Submit
+                            Payment
+                        </button>
+                        <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;" id="showOverlayButton">
+                            <i class="fas fa-download"></i> Request Change
+                        </button>
+                    </div>
+                </div>
+
+
+                @section Scripts {
+                    <script src="~/dist/js/notify.js"></script>
+                    <script src="~/dist/js/notify.min.js"></script>
+                    <script>
+                        $('#showOverlayButton').click(function () {
+                            $.ajax({
+                                url: '/BillSettings/OverlayPartial',
+                                type: 'GET',
+                                success: function (response) {
+                                    $('#overlay').html(response);
+                                    $('#overlay').fadeIn();
+                                },
+                                error: function (error) {
+                                    // Handle error response if needed
+                                }
+                            });
+                        });
+
+
+                        $(document).ready(function () {
+                            var childCount = 1;
+
+                            // Button click event to add child elements
+                            $("#add-row-btn").click(function () {
+                                console.log("add clicked");
+                                childCount++;
+                                var linebreak = '<br/>';
+                                var newDivId = 'billItem';
+
+                                var newRow = `
+                                                                                                        <br/>
+                                                                                                        <br/>
+                                                                                                                    <div style="border:solid 2px gray; padding: 1%;" id="childInput' + counter + '">
+                                                                                                                    <div class="form-row">
+                                                                                                                    <div class="form-group col-md-3">
+                                                                                                                        <label>Item</label>
+                                                                                                                        <input type="text" class="form-control" id="item">
+                                                                                                                    </div>
+                                                                                                                    <div class="form-group col-md-2">
+                                                                                                                        <label>Unit</label>
+                                                                                                                        <input type="text" class="form-control"id="unit">
+                                                                                                                    </div>
+                                                                                                                    <div class="form-group col-md-2">
+                                                                                                                        <label>Quantity</label>
+                                                                                                                        <input type="number" class="form-control" id="quantity">
+                                                                                                                    </div>
+                                                                                                                        <div class="form-group col-md-3">
+                                                                                                                        <label>Price</label>
+                                                                                                                            <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(event)">
+                                                                                                                    </div>
+                                                                                                                        <div class="form-group col-md-2">
+                                                                                                                        <label>Amount</label>
+                                                                                                                            <input type="number" step="0.01" class="form-control" id="amount">
+                                                                                                                    </div>
+                                                                                                                    </div>
+                                                                                                                    <div class="form-row">
+                                                                                                                        <div class="form-group col-md-8">
+                                                                                                                            <label>Description</label>
+                                                                                                                            <textarea class="form-control" id="description"></textarea>
+                                                                                                                    </div>
+                                                                                                                        <div class="form-group col-md-2">
+                                                                                                                            <label></label>
+                                                                                                                                                     <select class="form-control" onchange="CalculateTax(event)" id="taxOptions">
+                                                                                                                                 <option>Select Tax rate</option>
+                        @foreach (var item in ViewBag.taxList)
+                        {
+                                                                                                                                                  <option>@item</option>
+                        }
+                                                                                                                            </select>
+                                                                                                                        </div>
+                                                                                                                        <div class="form-group col-md-2">
+                                                                                                                            <label></label>
+                                                                                                                            <input type="number" step="0.01" class="form-control" id="taxedAmount">
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                    <button id="add-row-btn" class="btn btn-primary">Add</button>
+                                                                                                                    <button id="remove-btn" class="btn btn-primary">Delete</button>
+                        @*                    <button id="btnNotify" class="btn btn-primary">Show Notification</button>
+                                                                                *@
+                                                                                                                </div>`;
+
+                                // Create the new div element with the generated ID
+
+                                var newDiv = $('<div>', {
+                                    id: newDivId,
+                                    style: "border: solid 2px gray; padding: 1%"
+                                });
+
+
+                                newDiv.append(newRow);
+                                $("#billItems").append(linebreak);
+                                $("#billItems").append(linebreak);
+                                $("#billItems").append(newDiv);
+                                childCount++;
+                            });
+
+
+                            //var clientId = @ViewBag.clientId;
+                            var addCounter = 1 // Initialize a counter for the divs
+
+
+                            $("#remove-btn").click(function () {
+                                document.getElementById("billItems").removeChild(document.getElementById("billItems").children[0]);
+                            });
+
+                            function showNotification(type, message) {
+                                $.notify(message, type);
+                            }
+
+                            $(".dz-remove").click(function () {
+                                console.log("inside remove click");
+
+                            });
+
+                            $("#save-btn").click(function () {
+                                console.log("save button clicked");
+                                console.log(document.getElementById("billTitle").value);
+                                console.log(document.getElementById("summary").value);
+                                console.log(document.getElementById("invoice").value);
+                                console.log(document.getElementById("billTo").value);
+                                console.log(document.getElementById("careOf").value);
+                                console.log(document.getElementById("woId").value);
+                                console.log(document.getElementById("inputAddress").value);
+                                console.log(document.getElementById("inputAddress2").value);
+                                console.log(document.getElementById("city").value);
+                                console.log(document.getElementById("province").value);
+                                console.log(document.getElementById("zip").value);
+                                console.log(document.getElementById("billDate").value);
+                                console.log(document.getElementById("dueDate").value);
+
+                                $.ajax({
+
+                                    type: "POST",
+                                    url: "/BillSettings/Insert",
+                                    data: ({
+                                        item: document.getElementById("item").value,
+                                        description: document.getElementById("description").value,
+                                        quantity: document.getElementById("quantity").value,
+                                        unit: document.getElementById("unit").value,
+                                        price: document.getElementById("price").value,
+                                        tax: document.getElementById('taxOptions').value,
+                                        subtotal: document.getElementById("amount").value,
+                                        total: document.getElementById("taxedAmount").value,
+                                        title: document.getElementById("billTitle").value,
+                                        summary: document.getElementById("summary").value,
+                                        invoice: document.getElementById("invoice").value,
+                                        billTo: document.getElementById("billTo").value,
+                                        careOf: document.getElementById("careOf").value,
+                                        woId: document.getElementById("woId").value,
+                                        addressLine1: document.getElementById("inputAddress").value,
+                                        addressLine2: document.getElementById("inputAddress2").value,
+                                        city: document.getElementById("city").value,
+                                        province: document.getElementById("province").value,
+                                        zip: document.getElementById("zip").value,
+                                        billDate: document.getElementById("billDate").value,
+                                        dueDate: document.getElementById("dueDate").value
+                                    }),
+                                    success: function () {
+                                        debugger;
+                                        var postData = [];
+
+                                        // Loop through each child element of the parent div
+
+                                        $('#billItems').children().each(function () {
+                                            debugger;
+                                            if (document.getElementById("billItem").children != null) {
+                                                var item = document.getElementById("billItem").children[0].children[0].children[1].value;
+                                                var description = document.getElementById("billItem").children[1].children[0].children[1].value;
+                                                var quantity = document.getElementById("billItem").children[0].children[2].children[1].valuue;
+                                                var unit = document.getElementById("billItem").children[0].children[1].children[1].value;
+                                                var price = document.getElementById("billItem").children[0].children[4].children[1].value;
+                                                var tax = document.getElementById("billItem").children[1].children[1].children[1].value;
+                                                var subtotal = document.getElementById("billItem").children[1].children[2].children[1].value;
+                                                var total = document.getElementById("billItem").children[1].children[3].children[1].value;
+
+
+                                                var dataObj = {
+                                                    item: item,
+                                                    description: description,
+                                                    quantity: quantity,
+                                                    unit: unit,
+                                                    price: price,
+                                                    tax: tax,
+                                                    subtotal: subtotal,
+                                                    total: total
+
+                                                };
+                                                console.log(dataObj);
+                                                postData.push(dataObj);
+                                                console.log(postData);
+
+                                            }
+                                        });
+
+
+
+                                        $.ajax({
+
+                                            type: "POST",
+                                            url: "/BillSettings/InsertBillData",
+                                            data: JSON.stringify(postData),
+                                            contentType: 'application/json',
+                                            success: function () {
+
+                                                showNotification('success', 'Bill item added!');
+                                            }
+                                        });
+
+                                        showNotification('success', 'Bill item added!');
+                                    }
+                                });
+                            });
+
+
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+
+
+                    <script>
+                        // Initialize Dropzone
+                        Dropzone.options.myDropzone = {
+                            paramName: "files",
+                            maxFilesize: 50, // Maximum file size in MB
+                            acceptedFiles: ".jpg,.jpeg,.png,.pdf", // Accepted file types
+                            addRemoveLinks: true // Display remove links for uploaded files
+                        };
+                    </script>
+                    <script>
+                        //var tax = "";
+                        var subtotal = "";
+                        var total = "";
+
+                        function showNotification(type, message) {
+                            $.notify(message, type);
+                        }
+
+
+                        //$(document).on("change", "#price", function () {
+                        //    var price = this.value;
+                        //    var quantity = document.getElementById('quantity').value;
+                        //    var input2 = document.getElementById('amount');
+                        //    input2.value = parseFloat(event.target.value * quantity).toFixed(2);
+                        //});
+
+                        function UpdateAmount(event) {
+                            console.log(event.target.value);
+                            var quantity = document.getElementById('quantity').value;
+                            var input2 = document.getElementById('amount');
+                            input2.value = parseFloat(event.target.value * quantity).toFixed(2);
+                        }
+
+
+                        //$(document).on("change", "#taxOptions", function () {
+                        //    var tax = this.value;
+                        //    var quantity = document.getElementById('quantity').value;
+                        //    console.log(event.target.value);
+                        //    console.log(document.getElementById('price').value);
+                        //    console.log(parseInt(document.getElementById('price').value));
+                        //    document.getElementById("taxedAmount").value = parseFloat(parseFloat(document.getElementById('price').value) * parseFloat(tax.split("-")[1].split("%")[0]) / 100 + parseFloat(document.getElementById('price').value) * document.getElementById('quantity').value).toFixed(2)
+                        //    console.log(document.getElementById("taxedAmount").value);
+                        //    document.getElementById('taxes').innerHTML = parseInt(document.getElementById('price').value) * parseInt(tax.split("-")[1].split("%")[0]) / 100;
+                        //    document.getElementById('subtotals').innerHTML = parseFloat(document.getElementById('price').value) * parseFloat(document.getElementById('quantity').value);
+                        //    document.getElementById('totals').innerHTML = document.getElementById("taxedAmount").value;
+                        //});
+
+                        function CalculateTax(event) {
+                            debugger;
+                            var tax = event.target.value;
+                            console.log(event.target.value);
+                            console.log(document.getElementById('price').value);
+                            console.log(parseInt(document.getElementById('price').value));
+                            document.getElementById('subtotals').innerHTML = parseFloat(document.getElementById('price').value) * parseFloat(document.getElementById('quantity').value);
+                            document.getElementById('taxes').innerHTML = parseFloat(document.getElementById("amount").value) * parseFloat(tax.split("-")[1].split("%")[0] / 100);
+
+                            document.getElementById("taxedAmount").value = parseFloat(document.getElementById("subtotals").value).toFixed(2) + parseFloat(document.getElementById("taxes").value).toFixed(2);
+                            console.log(document.getElementById("taxedAmount").value);
+
+                            document.getElementById('totals').innerHTML = (parseFloat(document.getElementById("amount").value) + parseFloat(parseFloat(document.getElementById("amount").value) * parseFloat(tax.split("-")[1].split("%")[0] / 100))).toFixed(2)
+
+                        };
+                    </script>
+                }
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+

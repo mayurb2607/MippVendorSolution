@@ -1,8 +1,89 @@
-﻿@{
+﻿@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
+
+@{
     ViewData["Title"] = "Home Page";
+    var url = ViewBag.Url;
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="div1">
+    <h2 style="text-align: -webkit-center;">
+        Check Vendor
+    </h2>
+
+    <div class="form">
+        <label>Client ID</label>
+        <input type="text" id="clientID" />
+        <br />
+        <br />
+        <label>Email ID</label>
+        <input type="text" id="email" />
+        <input type="text" id="vendorID" style="display:none" value="@ViewBag.VendorID" />
+        <br />
+        <br />
+        <button id="check">Invite</button>
+    </div>
 </div>
+
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+    <script>
+
+        $("#check").click(function () {
+            var email = document.querySelector('#email').value;
+            var clientID = document.querySelector("#clientID").value;
+            var vendorID = document.querySelector("#vendorID").value;
+            console.log(email);
+            debugger
+            $.ajax({
+                type: "POST",
+                url: "@url" + "Invite/ValidateInvite",
+                data: {
+                    "email": email,
+                    "clientId": clientID,
+                    "rootVendorId": vendorID
+                },
+
+                success: function (result) {
+                    if (result !== null) {
+                         alert("An invite link has been shared!")
+                    }
+                    else {
+                        alert("Failed to send an Invite! Please try again..")
+                    }
+                 }
+             });
+
+         //}
+         //           else if (result === "false") {
+         //               $.ajax({
+         //                   type: "POST",
+         //                   url: "Invite/SendAcceptanceEmail",
+         //                   data: {
+         //                       'email': email,
+         //                       'clientId': clientID
+         //                   },
+
+         //                   success: function (result1) {
+         //                       if (result1 !== null) {
+         //                           alert("An invite link has been shared!")
+         //                       }
+         //                       else {
+         //                           alert("Failed to send an Invite! Please try again..")
+         //                       }
+         //                   }
+         //               });
+
+         //               alert("You will now be redirected.");
+         //               window.location = "https://localhost:7179/User/Login"
+         //           }
+         //       }
+         //   });
+
+
+        });
+    </script>
+}

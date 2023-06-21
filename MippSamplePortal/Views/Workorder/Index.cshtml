@@ -1,0 +1,300 @@
+﻿@model IEnumerable<MippSamplePortal.ViewModel.WorkorderMasterModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Workorders</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AssignedTo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PropertyManager)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExpectedEndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            @*  <th>
+            @Html.DisplayNameFor(model => model.AssignedToPhone)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.AssignedToEmailAddress)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ExpectedStartDate)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ExpectedEndDate)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ServiceRequestNumber)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.AdditionalComments)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ExpectedNoOfHoursToComplete)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.WorkPerformedBy)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.WorkCompletedAndMaterialsUsed)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TotalHoursSpent)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PropertyName)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PropertyAddress)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PropertyManager)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PropertyManagerPhone)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PropertyManagerEmail)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TenantName)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TenantEmailAddress)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TenantPhoneNumber)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.UnitName)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.UnitAddress)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Note)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PreferredTime)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.EnterCondition)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.PermissionNote)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.EntryDate)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TimeEntered)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TimeDeparted)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.EntryNote)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.WorkorderCompiledBy)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.WorkorderApprovedBy)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.DateOfApproval)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Priority)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.CostOfLabor)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.CostOfMaterials)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.TaxesPaid)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Total)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ClientId)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.VendorId)
+            </th>
+            *@
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AssignedTo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PropertyManager)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ExpectedEndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                @*<td>
+            @Html.DisplayFor(modelItem => item.AssignedToPhone)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.AssignedToEmailAddress)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.ExpectedStartDate)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.ExpectedEndDate)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.ServiceRequestNumber)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.AdditionalComments)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.ExpectedNoOfHoursToComplete)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.WorkPerformedBy)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.WorkCompletedAndMaterialsUsed)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TotalHoursSpent)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PropertyName)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PropertyAddress)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PropertyManager)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PropertyManagerPhone)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PropertyManagerEmail)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TenantName)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TenantEmailAddress)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TenantPhoneNumber)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.UnitName)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.UnitAddress)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Note)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PreferredTime)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.EnterCondition)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PermissionNote)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.EntryDate)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TimeEntered)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TimeDeparted)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.EntryNote)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.WorkorderCompiledBy)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.WorkorderApprovedBy)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.DateOfApproval)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Priority)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.CostOfLabor)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.CostOfMaterials)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.TaxesPaid)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Total)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.ClientId)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.VendorId)
+            </td>*@
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Update</a> |
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
