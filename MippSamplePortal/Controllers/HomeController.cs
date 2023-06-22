@@ -23,6 +23,8 @@ namespace MippSamplePortal.Controllers
         {
             ViewBag.Url = _configuration.GetValue<string>("LocalEndpoint");
             ViewBag.VendorID = _context.Vendors.Count() + 1;
+            ViewBag.Email = TempData["Email"];
+            TempData["Email"] = TempData["Email"];
             return View();
         }
 

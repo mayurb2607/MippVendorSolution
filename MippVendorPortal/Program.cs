@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MippPortalWebAPI.Models;
 using MippVendorPortal.Areas.Identity.Data;
 using MippVendorPortal.Data;
 using MippVendorPortal.Models;
@@ -14,7 +15,11 @@ builder.Services.AddDefaultIdentity<MippVendorPortalUser>(options => options.Sig
 //builder.Services.AddIdentity<MippVendorPortalUser, IdentityUser>().AddDefaultUI()
 //    .AddEntityFrameworkStores<MippVendorPortalContext>().AddDefaultTokenProviders();
 // Add services to the container.
+
+//builder.Services.AddIdentity<UserManager<IdentityUser>, IdentityRole>();
+
 builder.Services.AddTransient<MippVendorTestContext>();
+builder.Services.AddTransient<MippTestContext>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -42,7 +47,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+        pattern: "{controller=Homes}/{action=Index}/{id?}");
     endpoints.MapRazorPages();
 });
 

@@ -7,6 +7,7 @@ using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippVendorPortal.Models;
@@ -19,11 +20,16 @@ namespace MippVendorPortal.Controllers
     {
         private readonly MippVendorTestContext _context;
         private readonly MippTestContext _context1;
+        private readonly IConfiguration _configuration;
+        private readonly IHostEnvironment _hostEnvironment;
 
-        public BillsController(MippVendorTestContext context, MippTestContext context1)
+        public BillsController(MippVendorTestContext context, MippTestContext context1, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _context = context;
             _context1 = context1;
+            _configuration = configuration;
+            _hostEnvironment = hostEnvironment;
+
         }
 
 
@@ -133,12 +139,26 @@ namespace MippVendorPortal.Controllers
             workorderRequest.Status = "";
             workorderRequest.AdditionalComments = "";
 
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+
             IEnumerable<Bill> bill;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
 
-                using (var response = await httpClient.PostAsync("https://localhost:7026/api/Bills/GetBills", content))
+                using (var response = await httpClient.PostAsync(apiUrl + "Bills/GetBills", content))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     try
@@ -202,7 +222,6 @@ namespace MippVendorPortal.Controllers
         }
 
         [HttpPost]
-
         public async Task<IActionResult> InsertBillData(List<BillDataViewModel> billDataList)
         {
             foreach (var item in billDataList)
@@ -256,14 +275,12 @@ namespace MippVendorPortal.Controllers
                     await _context1.SaveChangesAsync();
                     return Ok();
 
-
                 }
                 return Ok();
 
 
             }
             return Ok();
-
 
         }
 

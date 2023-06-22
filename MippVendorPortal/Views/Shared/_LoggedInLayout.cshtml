@@ -3,7 +3,6 @@
 @using System.Web;
 @using Syncfusion.Licensing;
 @using Syncfusion.EJ2.Grids;
-@using Microsoft.AspNetCore.Razor.TagHelpers;
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,33 +11,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MippVendorPortal</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-
-    <link rel="stylesheet" href="~/dist/css/adminlte.min.css" />
+@*
+    @Styles.Render("~/Content/ej2/bootstrap4.css")
+    @Scripts.Render("~/Scripts/ej2/ej2.min.js")*@
     <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/21.1.41/fluent.css" />
+    <script src="https://cdn.syncfusion.com/ej2/21.4.41/dist/ej2.min.js"></script>
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <!-- Theme style -->
+  <link rel="stylesheet" href="~/dist/css/adminlte.min.css"/>
+  <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/21.4.41/fluent.css" />
     <link href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/21.1.41/fluent.css" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
 
-      <script src="https://cdn.syncfusion.com/ej2/21.1.41/dist/ej2.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.syncfusion.com/js/assets/external/jsrender.min.js"></script>
-    <script src="https://cdn.syncfusion.com/21.1.41/js/web/ej.web.all.min.js"></script>
-    
+    <script src="https://cdn.syncfusion.com/ej2/21.4.41/dist/ej2.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/dist/js/notify.js"></script>
     <script src="~/dist//js/notify.min.js"></script>
 </head>
 <body>
-    
-
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/js/assets/external/jsrender.min.js"></script>
+    <script src="https://cdn.syncfusion.com/21.4.41/js/web/ej.web.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <style>
+        .p-3 control-sidebar-content {
+            display: none
+        }
+    </style>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -55,7 +61,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                      @*  <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
                         </li>
                         <li class="nav-item">
@@ -63,7 +69,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Bills" asp-action="Index">Bills</a>
-                        </li>*@
+                        </li>
                     </ul>
                     <partial name="_LoginPartial" />
 
@@ -78,8 +84,6 @@
             </ul>
         </div>
         <main role="main" class="pb-3">
-            <ej-script-manager></ej-script-manager>
-            <ejs-scripts></ejs-scripts>
             @RenderBody()
         </main>
     </div>
@@ -92,9 +96,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @Html.EJS().ScriptManager()
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
     <ejs-scripts></ejs-scripts>
-    
 </body>
 </html>

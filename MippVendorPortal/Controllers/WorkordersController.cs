@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,28 +13,35 @@ using MippPortalWebAPI.Models;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
+using AspNetUser = MippVendorPortal.Models.AspNetUser;
 
 namespace MippVendorPortal.Controllers
 {
     public class WorkordersController : Controller
     {
-        private readonly MippTestContext _context;
+        private readonly MippVendorTestContext _context;
+        private readonly MippTestContext _context1;
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _hostEnvironment;
 
-        public WorkordersController(MippTestContext context, IConfiguration configuration, IHostEnvironment hostEnvironment)
+        public WorkordersController(MippVendorTestContext context, MippTestContext context1, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _context = context;
             _configuration = configuration;
             _hostEnvironment = hostEnvironment;
+            _context1 = context1;
         }
 
+
+        [Authorize]
         public async Task<IActionResult> Index(int rootvendorId, string msg)
         {
-            WorkorderRequest workorderRequest = new WorkorderRequest();
-            workorderRequest.VendorID = rootvendorId;
-            workorderRequest.AdditionalComments = "";
-            workorderRequest.Status = "";
+            WorkorderRequest workorderRequest = new WorkorderRequest
+            {
+                VendorID = rootvendorId,
+                AdditionalComments = "",
+                Status = ""
+            };
 
             var env = _hostEnvironment.EnvironmentName;
             string apiUrl = string.Empty;
@@ -66,7 +75,7 @@ namespace MippVendorPortal.Controllers
                         ViewBag.msg = msg;
                         if (_context.Vendors.FirstOrDefault(x => x.Id == rootvendorId) != null)
                         {
-                            ViewBag.Email = _context.Vendors.FirstOrDefault(x => x.Id == rootvendorId).Email;
+                            ViewBag.Email = _context.Vendors.FirstOrDefault(x => x.Id == rootvendorId).VendorEmail;
                         }
 
                         ViewData["GridData"] = workorder;
@@ -75,7 +84,7 @@ namespace MippVendorPortal.Controllers
                         ViewBag.Subtotal = "";
                         ViewBag.Total = "";
 
-                        return View();
+                        return View(workorder);
 
                     }
                     catch (Exception ex)
@@ -89,22 +98,22 @@ namespace MippVendorPortal.Controllers
 
 
         // GET: Workorders/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Workorders == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null || _context.Workorders == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var workorder = await _context.Workorders
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (workorder == null)
-            {
-                return NotFound();
-            }
-            ViewBag.VendorId = workorder.VendorId;
-            return View(workorder);
-        }
+        //    var workorder = await _context.Workorders
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (workorder == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewBag.VendorId = workorder.VendorId;
+        //    return View(workorder);
+        //}
 
         // GET: Workorders/Create
         public IActionResult Create(int? id)
@@ -131,8 +140,8 @@ namespace MippVendorPortal.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Workorders.Add(workorder);
-                await _context.SaveChangesAsync();
+                _context1.Workorders.Add(workorder);
+                await _context1.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(workorder);
@@ -141,19 +150,19 @@ namespace MippVendorPortal.Controllers
         //GET: Workorders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Workorders == null)
+            if (id == null || _context1.Workorders == null)
             {
                 return NotFound();
             }
 
 
-            var workorder = await _context.Workorders.FindAsync(id);
+            var workorder = await _context1.Workorders.FindAsync(id);
             if (workorder == null)
             {
                 return NotFound();
             }
 
-            var statuses = _context.ClientStatuses.Where(x => x.ClientId == workorder.ClientId);
+            var statuses = _context1.ClientStatuses.Where(x => x.ClientId == workorder.ClientId);
             var status = new List<string>();
             foreach (var stat in statuses)
             {
@@ -184,7 +193,7 @@ namespace MippVendorPortal.Controllers
             {
                 return NotFound();
             }
-            var wo = _context.Workorders.FirstOrDefault(x => x.Id == id);
+            var wo = _context1.Workorders.FirstOrDefault(x => x.Id == id);
             wo.Status = workorder.Status;
             wo.Description = workorder.Description;
             wo.AdditionalComments = workorder.AdditionalComments;
@@ -197,7 +206,7 @@ namespace MippVendorPortal.Controllers
             {
                 try
                 {
-                    _context.Workorders.Update(wo);
+                    _context1.Workorders.Update(wo);
                     await _context.SaveChangesAsync();
                     ViewBag.saveMsg = "Changes saved successfully!!";
 
@@ -206,8 +215,8 @@ namespace MippVendorPortal.Controllers
                     if (env == "Development")
                     {
                         // Configure services for development environment
-                        //apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
-                        apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                        apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                        //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
                     }
                     else
                     {
@@ -248,12 +257,12 @@ namespace MippVendorPortal.Controllers
         // GET: Workorders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Workorders == null)
+            if (id == null || _context1.Workorders == null)
             {
                 return NotFound();
             }
 
-            var workorder = await _context.Workorders
+            var workorder = await _context1.Workorders
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (workorder == null)
             {
@@ -268,14 +277,14 @@ namespace MippVendorPortal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Workorders == null)
+            if (_context1.Workorders == null)
             {
                 return Problem("Entity set 'MippdbContext.Workorders'  is null.");
             }
-            var workorder = await _context.Workorders.FindAsync(id);
+            var workorder = await _context1.Workorders.FindAsync(id);
             if (workorder != null)
             {
-                _context.Workorders.Remove(workorder);
+                _context1.Workorders.Remove(workorder);
             }
 
             await _context.SaveChangesAsync();
@@ -284,7 +293,7 @@ namespace MippVendorPortal.Controllers
 
         private bool WorkorderExists(int id)
         {
-            return (_context.Workorders?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context1.Workorders?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

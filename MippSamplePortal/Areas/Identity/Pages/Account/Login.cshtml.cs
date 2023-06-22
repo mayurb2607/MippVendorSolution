@@ -115,6 +115,8 @@ namespace MippSamplePortal.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    ViewData["Email"] = Input.Email;
+                    TempData["Email"] = Input.Email;
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }

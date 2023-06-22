@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Controllers;
+using MippPortalWebAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("MippPortalWebAPIContextConnection") ?? throw new InvalidOperationException("Connection string 'MippPortalWebAPIContextConnection' not found.");
@@ -9,7 +10,7 @@ var connectionString = builder.Configuration.GetConnectionString("MippPortalWebA
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 // Add services to the container.
-
+builder.Services.AddTransient<MippTestContext>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

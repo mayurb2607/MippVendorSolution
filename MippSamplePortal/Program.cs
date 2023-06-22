@@ -11,6 +11,8 @@ var connectionString = builder.Configuration.GetConnectionString("MippSamplePort
 builder.Services.AddDbContext<MippSamplePortalContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<MippSamplePortalUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<MippSamplePortalContext>();
+
+
 builder.Services.AddTransient<EmailService>();
 builder.Services.AddTransient<MippTestContext>();
 builder.Services.AddCors(c =>

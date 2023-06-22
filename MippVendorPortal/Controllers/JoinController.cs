@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using MippPortalWebAPI.Helpers;
 using MippSamplePortal.Models;
+using MippVendorPortal.Areas.Identity.Data;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
 using System.Text;
+using AspNetUser = MippVendorPortal.Models.AspNetUser;
 
 namespace MippVendorPortal.Controllers
 {
@@ -13,12 +16,15 @@ namespace MippVendorPortal.Controllers
         private readonly MippVendorTestContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _hostEnvironment;
+        private readonly UserManager<MippVendorPortalUser> _userManager;
 
-        public JoinController(MippVendorTestContext context, IConfiguration configuration, IHostEnvironment hostEnvironment)
+
+        public JoinController(MippVendorTestContext context, UserManager<MippVendorPortalUser> userManager, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _configuration = configuration;
             _hostEnvironment = hostEnvironment;
             _context = context;
+            _userManager = userManager;
 
         }
         // GET: Join
@@ -40,6 +46,8 @@ namespace MippVendorPortal.Controllers
 
                 return View();
             }
+            ViewBag.ClientId = cId;
+            ViewBag.VendorId = rvId;
             ViewBag.msg = "Your account already exists!";
             return PartialView("_AcceptPartial");
 
@@ -48,7 +56,6 @@ namespace MippVendorPortal.Controllers
         // GET: Join/Details/5
         public async Task<IActionResult> Accept(int id, [Bind("VendorEmail, VendorPassword, VendorCompany, VendorPhone, ClientId")] VendorClientViewModel viewModel)
         {
-
 
             var existingVendors = _context.Vendors.Count();
             if (id == 0 || _context.Vendors == null)
@@ -79,11 +86,9 @@ namespace MippVendorPortal.Controllers
                 return BadRequest("Hey! You are already registered..");
             }
 
-
             ViewBag.Id = vendor1.Id;
             ViewBag.VendorEmail = vendor1.VendorEmail;
             ViewBag.ClientId = viewModel.ClientId;
-
 
             VendorInvite vendorInvite = new VendorInvite();
             vendorInvite.Id = vendor1.Id;
@@ -134,12 +139,24 @@ namespace MippVendorPortal.Controllers
 
         }
 
+        public async Task<bool> RegisterUser(string username, string password)
+        {
+            MippVendorPortalUser aspNetUser = new MippVendorPortalUser()
+            {
+                Email = username,
+                UserName = username,
+                EmailConfirmed = true
+            };
+            var result = await _userManager.CreateAsync(aspNetUser, password);
+            return result.Succeeded;
+        }
+
         public async Task<IActionResult> Register(int id, [Bind("VendorEmail, VendorPassword, VendorCompany, VendorPhone, ClientId, RootVendorId")] VendorClientViewModel vendor)
         {
 
             VendorInvite vendorInvite = new VendorInvite();
-            vendorInvite.Id = 1;
-            vendorInvite.VendorId = 1;
+            vendorInvite.Id = int.Parse(vendor.RootVendorId);
+            vendorInvite.VendorId = int.Parse(vendor.RootVendorId);
             vendorInvite.VendorEmail = vendor.VendorEmail;
             vendorInvite.ClientId = int.Parse(vendor.ClientId);
             vendorInvite.JoinedDate = DateTime.Today.ToString();
@@ -167,7 +184,7 @@ namespace MippVendorPortal.Controllers
                     using (var response = await httpClient.PostAsync(apiUrl + "SendEmail/UpdateVendorInvite", content))
                     {
                         string apiResponse = await response.Content.ReadAsStringAsync();
-                        var vendorSaved = JsonConvert.DeserializeObject<MippSamplePortal.Models.Vendor>(apiResponse);
+                        var vendorSaved = JsonConvert.DeserializeObject<MippPortalWebAPI.Models.Vendor> (apiResponse);
 
                         Models.Vendor vendor1 = new Models.Vendor();
                         vendor1.Id = vendorSaved.Id;
@@ -185,12 +202,14 @@ namespace MippVendorPortal.Controllers
                         _context.Vendors.Add(vendor1);
                         _context.SaveChanges();
 
+                        bool registered = await RegisterUser(vendor.VendorEmail, vendor.VendorPassword);
+
                         CryptographyHelper cryptographyHelper = new CryptographyHelper();
                         var message = cryptographyHelper.EncryptString("Congrats, your registration was successfull!!");
 
                         if (_context.VendorClients.FirstOrDefault(x => x.VendorId == vendorSaved.Id && x.ClientId == int.Parse(vendor.ClientId)) != null)
                         {
-                            return RedirectToAction("Index", "Account", new { msg = message });
+                            return RedirectToAction("Index", "Homes");
                         }
                         //return true;
                         if (vendor == null)

@@ -1,0 +1,35 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var msg = ViewBag.msg;
+    var clientId = ViewBag.ClientId;
+    var vendorId = ViewBag.VendorId;
+}
+
+<div>
+    <p>@msg</p>
+@*    <button asp-controller="Account" asp-action="Index" asp-route-msg="Login page">Login</button>
+*@    <input type="button" value="Accept" onclick="location.href='@Url.Action("Accept", "Account", new{vendorID= vendorId, clientID = clientId})'" />
+    <input type="button" value="Decline" onclick="location.href='@Url.Action("Decline", "Account")'" />
+
+@*    <button asp-controller="Account" asp-action="Decline">Decline</button>
+*@
+</div>
+
+<script src="~/dist/js/notify.js"></script>
+<script src="~/dist/js/notify.min.js"></script>
+<script src="../wwwroot/plugins/jquery/jquery.min.js"></script>
+
+<script src="../wwwroot/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (@ViewBag.msg != null) {
+        $(document).ready(function () {
+            showNotification('success', @ViewBag.msg);
+        });
+    }
+    function showNotification(type, message) {
+        $.notify(message, type);
+    }
+</script>

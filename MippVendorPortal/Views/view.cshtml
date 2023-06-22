@@ -21,23 +21,25 @@
     <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
 
-      <script src="https://cdn.syncfusion.com/ej2/21.1.41/dist/ej2.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.syncfusion.com/js/assets/external/jsrender.min.js"></script>
-    <script src="https://cdn.syncfusion.com/21.1.41/js/web/ej.web.all.min.js"></script>
-    
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/dist/js/notify.js"></script>
-    <script src="~/dist//js/notify.min.js"></script>
+
+    @section scripts{
+        <script src="https://cdn.syncfusion.com/ej2/21.1.41/dist/ej2.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="https://cdn.syncfusion.com/js/assets/external/jsrender.min.js"></script>
+        <script src="https://cdn.syncfusion.com/21.1.41/js/web/ej.web.all.min.js"></script>
+
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/dist/js/notify.js"></script>
+        <script src="~/dist//js/notify.min.js"></script>
+    }
 </head>
 <body>
-    
+
 
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -55,14 +57,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                      @*  <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
+                        @*  <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Workorders" asp-route-email="@ViewData["Email"]" asp-action="Index">Workorders</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Workorders" asp-route-email="@ViewData["Email"]" asp-action="Index">Workorders</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Bills" asp-action="Index">Bills</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Bills" asp-action="Index">Bills</a>
                         </li>*@
                     </ul>
                     <partial name="_LoginPartial" />
@@ -93,8 +95,8 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @Html.EJS().ScriptManager()
-    @RenderSection("Scripts", required: false)
+    @RenderSection("scripts", required: false)
     <ejs-scripts></ejs-scripts>
-    
+
 </body>
 </html>

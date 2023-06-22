@@ -26,7 +26,7 @@ namespace MippSamplePortal.Services
             vendor.ClientId = inviteModel.ClientID;
             vendor.InviteSentDate = DateTime.Now.ToShortDateString();
             vendor.JoinedDate = "";
-            vendor.Id = context.VendorInvites.Count() + 1;
+            //vendor.Id = context.VendorInvites.Count() + 1;
             context.VendorInvites.Add(vendor);
             context.SaveChangesAsync();
 

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MippVendorPortal", "MippVendorPortal\MippVendorPortal.csproj", "{28F54860-F72B-4E19-ADA2-06EA4C23B088}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MippVendorPortal", "MippVendorPortal\MippVendorPortal.csproj", "{28F54860-F72B-4E19-ADA2-06EA4C23B088}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MippSamplePortal", "MippSamplePortal\MippSamplePortal.csproj", "{F7012831-33C1-4C15-8EF1-1C046401E282}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MippSamplePortal", "MippSamplePortal\MippSamplePortal.csproj", "{F7012831-33C1-4C15-8EF1-1C046401E282}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MippPortalWebAPI", "MippPortalWebAPI\MippPortalWebAPI.csproj", "{DE6E6739-9C57-4F36-A246-B42EF180AC86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MippPortalWebAPI", "MippPortalWebAPI\MippPortalWebAPI.csproj", "{DE6E6739-9C57-4F36-A246-B42EF180AC86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
