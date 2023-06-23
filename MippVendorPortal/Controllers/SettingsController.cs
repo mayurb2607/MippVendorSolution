@@ -21,11 +21,14 @@ namespace MippVendorPortal.Controllers
         }
 
         // GET: Settings
-        public async Task<IActionResult> Index()
+        public IActionResult Index(int vendorID)
         {
-              return _context.Settings != null ? 
-                          View(await _context.Settings.ToListAsync()) :
-                          Problem("Entity set 'MippVendorTestContext.Settings'  is null.");
+            ViewBag.VendorId = vendorID;
+            var data = _context.Settings.Where(x => x.VendorId == vendorID).AsEnumerable();
+            ViewBag.GridData = data;
+            ViewData["GridData"] = data;
+            
+            return View(data);
         }
 
         // GET: Settings/Details/5
@@ -47,8 +50,10 @@ namespace MippVendorPortal.Controllers
         }
 
         // GET: Settings/Create
-        public IActionResult Create()
+        public IActionResult Create(int vendorId)
         {
+            ViewBag.VendorId = vendorId;
+            ViewBag.Id = _context.Settings.Count() + 1;
             return View();
         }
 
@@ -57,13 +62,14 @@ namespace MippVendorPortal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,VendorId,BusinessName,CareOf,Phone,Email,AddressLine1,AddressLine2,City,Province,Zip,BillDate,DueDate")] Setting setting)
+        public async Task<IActionResult> Create([Bind("VendorId,BusinessName,CareOf,Phone,Email,AddressLine1,AddressLine2,City,Province,Zip,BillDate,DueDate")] Setting setting)
         {
+            //setting.Id = _context.Settings.Count() + 1;
             if (ModelState.IsValid)
             {
-                _context.Add(setting);
+                _context.Settings.Add(setting);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", new {vendorID = setting.VendorId});
             }
             return View(setting);
         }
@@ -81,6 +87,8 @@ namespace MippVendorPortal.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Id = setting.Id;
+            ViewBag.VendorId = setting.VendorId;
             return View(setting);
         }
 
@@ -114,7 +122,7 @@ namespace MippVendorPortal.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", new {vendorID= setting.VendorId});
             }
             return View(setting);
         }

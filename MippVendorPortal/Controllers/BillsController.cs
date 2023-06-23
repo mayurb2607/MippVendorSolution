@@ -13,6 +13,8 @@ using MippPortalWebAPI.Models;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
+using Syncfusion.EJ2.Charts;
+using Syncfusion.EJ2.Linq;
 
 namespace MippVendorPortal.Controllers
 {
@@ -94,11 +96,7 @@ namespace MippVendorPortal.Controllers
             return RedirectToAction("Bills", new { clientID = clientId });
         }
 
-        public IActionResult OverlayPartial()
-        {
-            return PartialView("_CommentsView");
-            //return PartialView("_FeedbackPartial");
-        }
+     
 
         public async Task<IActionResult> Index(int vendorID)
         {
@@ -114,13 +112,15 @@ namespace MippVendorPortal.Controllers
                 //settings.BillDate = dt;
                 //settings.DueDate = dt2;
                 IEnumerable<Setting> enumerable = lst;
+                var clientId = _context.VendorClients.FirstOrDefault(x => x.VendorId == vendorID).ClientId;
                 List<string> taxList = new List<string>();
-                var taxes = _context1.Taxes.Where(x => x.ClientId == _context.VendorClients.FirstOrDefault(x => x.VendorId == vendorID).ClientId);
+                var taxes = _context1.Taxes.Where(x => x.ClientId == clientId);
                 foreach (var tax in taxes)
                 {
                     taxList.Add(tax.TaxRate);
                 }
                 ViewBag.taxList = taxList;
+                ViewBag.woid = _context1.Workorders.FirstOrDefault(x => x.VendorId == vendorID).Id;
                 return View(enumerable);
             }
             catch (Exception ex)
@@ -130,6 +130,8 @@ namespace MippVendorPortal.Controllers
             }
             //return View(billSettingsViewModel);
         }
+
+
 
         [HttpGet("Bills")]
         public async Task<IActionResult> Bills(int vendorId, string msg)
@@ -188,101 +190,99 @@ namespace MippVendorPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(string item, string description, string quantity, int unit, string price, string tax, string subtotal, string total,
-            string title,
-            string summary,
-            string invoice,
-            string billTo,
-            string careOf,
-            string woId,
-            string addressLine,
-            string addressLine2,
-            string city,
-            string province,
-            string zip,
-            string billDate,
-            string dueDate,
-            int clientId)
+        public async Task<IActionResult> Insert(int woId, List<BillDataViewModel> billItems)
         {
-            clientId = 1;
-            Setting setting = _context.Settings.FirstOrDefault(x => x.VendorId == _context.VendorClients.FirstOrDefault(x=> x.ClientId== clientId).VendorId);
-            setting.AddressLine1 = addressLine;
-            setting.AddressLine2 = addressLine2;
-            setting.City = city;
-            setting.BillDate = billDate;
-            setting.DueDate = dueDate;
-            setting.BusinessName = billTo;
-            setting.CareOf = careOf;
-            setting.Province = province;
-            setting.Zip = zip;
-            _context.SaveChanges();
 
-            return Ok();
-
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> InsertBillData(List<BillDataViewModel> billDataList)
-        {
-            foreach (var item in billDataList)
+            foreach (var item in billItems)
             {
-                var existingBillId = _context1.Bills.FirstOrDefault(x => x.ClientId == item.clientId.ToString());
-                BillItem billItems = new BillItem();
-                if (billItems != null)
-                {
-                    billItems.Total = item.total;
-                    billItems.Name = item.item;
-                    billItems.Description = item.description;
-                    billItems.Quantity = item.quantity;
-                    billItems.Unit = item.unit;
-                    billItems.Price = item.price;
-                    billItems.Subtotal = item.subtotal;
-
-                    // Add record in BillItem
-                    // Add record in bills with corresponding billItemID
-                    var billcount = _context1.Bills.Count() + 1;
-                    var billItemCount = _context1.BillItems.Count() + 1;
-
-                    billItems.BillId = existingBillId.Id.ToString();
-                    billItems.Id = _context1.BillItems.Count() + 1;
-                    Bill bill = new Bill();
-                    bill.ClientId = billItems.Id.ToString();
-                    bill.Id = billcount;
-
-                    Bill bill1 = new Bill
-                    {
-                        Title = item.title,
-                        Summary = item.summary,
-                        AddressLine1 = item.addressLine,
-                        AddressLine2 = item.addressLine2,
-                        AddressLine3 = item.city,
-                        BillDate = item.billDate,
-                        InvoiceDate = item.dueDate,
-                        BillTo = item.billTo,
-                        CareOf = item.careOf,
-                        Province = item.province,
-                        Zip = item.zip,
-                        BillItemId = billItems.Id.ToString(),
-                        SubTotal = item.subtotal,
-                        TaxAmount = item.tax,
-                        Total = item.total,
-                        Wonumber = item.invoice
-
-                    };
-                    _context1.Bills.Add(bill1);
-                    _context1.BillItems.Add(billItems);
-
-                    await _context1.SaveChangesAsync();
-                    return Ok();
-
-                }
-                return Ok();
+                MippPortalWebAPI.Models.BillItem billItem = new MippPortalWebAPI.Models.BillItem();
+                billItem.Name = item.item;
+                billItem.Description = item.description;
+                billItem.Quantity = item.quantity;
+                billItem.Unit = item.unit;
+                billItem.Quantity = item.quantity;
+                billItem.Price = item.price;
+                billItem.Tax = item.tax;
+                billItem.Total = item.total;
+                billItem.Subtotal = item.subtotal;
+                billItem.BillId = "1";
+                _context1.Add(billItems);
+                _context1.SaveChanges();
 
 
             }
+           
+
+
+
+
+
             return Ok();
 
         }
+
+        //[HttpPost]
+        //public async Task<IActionResult> InsertBillData(List<BillDataViewModel> billDataList)
+        //{
+        //    foreach (var item in billDataList)
+        //    {
+        //        var existingBillId = _context1.Bills.FirstOrDefault(x => x.ClientId == item.clientId.ToString());
+        //        BillItem billItems = new BillItem();
+        //        if (billItems != null)
+        //        {
+        //            billItems.Total = item.total;
+        //            billItems.Name = item.item;
+        //            billItems.Description = item.description;
+        //            billItems.Quantity = item.quantity;
+        //            billItems.Unit = item.unit;
+        //            billItems.Price = item.price;
+        //            billItems.Subtotal = item.subtotal;
+
+        //            // Add record in BillItem
+        //            // Add record in bills with corresponding billItemID
+        //            var billcount = _context1.Bills.Count() + 1;
+        //            var billItemCount = _context1.BillItems.Count() + 1;
+
+        //            billItems.BillId = existingBillId.Id.ToString();
+        //            billItems.Id = _context1.BillItems.Count() + 1;
+        //            Bill bill = new Bill();
+        //            bill.ClientId = billItems.Id.ToString();
+        //            bill.Id = billcount;
+
+        //            Bill bill1 = new Bill
+        //            {
+        //                Title = item.title,
+        //                Summary = item.summary,
+        //                AddressLine1 = item.addressLine,
+        //                AddressLine2 = item.addressLine2,
+        //                AddressLine3 = item.city,
+        //                BillDate = item.billDate,
+        //                InvoiceDate = item.dueDate,
+        //                BillTo = item.billTo,
+        //                CareOf = item.careOf,
+        //                Province = item.province,
+        //                Zip = item.zip,
+        //                BillItemId = billItems.Id.ToString(),
+        //                SubTotal = item.subtotal,
+        //                TaxAmount = item.tax,
+        //                Total = item.total,
+        //                Wonumber = item.invoice
+
+        //            };
+        //            _context1.Bills.Add(bill1);
+        //            _context1.BillItems.Add(billItems);
+
+        //            await _context1.SaveChangesAsync();
+        //            return Ok();
+
+        //        }
+        //        return Ok();
+
+
+        //    }
+        //    return Ok();
+
+        //}
 
 
         // GET: BillSettings/Details/5

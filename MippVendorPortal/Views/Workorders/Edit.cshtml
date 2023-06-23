@@ -123,9 +123,9 @@
 </div>*@
         <div id="overlay" style="position: fixed;
                                 top: 50%;
-    left: 60%;
+    left: 50%;
     width: 25%;
-    height: 70%;
+    height: 30%;
                         transform: translate(-50%, -50%);
                         background-color: #fff;
                         border: 1px solid #ccc;
@@ -345,12 +345,13 @@ z-index: 1;"></div>
     width: 36vw;
     justify-content: space-between;">
 
-            <div class="col-sm-6">
+            <div class="col-sm-6" style="    display: inline-flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: flex-start;">
               
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="col-sm-12" style="
-    margin-top: 6%;
-">
+                    <div class="row d-flex ml-lg-2">
                         <div class="form-group" style="width: max-content;">
                             <label asp-for="Description" class="control-label">Requested Work Description: </label>
                             <input asp-for="Description" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
@@ -361,22 +362,28 @@ z-index: 1;"></div>
                             <input asp-for="AdditionalComments" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 91%;" />
                             <span asp-validation-for="AdditionalComments" class="text-danger"></span>
                         </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="ExpectedNoOfHoursToComplete" class="control-label">Expected Number Of Hours To Complete: </label>
-                            <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 67%;" />
-                            <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
-                        </div>
+                       
                          
                     </div>
-                    <div class="col-sm-12" style="
-             margin-left: 40vw;
-    margin-top: -119%;">
+                    <div class="row d-flex ml-lg-2">
                         <div class="form-group" style="width: max-content;">
                             <label asp-for="WorkPerformedBy" class="control-label">Work Perfomed By: </label>
                             <input asp-for="WorkPerformedBy" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
                             <span asp-validation-for="WorkPerformedBy" class="text-danger"></span>
                         </div>
-                        <div class="form-group" style="width: max-content;">
+                         <div class="form-group" style="width: max-content;">
+                            <label asp-for="ExpectedNoOfHoursToComplete" class="control-label">Expected Number Of Hours To Complete: </label>
+                            <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 67%;" />
+                            <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                    
+            </div>
+        </div>
+        <div id="descriptions">
+            <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+                      <div class="form-group" style="width: max-content;">
                             <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
                             <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
                             <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
@@ -386,13 +393,13 @@ z-index: 1;"></div>
                             <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
                             <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
                         </div>
-
+                       <button id="add-row-btn" class="btn btn-primary" style="height: fit-content;
+    margin-top: 3%;">Add</button>&nbsp;&nbsp;
+                        <button id="remove-btn" class="btn btn-primary" style="height: fit-content;
+    margin-top: 3%;">Delete</button>
                     </div>
-                    
-
-            </div>
-        </div>
-
+               
+         </div>  
     </div>
 
         <div class="card-body">
@@ -402,29 +409,23 @@ z-index: 1;"></div>
     overflow:auto;">
                 <h2>Comments Section</h2>
                 <section class="comments">
-                    <article class="comment">
+                @foreach (var comment in ViewBag.Comments)
+                            {
+/*                                <option asp-for="Status" selected="selected" class="form-control">@person</option>
+*/                      <article class="comment">
                         <a class="comment-img" href="#non">
                             <img src="https://pbs.twimg.com/profile_images/444197466133385216/UA08zh-B.jpeg" alt="" width="50" height="50">
                         </a>
                         <div class="comment-body">
                             <div class="text">
-                                <p>Hello, this is an example from me</p>
+                                <p>@comment.Text</p>
                             </div>
-                            <p class="attribution">by <a href="#non">Besnik Hetemi</a> at 14:23pm, 4 Dec 2015</p>
+                            <p class="attribution">by <a href="#non">@comment.Email</a> at @DateTime.Now.ToShortDateString()</p>
                         </div>
                     </article>
-                    <article class="comment">
-                        <a class="comment-img" href="#non">
-                            <img src="https://pbs.twimg.com/profile_images/444197466133385216/UA08zh-B.jpeg" alt="" width="50" height="50">
-                        </a>
-                        <div class="comment-body">
-                            <div class="text">
-                                <p>if you are interested for  more about me visited my profile on social page</p>
-                                <p>To visit me you can click my name  <a target="_blank" href="http://www.facebook.com/besnik.hetemii">Besnik Hetemi</a> and send me frends request or send me a message in inbox</p>
-                            </div>
-                            <p class="attribution">by <a href="#non">Besnik Hetemi</a> at 14:23pm, 4 Dec 2015</p>
-                        </div>
-                    </article>
+                               
+
+                            }
                 </section>
         </div>
 <div class="card-footer">
@@ -477,13 +478,37 @@ the plugin.*@
 
     </script>
     <script>
+                            $("#add-row-btn").click(function () {
+                                var newRow = `<br/><br/><div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+                      <div class="form-group" style="width: max-content;">
+                            <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
+                            <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+                            <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="width: max-content;">
+                            <label asp-for="TotalHoursSpent" class="control-label">Total hours spent: </label>
+                            <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+                            <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
+                        </div>
+                        <button  id="add-row-btn" style="margin-top:3%; width:min-content">+</button>
+                    <button id="remove-btn" style="margin-top:3%; width:min-content">x</button>
+                    </div>`;
+                                $("#descriptions").append(newRow);
+
+
+                            });
+                             $("#remove-btn").click(function () {
+                                document.getElementById("descriptions").removeChild(document.getElementById("descriptions").children[1]);
+                            });
+
+
 
         window.onload = function () {
             var popup = document.getElementById('overlay');
             var overlay = document.getElementsByClassName('detailBox');
             document.onclick = function (e) {
                 console.log(e);
-                if (e.target.className != 'close' || e.target.id != 'overlay') {
+                if (e.target.className == 'close') {
                     popup.style.display = 'none';
                     overlay.style.display = 'none';
                 }
@@ -492,8 +517,11 @@ the plugin.*@
         };
         $('#commentsSection').click(function () {
             $.ajax({
-                url: '/BillSettings/OverlayPartial',
+                url: '/Workorders/OverlayPartial',
                 type: 'GET',
+                data: {
+                        "woid": @ViewBag.id
+                    },
                 success: function (response) {
                     $('#overlay').html(response);
                     $('#overlay').fadeIn();

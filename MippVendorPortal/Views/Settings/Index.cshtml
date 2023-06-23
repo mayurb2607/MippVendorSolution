@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MippVendorPortal.Models.Setting>
+﻿@model IEnumerable<MippVendorPortal.Models.Setting>;
 
 @{
     ViewData["Title"] = "Index";
@@ -10,93 +10,92 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.VendorId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BusinessName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CareOf)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Phone)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AddressLine1)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AddressLine2)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.City)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Province)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Zip)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BillDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DueDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.VendorId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BusinessName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CareOf)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AddressLine1)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AddressLine2)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.City)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Province)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Zip)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BillDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DueDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+        <button id="create" class="btn btn-default">Create New</button>
+        <button id="edit" class="btn btn-default" disabled="true">Edit</button>
+        @*<button id="details" class="btn btn-default" disabled="true">Detaills</button>
+        <button id="delete" class="btn btn-default" disabled="true">Delete</button>*@
+    </div>
+    @* <div class="btn-group mr-2" role="group" aria-label="First group">
+    <button id="pdfview" class="btn btn-default" disabled="true">View PDF</button>
+    </div>*@
+
+</div>
+
+
+<div id="Grid"></div>
+
+@section scripts {
+
+    <script src="~/dist/js/notify.js"></script>
+    <script src="~/dist/js/notify.min.js"></script>
+    <script>
+        if (@ViewBag.msg != null) {
+            $(document).ready(function () {
+                showNotification('success', @ViewBag.msg);
+            });
+        }
+        function showNotification(type, message) {
+            $.notify(message, type);
+        }
+    </script>
+    <script>
+
+        function rowSelected() {
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0]
+            var selectedRecords = grid.getSelectedRecords();
+            //var selectedRecordsCount = selectedRecords.length;
+            console.log("selectedRecord:", grid);
+
+
+            if (grid != null) {
+
+                //document.getElementById("pdfview").disabled = false;
+                document.getElementById("edit").disabled = false;
+                //document.getElementById("details").disabled = false;
+            }
+            else {
+                //document.getElementById("pdfview").disabled = true;
+                document.getElementById("edit").disabled = true;
+                //document.getElementById("details").disabled = true;
+            }
+
+        }
+
+
+        document.getElementById('create').onclick = function () {
+
+            var vendorId = @ViewBag.VendorId;
+                    var url = document.location.origin + "/Settings/Create?vendorId=" + vendorId;
+            window.location.replace(url);
+
+        };
+
+        document.getElementById('edit').onclick = function () {
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Settings/Edit/" + id;
+            window.location.replace(url);
+
+        };
+
+
+    </script>
+    <ejs-grid id="Grid" allow-paging="true" allow-selection="true" rowSelected="rowSelected" datasource="@ViewBag.GridData">
+        <e-grid-columns>
+            <e-grid-column type="checkbox" width="50" />
+            <e-grid-column field="BusinessName" header - text="Business Name" width="75" text-align="right"> </e-grid-column>
+            <e-grid-column field="Province" header-text="Province" width="80"> </e-grid-column>
+            <e-grid-column field="BillDate" header-text="Bill Date" text-align="right" width="75"> </e-grid-column>
+            <e-grid-column field="DueDate" header-text="Due On" text-align="right" width="75"> </e-grid-column>
+        </e-grid-columns>
+    </ejs-grid>
+
+
+
 }
-    </tbody>
-</table>

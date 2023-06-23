@@ -187,8 +187,8 @@ namespace MippPortalWebAPI.Controllers
         }
 
         [EnableCors("AllowOrigin")]
-        [HttpPost("Sen_contextillCreatedEmail")]
-        public async Task<IActionResult> Sen_contextillCreatedEmail(Bill bill)
+        [HttpPost("SendBillCreatedEmail")]
+        public async Task<IActionResult> SendBillCreatedEmail(Bill bill)
         {
             try
             {
@@ -212,11 +212,12 @@ namespace MippPortalWebAPI.Controllers
         {
             try
             {
-
+                var cc = new List<string>();
+                cc.Add(workorder.PropertyManagerEmail); 
                 SendEmailViewModel request = new SendEmailViewModel();
                 request.Body = "Workorder" + " " + workorder.Id + " " + "updated with status" + " " + workorder.Status + " " + "by" + " " + workorder.AssignedTo;
                 request.ToEmail = workorder.AssignedToEmailAddress;
-                request.Cc.Add(workorder.PropertyManagerEmail);
+                request.Cc = cc;
                 request.Subject = "Workorder Update for:" + " " + workorder.Id;
                 await _mailHelper.SendEmailAsync(request);
                 return Ok();

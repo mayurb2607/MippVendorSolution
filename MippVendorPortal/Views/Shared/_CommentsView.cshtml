@@ -1,0 +1,60 @@
+﻿
+@{
+    var id = ViewBag.workorderId;
+    var email = ViewBag.Email;
+}
+<div class="detailBox">
+    <div class="titleBox">
+        <label>Add Comments (Visible to tenants)</label>
+        <button type="button" class="close" aria-hidden="true">&times;</button>
+    </div>
+
+    <div class="actionBox">
+        <div class="form-inline">
+            <div class="form-group">
+                <input class="form-control" type="text" id="text" placeholder="Your comments" />
+            </div>&nbsp;
+            <div class="form-group">
+                <button class="btn btn-default" id="myButton">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+    <script>
+        const field = document.getElementById('text');
+        
+        // const comments = document.querySelector('#comment-box')
+        const comments = document.getElementById('comment-box');
+
+        // array to store the comments
+        const comments_arr = [];
+
+        $(document).on('click', '#myButton', function () {
+            const content = field.value;
+            if (content.length > 0) { 
+                // if there is content
+                console.log("Comments");
+                $.ajax({
+                    type: "GET",
+                    url: '/Workorders/SubmitComments',,
+                    data: {
+                        "workorderId": id,
+                        "text" = content,
+                        "email": email
+                       
+                    },
+
+                    success: function (result) {
+
+                    }
+                });
+
+            }
+        });
+    </script>
+}

@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    var email = ViewBag.Email;
 }
 
 <h1>Workorders</h1>
@@ -291,7 +292,7 @@
             @Html.DisplayFor(modelItem => item.VendorId)
             </td>*@
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Update</a> |
+                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-email="@email">Update</a> |
 
                 </td>
             </tr>

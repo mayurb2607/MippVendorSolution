@@ -69,6 +69,8 @@ namespace MippSamplePortal.Controllers
                         ViewBag.Subtotal = "";
                         ViewBag.Total = "";
                         ViewBag.ClientID = workorderRequest.ClientID;
+                        TempData["Email"] = email;
+                        ViewBag.Email = email;
                         return View(workorder.ToList());
                     }
                     catch (Exception ex)
@@ -177,7 +179,7 @@ namespace MippSamplePortal.Controllers
 
 
 
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string email)
         {
             if (id == null)
             {
@@ -252,6 +254,7 @@ namespace MippSamplePortal.Controllers
                                     //}
 
                                     ViewData["Vendors"] = data;
+                                    TempData["Email"] = email;
                                 }
                                 catch (Exception ex)
                                 {
@@ -279,7 +282,7 @@ namespace MippSamplePortal.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,OrderNumber,OrderDate,AssignedTo,AssignedToCompany,AssignedToAddress," +
+        public async Task<IActionResult> Edit(int id, string email, [Bind("Id,OrderNumber,OrderDate,AssignedTo,AssignedToCompany,AssignedToAddress," +
             "AssignedToPhone,AssignedToEmailAddress,ExpectedStartDate,ExpectedEndDate,ServiceRequestNumber,Status,Description," +
             "AdditionalComments,ExpectedNoOfHoursToComplete,WorkPerformedBy,WorkCompletedAndMaterialsUsed,TotalHoursSpent," +
             "PropertyName,PropertyAddress,PropertyManager,PropertyManagerPhone,PropertyManagerEmail,TenantName,TenantEmailAddress," +
@@ -287,12 +290,13 @@ namespace MippSamplePortal.Controllers
             "TimeDeparted,EntryNote,WorkorderCompiledBy,WorkorderApprovedBy,DateOfApproval,Priority,CostOfLabor,CostOfMaterials," +
             "TaxesPaid,Total,ClientId,VendorId")] Workorder workorder)
         {
-            workorder.AssignedTo = "Jacob Paul";
+            //workorder.AssignedTo = "Jacob Paul";
             WorkorderRequest workorderRequest = new WorkorderRequest();
             workorderRequest.ClientID = (int)workorder.ClientId;
-            workorderRequest.AdditionalComments = "";
-            workorderRequest.Status = "";
+            workorderRequest.AdditionalComments = workorder.AdditionalComments;
+            workorderRequest.Status = workorder.Status;
             workorderRequest.Id = workorder.Id;
+            
 
             var env = _hostEnvironment.EnvironmentName;
             string apiUrl = string.Empty;
@@ -323,6 +327,10 @@ namespace MippSamplePortal.Controllers
                         workorderMaster = workorder1.FirstOrDefault(x => x.Id == id);
                         workorderMaster.AssignedTo = workorder.AssignedTo;
                         workorderMaster.AdditionalComments = workorder.AdditionalComments;
+                        workorderMaster.VendorId = _context.Vendors.FirstOrDefault(x => x.FirstName == workorder.AssignedTo).Id;
+                        workorderMaster.Status = workorder.Status;
+                        //workorderMaster.AssignedToPhone = _context.V
+                        
                     }
                     catch (Exception ex)
                     {
@@ -349,7 +357,7 @@ namespace MippSamplePortal.Controllers
                                 string apiResponse = await response.Content.ReadAsStringAsync();
                                 //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
                                 //return true;
-                                return RedirectToAction("Index", new { clientId = workorderMaster.ClientId });
+                                return RedirectToAction("Index", new { email = email});
                             }
                         }
                     }

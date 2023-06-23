@@ -45,6 +45,10 @@ public partial class MippTestContext : DbContext
 
     public virtual DbSet<Workorder> Workorders { get; set; }
 
+    public virtual DbSet<WorkorderComment> WorkorderComments { get; set; }
+
+    public virtual DbSet<WorkorderWorkDescription> WorkorderWorkDescriptions { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=L028;Database=MippTest;Trusted_Connection=True; User Id=ANAR\\Mayur.b;Password=Speak2m; MultipleActiveResultSets=true;TrustServerCertificate=True;");
@@ -310,6 +314,29 @@ public partial class MippTestContext : DbContext
             entity.Property(e => e.WorkPerformedBy).HasMaxLength(50);
             entity.Property(e => e.WorkorderApprovedBy).HasMaxLength(50);
             entity.Property(e => e.WorkorderCompiledBy).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<WorkorderComment>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("ID");
+            entity.Property(e => e.WorkorderId).HasColumnName("WorkorderID");
+        });
+
+        modelBuilder.Entity<WorkorderWorkDescription>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("WorkorderWorkDescription");
+
+            entity.Property(e => e.DescriptionOfWorkCompletedMaterialsUsed).HasColumnName("DescriptionOfWorkCompleted&MaterialsUsed");
+            entity.Property(e => e.HoursSpent).HasMaxLength(50);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.WorkorderId).HasColumnName("WorkorderID");
         });
 
         OnModelCreatingPartial(modelBuilder);

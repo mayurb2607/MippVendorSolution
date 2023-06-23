@@ -33,6 +33,28 @@ namespace MippVendorPortal.Controllers
         }
 
 
+        public IActionResult SubmitComments(int workorderId, string text, string email)
+        {
+            var commentsObj = new WorkorderComment();
+            commentsObj.Email = email;
+            commentsObj.Text = text;
+            commentsObj.WorkorderId = workorderId;
+
+            _context1.WorkorderComments.Add(commentsObj);
+            _context1.SaveChanges();
+            return RedirectToAction("Edit", new { id = workorderId });
+
+
+        }
+        public IActionResult OverlayPartial(int woid)
+        {
+            ViewBag.Id = woid;
+            ViewBag.Email = _context1.Vendors.FirstOrDefault
+                                (x => x.Id == _context1.Workorders.FirstOrDefault(x=> x.Id == woid).VendorId).Email;
+            return PartialView("_CommentsView");
+            //return PartialView("_FeedbackPartial");
+        }
+
         [Authorize]
         public async Task<IActionResult> Index(int rootvendorId, string msg)
         {
@@ -83,6 +105,7 @@ namespace MippVendorPortal.Controllers
                         ViewBag.Tax = "";
                         ViewBag.Subtotal = "";
                         ViewBag.Total = "";
+                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.RootVendorId == rootvendorId).Id;
 
                         return View(workorder);
 
@@ -97,24 +120,7 @@ namespace MippVendorPortal.Controllers
         }
 
 
-        // GET: Workorders/Details/5
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null || _context.Workorders == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var workorder = await _context.Workorders
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (workorder == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewBag.VendorId = workorder.VendorId;
-        //    return View(workorder);
-        //}
-
+        
         // GET: Workorders/Create
         public IActionResult Create(int? id)
         {
@@ -161,12 +167,18 @@ namespace MippVendorPortal.Controllers
             {
                 return NotFound();
             }
-
+            var comments = _context1.WorkorderComments.Where(x => x.WorkorderId == workorder.Id);
             var statuses = _context1.ClientStatuses.Where(x => x.ClientId == workorder.ClientId);
             var status = new List<string>();
             foreach (var stat in statuses)
             {
                 status.Add(stat.Status);
+            }
+            var comment = new List<string>();
+
+            foreach (var item in comments)
+            {
+                comment.Add(item.Text);
             }
             ViewBag.Statuses = status;
             ViewBag.Status = workorder.Status;
@@ -174,6 +186,7 @@ namespace MippVendorPortal.Controllers
             ViewBag.VendorId = workorder.VendorId;
             ViewBag.id = workorder.Id;
             ViewBag.clientId = workorder.ClientId;
+            ViewBag.Comments = comments;
             return View(workorder);
         }
 
@@ -234,7 +247,7 @@ namespace MippVendorPortal.Controllers
                             //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
                             //return true;
                             if (response.IsSuccessStatusCode)
-                                return RedirectToAction("Index", new { vendorId = wo.VendorId, msg = ViewBag.savemsg });
+                                return RedirectToAction("Index", new { rootVendorId = wo.VendorId, msg = ViewBag.savemsg });
                         }
                     }
                 }

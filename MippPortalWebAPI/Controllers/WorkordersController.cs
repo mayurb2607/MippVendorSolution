@@ -154,7 +154,9 @@ namespace MippPortalWebAPI.Controllers
             workorder.Status = workorderRequest.Status;
             workorder.AdditionalComments = workorderRequest.AdditionalComments;
             workorder.AssignedTo = workorderRequest.AssignedTo;
-            workorder.VendorId = 1;
+            workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == workorderRequest.AssignedTo).Email;
+            //workorder.AssignedToPhone = _context.VendorInvites.FirstOrDefault(x => x. == workorderRequest.AssignedTo).P
+            workorder.VendorId = workorderRequest.VendorId;
             //workorder.VendorId = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Id;
             workorder.AssignedToEmailAddress = workorderRequest.AssignedToEmailAddress;
             //workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Email;
