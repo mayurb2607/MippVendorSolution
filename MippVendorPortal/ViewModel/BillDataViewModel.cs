@@ -2,14 +2,16 @@
 {
     public class BillDataViewModel
     {
-        public string item { get; set; }
         public string description { get; set; }
-        public string quantity { get; set; }
-        public int unit { get; set; }
+        public string item { get; set; }
         public string price { get; set; }
-        public string tax { get; set; }
+        public string quantity { get; set; }
         public string subtotal { get; set; }
+        public string tax { get; set; }
         public string total { get; set; }
+
+        public int unit { get; set; }
+        
         //public string title { get; set; }
         //public string summary { get; set; }
         //public string invoice { get; set; }

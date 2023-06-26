@@ -51,7 +51,7 @@ namespace MippVendorPortal.Controllers
             ViewBag.Id = woid;
             ViewBag.Email = _context1.Vendors.FirstOrDefault
                                 (x => x.Id == _context1.Workorders.FirstOrDefault(x=> x.Id == woid).VendorId).Email;
-            return PartialView("_CommentsView");
+            return View("_CommentsView");
             //return PartialView("_FeedbackPartial");
         }
 
@@ -214,13 +214,15 @@ namespace MippVendorPortal.Controllers
             wo.WorkPerformedBy = workorder.WorkPerformedBy;
             wo.WorkCompletedAndMaterialsUsed = workorder.WorkCompletedAndMaterialsUsed;
             wo.TotalHoursSpent = workorder.TotalHoursSpent;
+            _context1.Workorders.Update(wo);
+            _context1.SaveChanges();
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context1.Workorders.Update(wo);
-                    await _context.SaveChangesAsync();
+                    _context1.SaveChangesAsync();
                     ViewBag.saveMsg = "Changes saved successfully!!";
 
                     var env = _hostEnvironment.EnvironmentName;

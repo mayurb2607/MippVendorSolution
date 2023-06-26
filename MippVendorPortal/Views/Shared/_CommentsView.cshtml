@@ -2,6 +2,7 @@
 @{
     var id = ViewBag.workorderId;
     var email = ViewBag.Email;
+    Layout = null;
 }
 <div class="detailBox">
     <div class="titleBox">
@@ -39,20 +40,26 @@
             if (content.length > 0) { 
                 // if there is content
                 console.log("Comments");
-                $.ajax({
-                    type: "GET",
-                    url: '/Workorders/SubmitComments',,
-                    data: {
-                        "workorderId": id,
-                        "text" = content,
-                        "email": email
+                //$.ajax({
+                //    type: "GET",
+                //    url: '/Workorders/SubmitComments',,
+                //    data: {
+                //        "workorderId": id,
+                //        "text" = content,
+                //        "email": email
                        
-                    },
+                //    },
 
-                    success: function (result) {
+                //    success: function (result) {
 
-                    }
-                });
+                //    }
+                //});
+
+
+                $.post('@Url.Action("SubmitComments", "Workorders")', { workorderId: id, "text": content, "email":email },
+                    function () {
+                         $('#result').html('"PassThings()" successfully called.');
+                    });
 
             }
         });

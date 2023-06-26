@@ -15,6 +15,18 @@
     margin: 0 0 1em;
 }
 
+#overlay{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 25%;
+    height: 30%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    display:none;z-index: 1;
+}
 .comment {
     overflow: hidden;
     padding: 0 0 1em;
@@ -121,17 +133,7 @@
 <i class="fas fa-times"></i>
 </button>
 </div>*@
-        <div id="overlay" style="position: fixed;
-                                top: 50%;
-    left: 50%;
-    width: 25%;
-    height: 30%;
-                        transform: translate(-50%, -50%);
-                        background-color: #fff;
-                        border: 1px solid #ccc;
-                        padding: 20px;
-                        display: none;
-z-index: 1;"></div>
+        <div id="overlay"></div>
 </div>
 
     <form asp-action="Edit">
@@ -479,7 +481,7 @@ the plugin.*@
     </script>
     <script>
                             $("#add-row-btn").click(function () {
-                                var newRow = `<br/><br/><div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+                                var newRow = `<br/><br/>            <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
                       <div class="form-group" style="width: max-content;">
                             <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
                             <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
@@ -490,9 +492,12 @@ the plugin.*@
                             <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
                             <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
                         </div>
-                        <button  id="add-row-btn" style="margin-top:3%; width:min-content">+</button>
-                    <button id="remove-btn" style="margin-top:3%; width:min-content">x</button>
-                    </div>`;
+                       <button id="add-row-btn" class="btn btn-primary" style="height: fit-content;
+    margin-top: 3%;">Add</button>&nbsp;&nbsp;
+                        <button id="remove-btn" class="btn btn-primary" style="height: fit-content;
+    margin-top: 3%;">Delete</button>
+                    </div>
+`;
                                 $("#descriptions").append(newRow);
 
 

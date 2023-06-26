@@ -167,8 +167,8 @@ namespace MippPortalWebAPI.Controllers
         }
 
         [EnableCors("AllowOrigin")]
-        [HttpPost("Sen_contextillUpdateEmail")]
-        public async Task<IActionResult> Sen_contextillUpdateEmail(Bill bill)
+        [HttpPost("SendBillUpdateEmail")]
+        public async Task<IActionResult> SendBillUpdateEmail(Bill bill)
         {
             try
             {
@@ -194,7 +194,9 @@ namespace MippPortalWebAPI.Controllers
             {
                 SendEmailViewModel request = new SendEmailViewModel();
                 request.Body = "Bill" + " " + bill.Id + " " + "has been created for Workorder" + " " + bill.Wonumber + " " + "by" + " " + bill.VendorId;
-                //request.ToEmail = bill.vendoremail;
+                request.ToEmail = bill.ClientEmail;
+                request.Cc = new List<string>();
+                request.Cc.Add(bill.VendorEmail);
                 //request.Cc = bill.PropertyManagerEmail;
                 request.Subject = "Bill created for workorder:" + " " + bill.Wonumber;
                 await _mailHelper.SendEmailAsync(request);

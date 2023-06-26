@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
+using dotless.Core.Parser.Functions;
+using dotless.Core.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +18,13 @@ using Newtonsoft.Json;
 using Syncfusion.EJ2.Charts;
 using Syncfusion.EJ2.Linq;
 
+
 namespace MippVendorPortal.Controllers
 {
     public class BillsController : Controller
     {
         private readonly MippVendorTestContext _context;
-        private readonly MippTestContext _context1;
+        private readonly MippPortalWebAPI.Models.MippTestContext _context1;
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _hostEnvironment;
 
@@ -155,7 +158,7 @@ namespace MippVendorPortal.Controllers
                 apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
             }
 
-            IEnumerable<Bill> bill;
+            IEnumerable<MippPortalWebAPI.Models.Bill> bill;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -165,7 +168,7 @@ namespace MippVendorPortal.Controllers
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     try
                     {
-                        bill = JsonConvert.DeserializeObject<IEnumerable<Bill>>(apiResponse);
+                        bill = JsonConvert.DeserializeObject<IEnumerable<MippPortalWebAPI.Models.Bill>>(apiResponse);
                         ViewBag.VendorId = vendorId;
                         ViewBag.Workorder = bill;
                         ViewBag.msg = msg;
@@ -190,10 +193,15 @@ namespace MippVendorPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(int woId, List<BillDataViewModel> billItems)
+        public async Task<IActionResult> Insert(string woId, string title, string summary, Setting settings, IEnumerable<BillDataViewModel> testArr)
         {
+            //IEnumerable<BillDataViewModel> billData;
+            //billData = (IEnumerable<BillDataViewModel>)JsonConvert.DeserializeObject<IEnumerable<WorkorderMasterModel>>(billItems);
+            Bill bill = new Bill();
+            var existing = _context1.BillItems.Where(x => x.BillId == _context1.Bills.FirstOrDefault(x => x.Wonumber == woId).Id.ToString());
 
-            foreach (var item in billItems)
+
+            foreach (var item in testArr)
             {
                 MippPortalWebAPI.Models.BillItem billItem = new MippPortalWebAPI.Models.BillItem();
                 billItem.Name = item.item;
@@ -206,16 +214,74 @@ namespace MippVendorPortal.Controllers
                 billItem.Total = item.total;
                 billItem.Subtotal = item.subtotal;
                 billItem.BillId = "1";
-                _context1.Add(billItems);
+
+
+                bill.AddressLine1 = settings.AddressLine1;
+                bill.AddressLine2 = settings.AddressLine2;
+                bill.AddressLine3 = settings.City;
+                bill.City = settings.City;
+                bill.Province = settings.Province;
+                bill.Wonumber = woId;
+                bill.CareOf = settings.CareOf;
+                bill.BillTo = settings.BusinessName;
+                bill.BillDate = settings.BillDate;
+                bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
+                bill.ClientEmail = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).PropertyManagerEmail.ToString();
+                bill.Footer = string.Empty;
+                bill.Note = string.Empty;
+                bill.SubTotal = bill.SubTotal + item.subtotal;
+                bill.TaxAmount = bill.TaxAmount + item.tax;
+                bill.Total = bill.Total + item.total;
+                bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.Description == item.description).Id.ToString(); ;
+                bill.Summary = string.Empty;
+                _context1.Bills.Add(bill);
                 _context1.SaveChanges();
 
 
+                _context1.BillItems.Add(billItem);
+                _context1.SaveChanges();
+
+                //update wo status here
+
+                
             }
-           
+            var workorder = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId));
+            workorder.Status = "Bill Created";
+            _context1.Workorders.Update(workorder);
+            _context1.SaveChanges();
+
+            //send bill created email
+
+            var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                }
+
+                
 
 
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
 
-
+                    using (var response = await httpClient.PostAsync(apiUrl + "SendEmail/SendBillCreatedEmail", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                        //return true;
+                        if (response.IsSuccessStatusCode)
+                            return RedirectToAction("Index", new { rootVendorId = workorder.VendorId, msg = ViewBag.savemsg });
+                    }
+                }
 
             return Ok();
 
