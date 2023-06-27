@@ -9,7 +9,69 @@
 
 }
 
+<style>
+    .uploadSection {
+        background-color: #ffffff;
+        min-width: 27.5em;
+        padding: 3.12em 1.87em;
+        left: 50%;
+        top: 50%;
+        box-shadow: 0 1.25em 3.43em rgba(0, 0, 0, 0.08);
+        border-radius: 0.5em;
+    }
 
+    input[type="file"] {
+        display: none;
+    }
+
+    .label {
+        display: block;
+        position: relative;
+        background-color: #025bee;
+        color: #ffffff;
+        font-size: 1.1em;
+        text-align: center;
+        width: 16em;
+        padding: 1em 0;
+        border-radius: 0.3em;
+        margin: 0 auto 1em auto;
+        cursor: pointer;
+    }
+
+    #image-display {
+        position: relative;
+        width: 90%;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-evenly;
+        gap: 1.25em;
+        flex-wrap: wrap;
+    }
+
+        #image-display figure {
+            width: 45%;
+        }
+
+        #image-display img {
+            width: 100%;
+        }
+
+        #image-display figcaption {
+            font-size: 0.8em;
+            text-align: center;
+            color: #5a5861;
+        }
+
+    .active {
+        border: 0.2em dashed #025bee;
+    }
+
+    #error {
+        text-align: center;
+        color: #ff3030;
+    }
+
+</style>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -156,7 +218,7 @@
                 </div>
                 <div class="row">
 
-                    <div class="col-6">
+@*                    <div class="col-6">
                         <p class="lead">Payment Methods:</p>
                         <img src="../../dist/img/credit/visa.png" alt="Visa">
                         <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
@@ -166,7 +228,7 @@
                             All cards are accepted.
                         </p>
                     </div>
-
+*@
                     <div class="col-6">
                         <p class="lead">Amount Due </p>
                         <div class="table-responsive">
@@ -191,13 +253,22 @@
                     </div>
 
                 </div>
+                <br/>
+                    <label id="document">Upload Document</label>
+                
+                <form asp-controller="Bills" asp-action="Upload" class="dropzone" id="myDropzone">
+                    <div class="uploadSection">
+                    <input type="file" id="upload-button" multiple accept="image/*" />
+                    <label class="label" for="upload-button">
+                        <i class="fa-solid fa-upload"></i>&nbsp; Choose Or Drop Photos
+                    </label>
+                    <div id="error"></div>
+                    <div id="image-display"></div>
+                    </div>
+                </form>
+                <button asp-controller="Bills" asp-action="Upload"class="btn btn-primary"  id="myDropzone">Remove</button>
+                
                 <br />
-                <label id="document">Upload Document</label>
-                <div class="form-row">
-
-                    <input id="file" name="file" type="file" class="form-control" style="width:75%" /> &nbsp;&nbsp;
-                    <button class="btn btn-primary">Upload</button>
-                </div>
                 <br />
 
                 <button id="save-btn" class="btn btn-primary">Save</button>
@@ -214,6 +285,15 @@
 
 
                 @section Scripts {
+                    <script>
+                        // Initialize Dropzone
+                        Dropzone.options.myDropzone = {
+                            paramName: "files",
+                            maxFilesize: 50, // Maximum file size in MB
+                            acceptedFiles: ".jpg,.jpeg,.png,.pdf", // Accepted file types
+                            addRemoveLinks: true // Display remove links for uploaded files
+                        };
+                    </script>
                     <script src="~/dist/js/notify.js"></script>
                     <script src="~/dist/js/notify.min.js"></script>
                     <script>
@@ -400,6 +480,94 @@
                                 parseFloat(parseFloat(document.getElementById("totals").innerHTML) + parseFloat(document.querySelectorAll("#taxedAmount")[taxLen - 1].value)).toFixed(2);
 
                         };
+
+
+
+                        let uploadButton = document.getElementById("upload-button");
+                        let chosenImage = document.getElementById("chosen-image");
+                        let fileName = document.getElementById("file-name");
+                        let container = document.querySelector(".uploadSection");
+                        let error = document.getElementById("error");
+                        let imageDisplay = document.getElementById("image-display");
+
+                        const fileHandler = (file, name, type) => {
+                            if (type.split("/")[0] !== "image") {
+                                //File Type Error
+                                error.innerText = "Please upload an image file";
+                                return false;
+                            }
+                            error.innerText = "";
+                            let reader = new FileReader();
+                            reader.readAsDataURL(file);
+                            reader.onloadend = () => {
+                                //image and file name
+                                let imageContainer = document.createElement("figure");
+                                let img = document.createElement("img");
+                                img.src = reader.result;
+                                imageContainer.appendChild(img);
+                                imageContainer.innerHTML += `<figcaption>${name}</figcaption>`;
+                                imageDisplay.appendChild(imageContainer);
+                            };
+                        };
+
+                        //Upload Button
+                        uploadButton.addEventListener("change", () => {
+                            imageDisplay.innerHTML = "";
+                            Array.from(uploadButton.files).forEach((file) => {
+                                fileHandler(file, file.name, file.type);
+                            });
+                        });
+
+                        container.addEventListener(
+                            "dragenter",
+                            (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                container.classList.add("active");
+                            },
+                            false
+                        );
+
+                        container.addEventListener(
+                            "dragleave",
+                            (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                container.classList.remove("active");
+                            },
+                            false
+                        );
+
+                        container.addEventListener(
+                            "dragover",
+                            (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                container.classList.add("active");
+                            },
+                            false
+                        );
+
+                        container.addEventListener(
+                            "drop",
+                            (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                container.classList.remove("active");
+                                let draggedData = e.dataTransfer;
+                                let files = draggedData.files;
+                                imageDisplay.innerHTML = "";
+                                Array.from(files).forEach((file) => {
+                                    fileHandler(file, file.name, file.type);
+                                });
+                            },
+                            false
+                        );
+
+                        window.onload = () => {
+                            error.innerText = "";
+                        };
+
                     </script>
                 }
 

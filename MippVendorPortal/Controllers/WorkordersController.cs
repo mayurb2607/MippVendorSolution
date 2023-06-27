@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
@@ -14,6 +15,7 @@ using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
 using AspNetUser = MippVendorPortal.Models.AspNetUser;
+using WorkorderRequest = MippPortalWebAPI.Helpers.WorkorderRequest;
 
 namespace MippVendorPortal.Controllers
 {
@@ -32,10 +34,52 @@ namespace MippVendorPortal.Controllers
             _context1 = context1;
         }
 
+        public async Task<IEnumerable<MippPortalWebAPI.Models.WorkorderWorkDescription>> GetWorkorderDescriptions(int workorderID)
+        {
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+            IEnumerable<MippPortalWebAPI.Models.WorkorderWorkDescription> workDescriptions;
+
+            using (var httpClient = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderID), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorderDescriptions", content))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    workDescriptions = JsonConvert.DeserializeObject<IEnumerable<MippPortalWebAPI.Models.WorkorderWorkDescription>>(apiResponse);
+                    try
+                    {
+                        return workDescriptions;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public void PostWorkorderDescriptions()
+        {
+
+        }
+
 
         public IActionResult SubmitComments(int workorderId, string text, string email)
         {
-            var commentsObj = new WorkorderComment();
+            var commentsObj = new MippPortalWebAPI.Models.WorkorderComment();
             commentsObj.Email = email;
             commentsObj.Text = text;
             commentsObj.WorkorderId = workorderId;
@@ -54,6 +98,7 @@ namespace MippVendorPortal.Controllers
             return View("_CommentsView");
             //return PartialView("_FeedbackPartial");
         }
+
 
         [Authorize]
         public async Task<IActionResult> Index(int rootvendorId, string msg)
@@ -81,7 +126,7 @@ namespace MippVendorPortal.Controllers
 
 
 
-            IEnumerable<WorkorderMasterModel> workorder;
+            IEnumerable<ViewModel.WorkorderMasterModel> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -91,7 +136,7 @@ namespace MippVendorPortal.Controllers
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     try
                     {
-                        workorder = JsonConvert.DeserializeObject<IEnumerable<WorkorderMasterModel>>(apiResponse);
+                        workorder = JsonConvert.DeserializeObject<IEnumerable<ViewModel.WorkorderMasterModel>>(apiResponse);
                         ViewBag.VendorId = rootvendorId;
                         ViewBag.Workorder = workorder;
                         ViewBag.msg = msg;
@@ -142,7 +187,7 @@ namespace MippVendorPortal.Controllers
             "PropertyManager,PropertyManagerPhone,PropertyManagerEmail,TenantName,TenantEmailAddress," +
             "TenantPhoneNumber,UnitName,UnitAddress,Note,PreferredTime,EnterCondition,PermissionNote," +
             "EntryDate,TimeEntered,TimeDeparted,EntryNote,WorkorderCompiledBy,WorkorderApprovedBy," +
-            "DateOfApproval,Priority,CostOfLabor,CostOfMaterials,TaxesPaid,Total,ClientId,VendorId")] Workorder workorder)
+            "DateOfApproval,Priority,CostOfLabor,CostOfMaterials,TaxesPaid,Total,ClientId,VendorId")] MippPortalWebAPI.Models.Workorder workorder)
         {
             if (ModelState.IsValid)
             {
@@ -187,6 +232,10 @@ namespace MippVendorPortal.Controllers
             ViewBag.id = workorder.Id;
             ViewBag.clientId = workorder.ClientId;
             ViewBag.Comments = comments;
+
+            var descriptions = _context1.WorkorderWorkDescriptions.Where(x => x.WorkorderId == workorder.Id);
+            ViewBag.Descriptions = descriptions;
+            //var data = await GetWorkorderDescriptions(workorder.Id);
             return View(workorder);
         }
 
@@ -194,79 +243,76 @@ namespace MippVendorPortal.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,OrderNumber,OrderDate,AssignedTo,AssignedToCompany,AssignedToAddress," +
-            "AssignedToPhone,AssignedToEmailAddress,ExpectedStartDate,ExpectedEndDate,ServiceRequestNumber,Status,Description," +
-            "AdditionalComments,ExpectedNoOfHoursToComplete,WorkPerformedBy,WorkCompletedAndMaterialsUsed,TotalHoursSpent,PropertyName," +
-            "PropertyAddress,PropertyManager,PropertyManagerPhone,PropertyManagerEmail,TenantName,TenantEmailAddress,TenantPhoneNumber," +
-            "UnitName,UnitAddress,Note,PreferredTime,EnterCondition,PermissionNote,EntryDate,TimeEntered,TimeDeparted,EntryNote," +
-            "WorkorderCompiledBy,WorkorderApprovedBy,DateOfApproval,Priority,CostOfLabor,CostOfMaterials,TaxesPaid,Total,ClientId,VendorId")] Workorder workorder)
+        public async Task<IActionResult> Edit(IEnumerable<WorkorderViewModel> workorder)
         {
-            if (id != workorder.Id)
+            foreach (var item in workorder)
             {
-                return NotFound();
-            }
-            var wo = _context1.Workorders.FirstOrDefault(x => x.Id == id);
-            wo.Status = workorder.Status;
-            wo.Description = workorder.Description;
-            wo.AdditionalComments = workorder.AdditionalComments;
-            wo.ExpectedNoOfHoursToComplete = workorder.ExpectedNoOfHoursToComplete;
-            wo.WorkPerformedBy = workorder.WorkPerformedBy;
-            wo.WorkCompletedAndMaterialsUsed = workorder.WorkCompletedAndMaterialsUsed;
-            wo.TotalHoursSpent = workorder.TotalHoursSpent;
-            _context1.Workorders.Update(wo);
-            _context1.SaveChanges();
 
-            if (ModelState.IsValid)
-            {
-                try
+                var wo = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(item.Id));
+                wo.Status = item.Status;
+                wo.Description = item.Description;
+                wo.AdditionalComments = item.AdditionalComments;
+                wo.ExpectedNoOfHoursToComplete = item.ExpectedNoOfHoursToComplete;
+                wo.WorkPerformedBy = item.WorkPerformedBy;
+                //wo.WorkCompletedAndMaterialsUsed = workorder.WorkCompletedAndMaterialsUsed;
+                //wo.TotalHoursSpent = workorder.TotalHoursSpent;
+                _context1.Workorders.Update(wo);
+                _context1.SaveChanges();
+
+
+
+                if (ModelState.IsValid)
                 {
-                    _context1.Workorders.Update(wo);
-                    _context1.SaveChangesAsync();
-                    ViewBag.saveMsg = "Changes saved successfully!!";
-
-                    var env = _hostEnvironment.EnvironmentName;
-                    string apiUrl = string.Empty;
-                    if (env == "Development")
+                    try
                     {
-                        // Configure services for development environment
-                        apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
-                        //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
-                    }
-                    else
-                    {
-                        // Configure services for local environment
-                        apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
-                    }
+                        _context1.Workorders.Update(wo);
+                        _context1.SaveChangesAsync();
+                        ViewBag.saveMsg = "Changes saved successfully!!";
 
-                    using (var httpClient = new HttpClient())
-                    {
-                        StringContent content = new StringContent(JsonConvert.SerializeObject(wo), Encoding.UTF8, "application/json");
-
-                        using (var response = await httpClient.PostAsync(apiUrl + "SendEmail/SendWorkorderStatusUpdateEmail", content))
+                        var env = _hostEnvironment.EnvironmentName;
+                        string apiUrl = string.Empty;
+                        if (env == "Development")
                         {
-                            string apiResponse = await response.Content.ReadAsStringAsync();
-                            //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
-                            //return true;
-                            if (response.IsSuccessStatusCode)
-                                return RedirectToAction("Index", new { rootVendorId = wo.VendorId, msg = ViewBag.savemsg });
+                            // Configure services for development environment
+                            apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                            //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                        }
+                        else
+                        {
+                            // Configure services for local environment
+                            apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                        }
+
+                        using (var httpClient = new HttpClient())
+                        {
+                            StringContent content = new StringContent(JsonConvert.SerializeObject(wo), Encoding.UTF8, "application/json");
+
+                            using (var response = await httpClient.PostAsync(apiUrl + "SendEmail/SendWorkorderStatusUpdateEmail", content))
+                            {
+                                string apiResponse = await response.Content.ReadAsStringAsync();
+                                //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                                //return true;
+                                if (response.IsSuccessStatusCode)
+                                    return RedirectToAction("Index", new { rootVendorId = wo.VendorId, msg = ViewBag.savemsg });
+                            }
                         }
                     }
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!WorkorderExists(workorder.Id))
+                    catch (DbUpdateConcurrencyException)
                     {
-                        return NotFound();
+                        if (!WorkorderExists(int.Parse(item.Id)))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
-                    else
-                    {
-                        throw;
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                return View(workorder);
             }
-            return View(workorder);
+            return BadRequest();
         }
 
         // GET: Workorders/Delete/5

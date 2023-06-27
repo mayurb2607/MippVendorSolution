@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippSamplePortal.ViewModel;
 
@@ -22,7 +23,7 @@ namespace MippPortalWebAPI.Controllers
         }
 
         [HttpPost("GetVendors")]
-        public async Task<List<string>> GetVendors(WorkorderRequest workorderRequest)
+        public async Task<List<string>> GetVendors(Helpers.WorkorderRequest workorderRequest)
         {
             workorderRequest.ClientID = 1;
             if (workorderRequest.ClientID != 0)
@@ -57,8 +58,15 @@ namespace MippPortalWebAPI.Controllers
             }
         }
 
+        [HttpPost("GetWorkorderDescriptions")]
+        public List<WorkorderWorkDescription> GetWorkorderDescriptions (string workorderId)
+        {
+            var descriptions = _context.WorkorderWorkDescriptions.Where(x => x.WorkorderId == int.Parse(workorderId)).ToList();
+            return descriptions;
+        }
+
         [HttpPost("GetWorkorders")]
-        public async Task<ActionResult<IEnumerable<Workorder>>> GetWorkorders(WorkorderRequest workorderRequest)
+        public async Task<ActionResult<IEnumerable<Workorder>>> GetWorkorders(Helpers.WorkorderRequest workorderRequest)
         {
             if (workorderRequest.ClientID != 0)
             {
@@ -204,7 +212,7 @@ namespace MippPortalWebAPI.Controllers
                     throw;
                 }
             }
-            WorkorderRequest workorderRequest = new WorkorderRequest();
+            Helpers.WorkorderRequest workorderRequest = new Helpers.WorkorderRequest();
             workorderRequest.ClientID = (int)workorder.ClientId;
             return CreatedAtAction("GetWorkorders", new { workorderRequest = workorderRequest });
         }
