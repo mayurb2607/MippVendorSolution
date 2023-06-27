@@ -71,9 +71,14 @@ namespace MippVendorPortal.Controllers
             }
         }
 
-        public void PostWorkorderDescriptions()
+        public void PostWorkorderDescriptions(string woId, string description, string hours)
         {
-
+            WorkorderWorkDescription workDescription = new WorkorderWorkDescription();
+            workDescription.WorkorderId = int.Parse(woId);
+            workDescription.DescriptionOfWorkCompletedMaterialsUsed = description;
+            workDescription.HoursSpent = hours;
+            _context1.WorkorderWorkDescriptions.Add(workDescription);
+            _context1.SaveChanges();
         }
 
 
@@ -87,6 +92,7 @@ namespace MippVendorPortal.Controllers
             _context1.WorkorderComments.Add(commentsObj);
             _context1.SaveChanges();
             return RedirectToAction("Edit", new { id = workorderId });
+            //send email on adding comments
 
 
         }
@@ -212,31 +218,146 @@ namespace MippVendorPortal.Controllers
             {
                 return NotFound();
             }
-            var comments = _context1.WorkorderComments.Where(x => x.WorkorderId == workorder.Id);
-            var statuses = _context1.ClientStatuses.Where(x => x.ClientId == workorder.ClientId);
-            var status = new List<string>();
-            foreach (var stat in statuses)
-            {
-                status.Add(stat.Status);
-            }
-            var comment = new List<string>();
 
-            foreach (var item in comments)
+            WorkorderRequest workorderRequest = new WorkorderRequest
             {
-                comment.Add(item.Text);
-            }
-            ViewBag.Statuses = status;
-            ViewBag.Status = workorder.Status;
-            ViewData["VendorId"] = workorder.VendorId;
-            ViewBag.VendorId = workorder.VendorId;
-            ViewBag.id = workorder.Id;
-            ViewBag.clientId = workorder.ClientId;
-            ViewBag.Comments = comments;
+                Id = workorder.Id,
 
-            var descriptions = _context1.WorkorderWorkDescriptions.Where(x => x.WorkorderId == workorder.Id);
-            ViewBag.Descriptions = descriptions;
-            //var data = await GetWorkorderDescriptions(workorder.Id);
-            return View(workorder);
+            };
+
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+
+
+
+            Workorder workorder1;
+            IEnumerable <WorkorderComment> workorderComment = null;
+            IEnumerable<ClientStatus> workorderStatus = null;
+            IEnumerable<WorkorderWorkDescription> workorderWorkDescription = null;
+            using (var httpClient = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorder", content))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        workorder1 = JsonConvert.DeserializeObject
+                            <Workorder>(apiResponse);
+                        ViewBag.VendorId = workorder1.VendorId;
+                        ViewBag.Workorder = workorder;
+                        ViewBag.msg = "";
+                        if (_context.Vendors.FirstOrDefault(x => x.Id == workorder1.VendorId) != null)
+                        {
+                            ViewBag.Email = _context.Vendors.FirstOrDefault(x => x.Id == workorder1.VendorId).VendorEmail;
+                        }
+
+                        ViewData["GridData"] = workorder1;
+                        ViewBag.GridData = workorder1;
+                        ViewBag.Tax = "";
+                        ViewBag.Subtotal = "";
+                        ViewBag.Total = "";
+                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.RootVendorId == workorder1.VendorId).Id;
+
+                        using (var httpClient1 = new HttpClient())
+                        {
+                            StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                            using (var response1 = await httpClient1.PostAsync(apiUrl + "Workorders/GetWorkorderComments", content1))
+                            {
+                                string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                                try
+                                {
+                                    workorderComment = JsonConvert.DeserializeObject
+                                        <IEnumerable<WorkorderComment>>(apiResponse1);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+
+                        using (var httpClient2 = new HttpClient())
+                        {
+                            StringContent content2 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                            using (var response2 = await httpClient2.PostAsync(apiUrl + "Workorders/GetWorkorderStatuses", content2))
+                            {
+                                string apiResponse2 = await response2.Content.ReadAsStringAsync();
+                                try
+                                {
+                                    workorderStatus = JsonConvert.DeserializeObject
+                                        <IEnumerable<ClientStatus>>(apiResponse2);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+
+                        var status = new List<string>();
+                        foreach (var stat in workorderStatus)
+                        {
+                            status.Add(stat.Status);
+                        }
+                
+                        ViewBag.Statuses = status;
+                        ViewBag.Status = workorder.Status;
+                        ViewData["VendorId"] = workorder.VendorId;
+                        ViewBag.VendorId = workorder.VendorId;
+                        ViewBag.id = workorder.Id;
+                        ViewBag.clientId = workorder.ClientId;
+                        ViewBag.Comments = workorderComment;
+
+
+                        using (var httpClient3 = new HttpClient())
+                        {
+                            StringContent content3 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                            using (var response3= await httpClient3.PostAsync(apiUrl + "Workorders/GetWorkorderWorkDescription", content3))
+                            {
+                                string apiResponse3 = await response3.Content.ReadAsStringAsync();
+                                try
+                                {
+                                    workorderWorkDescription = JsonConvert.DeserializeObject
+                                        <IEnumerable<WorkorderWorkDescription>>(apiResponse3);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+
+                        ViewBag.Descriptions = workorderWorkDescription;
+
+                        return View(workorder1);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+
+                }
+            }
+            
+
+
+
         }
 
         // POST: Workorders/Edit/5
@@ -293,7 +414,7 @@ namespace MippVendorPortal.Controllers
                                 //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
                                 //return true;
                                 if (response.IsSuccessStatusCode)
-                                    return RedirectToAction("Index", new { rootVendorId = wo.VendorId, msg = ViewBag.savemsg });
+                                    return RedirectToAction("Index", new { rootVendorId = wo.VendorId, msg = "" });
                             }
                         }
                     }

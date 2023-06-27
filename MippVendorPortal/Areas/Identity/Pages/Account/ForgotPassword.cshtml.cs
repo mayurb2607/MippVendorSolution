@@ -13,7 +13,11 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Hosting;
+using MippPortalWebAPI.Helpers;
+using MippSamplePortal.ViewModel;
 using MippVendorPortal.Areas.Identity.Data;
+using Newtonsoft.Json;
 
 namespace MippVendorPortal.Areas.Identity.Pages.Account
 {
@@ -21,11 +25,13 @@ namespace MippVendorPortal.Areas.Identity.Pages.Account
     {
         private readonly UserManager<MippVendorPortalUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly MailHelper _mailHelper;
 
-        public ForgotPasswordModel(UserManager<MippVendorPortalUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<MippVendorPortalUser> userManager, IEmailSender emailSender, MailHelper mailHelper)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _mailHelper = mailHelper;
         }
 
         /// <summary>
@@ -69,17 +75,44 @@ namespace MippVendorPortal.Areas.Identity.Pages.Account
                     "/Account/ResetPassword",
                     pageHandler: null,
                     values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
+                protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                 SendForgotPasswordEmail(
+                    new Login { Email = Input.Email, CallbackUrl = HtmlEncoder.Default.Encode(callbackUrl) });
+
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 
             return Page();
         }
+
+
+        public async void SendForgotPasswordEmail(Login loginModel)
+        {
+            try
+            {
+                SendEmailViewModel request = new SendEmailViewModel();
+                request.FromEmail = "bhavsarmayur26@gmail.com";
+                request.Cc = new List<string>();
+                request.Body = "Reset password, click here:" + loginModel.CallbackUrl + "<br/>";
+                request.ToEmail = loginModel.Email;
+                request.Subject = "Credentials for Vendor Portal";
+                await _mailHelper.SendEmailAsync(request);
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    public class Login
+    {
+        public string Email { get; set; }
+        public string CallbackUrl { get; set; }
     }
 }

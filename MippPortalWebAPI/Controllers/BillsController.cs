@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 
 namespace MippPortalWebAPI.Controllers
@@ -80,6 +82,14 @@ namespace MippPortalWebAPI.Controllers
             return NoContent();
         }
 
+        [HttpPost("GetTaxList")]
+        public async Task<ActionResult<IEnumerable<Tax>>> GetTaxList (WorkorderRequest workorderRequest)
+        {
+            var taxes = _context.Taxes.Where(x => x.ClientId == workorderRequest.ClientID).ToList();
+
+            return taxes;
+        }
+
         // POST: api/Bills
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -113,6 +123,51 @@ namespace MippPortalWebAPI.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("GetBillDetails")]
+        public async Task<Bill> GetBillDetails (BillRequest billRequest)
+        {
+            if(billRequest.Id != 0)
+            {
+                var bill = await _context.Bills.FirstOrDefaultAsync(x => x.Id == billRequest.Id);
+                return bill;
+            }
+            return null;
+        }
+
+        [HttpPost("AddBillItems")]
+        public bool AddBillItems (BillItem billItem)
+        {
+            if(billItem != null)
+            {
+                _context.BillItems.Add(billItem);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
+        [HttpPost("AddBill")]
+        public bool AddBill(Bill bill)
+        {
+            if (bill != null)
+            {
+                _context.Bills.Add(bill);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
+        [HttpPost("GetClientEmail")]
+        public string GetClientEmail(WorkorderRequest workorderRequest)
+        {
+            if(workorderRequest.ClientID != 0)
+            {
+                return _context.Clients.FirstOrDefault(x => x.ClientId == workorderRequest.ClientID).Email;
+            }
+            return null;
         }
 
         private bool BillExists(int id)
