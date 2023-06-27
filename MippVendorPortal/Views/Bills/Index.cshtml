@@ -71,11 +71,11 @@
 
                                 <div class="form-group">
                                     <label>Invoice:</label>
-                                    <input type="text" class="form-control" value=" #007612" id="invoice">
+                                    <input type="text" class="form-control"value="@item.Id" id="invoice" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label>Workorder ID:</label>
-                                    <input type="text" class="form-control" value="@item.Id" id="woId">
+                                    <input type="text" class="form-control" value="@item.Id" id="woId" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="@item.BillDate">Bill Date:</label>
@@ -138,14 +138,14 @@
                                 <input type="number" step="0.01" class="form-control" id="taxedAmount">
                             </div>
                         </div>
-                        <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary">Add</button>
-                        <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
-                        @*                    <button id="btnNotify" class="btn btn-primary">Show Notification</button>
-                        *@
+                        <button id="remove-btn" class="btn btn-primary">Delete</button>
+
                     </div>
                 </div>
                 <br />
                 <br />
+                <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary">Add Item</button>
+
                 <div class="form-group">
                     <label>Notes:</label>
                     <textarea class="form-control" id="description"></textarea>
@@ -224,8 +224,7 @@
 
                         function AddLine(){
                             var newRow = `
-                                                                                <br/>
-                                                                                <br/>
+                                                                               
                                                                                       <div style="border:solid 2px gray; padding: 1%;" id="billItem">
                                                                                             <div class="form-row">
                                                                                             <div class="form-group col-md-3">
@@ -270,17 +269,37 @@
                                                                                                     <input type="number" step="0.01" class="form-control" id="taxedAmount">
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary">Add</button>
                                                                                             <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
 
-                        @*                    <button id="btnNotify" class="btn btn-primary">Show Notification</button>
-                                                            *@
+ 
                                                                                         </div>`;
                             $("#billItems").append(newRow);
                         }
 
                         function DeleteLine(){
-                            document.getElementById("billItems").removeChild(document.getElementById("billItems").children[1]);
+                            var quanLen = document.querySelectorAll("#quantity").length;
+                            var taxString = document.querySelectorAll("#taxOptions")[quanLen - 1].value;
+                            var tax = parseFloat(taxString.split("-")[1].split("%")[0]) / 100;
+
+                            if ( 
+                            document.querySelectorAll("#taxOptions")[quanLen - 1].value == "Select Tax rate") 
+                            {
+                                document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
+                            }
+                            else{
+                                document.getElementById("subtotals").innerText = parseFloat(parseFloat(document.getElementById("subtotals").innerHTML) - parseFloat(document.querySelectorAll("#amount")[quanLen - 1].value)).toFixed(2);
+
+                                document.getElementById('taxes').innerHTML =
+
+                                    parseFloat(parseFloat(document.getElementById("taxes").innerHTML) - tax * parseFloat(document.querySelectorAll('#amount')[quanLen - 1].value)).toFixed(2)
+
+                                document.getElementById('totals').innerHTML =
+                                    parseFloat(parseFloat(document.getElementById("totals").innerHTML) - parseFloat(document.querySelectorAll("#taxedAmount")[quanLen - 1].value)).toFixed(2);
+
+                                document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
+
+                            }
+
 
                         }
 
@@ -305,12 +324,26 @@
                             console.log(testArr);
 
                             var testArrSettings = [];
-
+                            testArrSettings.push({
+                                Title: document.getElementById("billTitle").value,
+                                Summary: document.getElementById("summary").value,
+                                Id: document.getElementById("invoice").value,
+                                BusinessName: document.getElementById("billTo").value,
+                                CareOf: document.getElementById("careOf").value,
+                                //document.getElementById("woId").value,
+                                AddressLine1: document.getElementById("inputAddress").value,
+                                AddressLine2: document.getElementById("inputAddress2").value,
+                                City: document.getElementById("city").value,
+                                Province: document.getElementById("province").value,
+                                Zip: document.getElementById("zip").value,
+                                BillDate: document.getElementById("billDate").value,
+                                DueDate: document.getElementById("dueDate").value,
+                            });
 
                             var title = document.getElementById("billTitle");
                             var summary = document.getElementById("summary");
 
-                            $.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr },
+                            $.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
                                 function () {
                                     $('#result').html('"PassThings()" successfully called.');
                                 });
@@ -364,7 +397,6 @@
                             
                             //document.getElementById('subtotals').innerHTML = parseFloat(document.querySelectorAll("#subtotals").value) + parseFloat(document.querySelectorAll("#price").value) * parseFloat(document.querySelectorAll("#quantity").value);
                             document.getElementById('totals').innerHTML = 
-                            //parseFloat(document.querySelectorAll("#totals").value) + parseFloat(document.querySelectorAll("#subtotals").value) + parseFloat(document.querySelectorAll("#taxes").value);
                                 parseFloat(parseFloat(document.getElementById("totals").innerHTML) + parseFloat(document.querySelectorAll("#taxedAmount")[taxLen - 1].value)).toFixed(2);
 
                         };

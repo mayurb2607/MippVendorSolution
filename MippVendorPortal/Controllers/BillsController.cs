@@ -193,7 +193,7 @@ namespace MippVendorPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(string woId, string title, string summary, Setting settings, IEnumerable<BillDataViewModel> testArr)
+        public async Task<IActionResult> Insert(string woId, IEnumerable<BillDataViewModel> testArr, IEnumerable<SettingsViewModel> testArrSettings)
         {
             //IEnumerable<BillDataViewModel> billData;
             //billData = (IEnumerable<BillDataViewModel>)JsonConvert.DeserializeObject<IEnumerable<WorkorderMasterModel>>(billItems);
@@ -215,25 +215,28 @@ namespace MippVendorPortal.Controllers
                 billItem.Subtotal = item.subtotal;
                 billItem.BillId = "1";
 
-
-                bill.AddressLine1 = settings.AddressLine1;
-                bill.AddressLine2 = settings.AddressLine2;
-                bill.AddressLine3 = settings.City;
-                bill.City = settings.City;
-                bill.Province = settings.Province;
-                bill.Wonumber = woId;
-                bill.CareOf = settings.CareOf;
-                bill.BillTo = settings.BusinessName;
-                bill.BillDate = settings.BillDate;
-                bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
-                bill.ClientEmail = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).PropertyManagerEmail.ToString();
-                bill.Footer = string.Empty;
-                bill.Note = string.Empty;
-                bill.SubTotal = bill.SubTotal + item.subtotal;
-                bill.TaxAmount = bill.TaxAmount + item.tax;
-                bill.Total = bill.Total + item.total;
-                bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.Description == item.description).Id.ToString(); ;
-                bill.Summary = string.Empty;
+                foreach (var item1 in testArrSettings)
+                {
+                    bill.AddressLine1 = item1.AddressLine1;
+                    bill.AddressLine2 = item1.AddressLine2;
+                    bill.AddressLine3 = item1.City;
+                    bill.City = item1.City;
+                    bill.Province = item1.Province;
+                    bill.Wonumber = woId;
+                    bill.CareOf = item1.CareOf;
+                    bill.BillTo = item1.BusinessName;
+                    bill.BillDate = item1.BillDate;
+                    bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
+                    bill.ClientEmail = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).PropertyManagerEmail.ToString();
+                    bill.Footer = string.Empty;
+                    bill.Note = string.Empty;
+                    bill.SubTotal = bill.SubTotal + item.subtotal;
+                    bill.TaxAmount = bill.TaxAmount + item.tax;
+                    bill.Total = bill.Total + item.total;
+                    bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.Description == item.description).Id.ToString(); ;
+                    bill.Summary = string.Empty;
+                }
+               
                 _context1.Bills.Add(bill);
                 _context1.SaveChanges();
 
