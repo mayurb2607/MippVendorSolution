@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippVendorPortal.Areas.Identity.Data;
 using MippVendorPortal.Data;
@@ -17,9 +18,12 @@ builder.Services.AddDefaultIdentity<MippVendorPortalUser>(options => options.Sig
 // Add services to the container.
 
 //builder.Services.AddIdentity<UserManager<IdentityUser>, IdentityRole>();
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddTransient<MippVendorTestContext>();
 builder.Services.AddTransient<MippTestContext>();
+builder.Services.AddTransient<MailHelper>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();

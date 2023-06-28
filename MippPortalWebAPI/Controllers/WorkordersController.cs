@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
-using MippSamplePortal.ViewModel;
 
 namespace MippPortalWebAPI.Controllers
 {
@@ -68,7 +67,7 @@ namespace MippPortalWebAPI.Controllers
         [HttpPost("GetWorkorders")]
         public async Task<ActionResult<IEnumerable<Workorder>>> GetWorkorders(Helpers.WorkorderRequest workorderRequest)
         {
-            if (workorderRequest.ClientID != 0)
+            if (workorderRequest.ClientID != 0 && workorderRequest.ClientID != null)
             {
                 var workorders = await _context.Workorders.Where(x => x.ClientId == workorderRequest.ClientID).ToListAsync();
                 var productList = new List<Workorder>();
@@ -92,6 +91,12 @@ namespace MippPortalWebAPI.Controllers
             else if (workorderRequest.VendorID != 0)
             {
                 var workorders = await _context.Workorders.Where(x => x.VendorId == workorderRequest.VendorID).ToListAsync();
+                
+                var workorder = new Workorder();
+                if(workorderRequest.Id != 0)
+                {
+                    workorder = workorders.FirstOrDefault(x => x.Id == workorderRequest.Id);
+                }
                 var productList = new List<Workorder>();
 
                 foreach (var item in workorders)
@@ -128,15 +133,43 @@ namespace MippPortalWebAPI.Controllers
 
         }
 
+        [HttpPost("GetWorkorderComments")]
+        public async Task<ActionResult<IEnumerable<WorkorderComment>>> GetWorkorderComments (Helpers.WorkorderRequest workorderRequest)
+        {
+            var comments =  _context.WorkorderComments.Where(x => x.WorkorderId == workorderRequest.Id).ToList();
+            
+            return comments;
+        }
+
+
+        [HttpPost("GetWorkorderStatuses")]
+        public async Task<ActionResult<IEnumerable<ClientStatus>>> GetWorkorderStatuses(Helpers.WorkorderRequest workorderRequest)
+        {
+            workorderRequest.ClientID = 1;
+            var statuses = _context.ClientStatuses.Where(x => x.ClientId == workorderRequest.ClientID).ToList();
+
+            return statuses;
+        }
+
+        [HttpPost("GetWorkorderWorkDescription")]
+        public async Task<ActionResult<IEnumerable<WorkorderWorkDescription>>> GetWorkorderWorkDescription(Helpers.WorkorderRequest workorderRequest)
+        {
+            workorderRequest.ClientID = 1;
+            var workDescriptions = _context.WorkorderWorkDescriptions.Where(x => x.WorkorderId == workorderRequest.Id).ToList();
+
+            return workDescriptions;
+        }
+
+
         // GET: api/Workorders/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Workorder>> GetWorkorder(int id)
+        [HttpPost("GetWorkorder")]
+        public async Task<ActionResult<Workorder>> GetWorkorder(Helpers.WorkorderRequest workorderRequest)
         {
             if (_context.Workorders == null)
             {
                 return NotFound();
             }
-            var workorder = await _context.Workorders.FindAsync(id);
+            var workorder = await _context.Workorders.FindAsync(workorderRequest.Id);
 
             if (workorder == null)
             {
@@ -144,6 +177,21 @@ namespace MippPortalWebAPI.Controllers
             }
 
             return workorder;
+        }
+
+
+        [HttpPost("UpdateWorkorderStatus")]
+        public bool UpdateWorkorderStatus(WorkorderRequest workorderRequest)
+        {
+            if (workorderRequest.Id != 0)
+            {
+                var workorder = _context.Workorders.FirstOrDefault(x => x.Id == workorderRequest.Id);
+                workorder.Status = workorderRequest.Status;
+                _context.Workorders.Update(workorder);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
 
         // PUT: api/Workorders/5

@@ -191,7 +191,7 @@
                                     <option>Select Tax rate</option>
                                     @foreach (var item in ViewBag.taxList)
                                     {
-                                        <option>@item</option>
+                                        <option>@item.TaxRate</option>
                                     }
                                 </select>
                             </div>
@@ -210,11 +210,11 @@
 
                 <div class="form-group">
                     <label>Notes:</label>
-                    <textarea class="form-control" id="description"></textarea>
+                    <textarea class="form-control" id="note"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Footer:</label>
-                    <textarea class="form-control" id="description"></textarea>
+                    <textarea class="form-control" id="footer"></textarea>
                 </div>
                 <div class="row">
 
@@ -418,6 +418,11 @@
                                 Zip: document.getElementById("zip").value,
                                 BillDate: document.getElementById("billDate").value,
                                 DueDate: document.getElementById("dueDate").value,
+                                Subtotal: document.getElementById("subtotals").value,
+                                Tax:document.getElementById("taxes").value,
+                                Total:document.getElementById("totals").value,
+                                Note: document.getElementById("note").value,
+                                Footer: document.getElementById("footer").value
                             });
 
                             var title = document.getElementById("billTitle");

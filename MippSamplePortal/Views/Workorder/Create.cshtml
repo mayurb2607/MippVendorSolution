@@ -2,70 +2,18 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
-
+    var emails = ViewBag.EmailAddresses;
 }
 <div class="form-horizontal">
 
     <div class="col-sm-6">
-        <form asp-action="Create" style="display: flex;
+        <form asp-action="Create" asp-route-clientId="@ViewBag.ClientID" style="display: flex;
     width: 36vw;
     justify-content: space-between;">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="col-sm-12">
                 <input type="hidden" asp-for="Id" />
-                @*<input type="hidden" asp-for="OrderNumber" />
-                <input type="hidden" asp-for="OrderDate" />
-                <input type="hidden" asp-for="AssignedTo" />
-                <input type="hidden" asp-for="AssignedToCompany" />
-                <input type="hidden" asp-for="AssignedToAddress" />
-                <input type="hidden" asp-for="AssignedToPhone" />
-                <input type="hidden" asp-for="AssignedToEmailAddress" />
-                <input type="hidden" asp-for="ExpectedStartDate" />
-                <input type="hidden" asp-for="ExpectedEndDate" />
-                <input type="hidden" asp-for="ServiceRequestNumber" />
-                <div class="form-group">
-                <label asp-for="Status" class="control-label">: </label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
-                </div>
-                <input type="hidden" asp-for="Description" />
-                <div class="form-group">
-                <label asp-for="AdditionalComments" class="control-label">: </label>
-                <input asp-for="AdditionalComments" class="form-control" />
-                <span asp-validation-for="AdditionalComments" class="text-danger"></span>
-                </div>
-                <input type="hidden" asp-for="ExpectedNoOfHoursToComplete" />
-                <input type="hidden" asp-for="WorkPerformedBy" />
-                <input type="hidden" asp-for="WorkCompletedAndMaterialsUsed" />
-                <input type="hidden" asp-for="TotalHoursSpent" />
-                <input type="hidden" asp-for="PropertyName" />
-                <input type="hidden" asp-for="PropertyAddress" />
-                <input type="hidden" asp-for="PropertyManager" />
-                <input type="hidden" asp-for="PropertyManagerPhone" />
-                <input type="hidden" asp-for="PropertyManagerEmail" />
-                <input type="hidden" asp-for="TenantName" />
-                <input type="hidden" asp-for="TenantEmailAddress" />
-                <input type="hidden" asp-for="TenantPhoneNumber" />
-                <input type="hidden" asp-for="UnitName" />
-                <input type="hidden" asp-for="UnitAddress" />
-                <input type="hidden" asp-for="Note" />
-                <input type="hidden" asp-for="PreferredTime" />
-                <input type="hidden" asp-for="EnterCondition" />
-                <input type="hidden" asp-for="PermissionNote" />
-                <input type="hidden" asp-for="EntryDate" />
-                <input type="hidden" asp-for="TimeEntered" />
-                <input type="hidden" asp-for="TimeDeparted" />
-                <input type="hidden" asp-for="EntryNote" />
-                <input type="hidden" asp-for="WorkorderCompiledBy" />
-                <input type="hidden" asp-for="WorkorderApprovedBy" />
-                <input type="hidden" asp-for="DateOfApproval" />
-                <input type="hidden" asp-for="Priority" />
-                <input type="hidden" asp-for="CostOfLabor" />
-                <input type="hidden" asp-for="CostOfMaterials" />
-                <input type="hidden" asp-for="TaxesPaid" />
-                <input type="hidden" asp-for="Total" />
-                <input type="hidden" asp-for="ClientId" />
-                <input type="hidden" asp-for="VendorId" />*@
+               
 
                 <div class="form-group">
                     <label asp-for="AssignedTo" class="control-label">Vendor: </label>
@@ -89,18 +37,25 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="AssignedToEmailAddress" class="control-label">Email: </label>
-                    <input asp-for="AssignedToEmailAddress" class="form-control" style="border: none; background-color:white; display:inline" />
-                    <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
+                     <select class="form-control" id="taxOptions">
+                                    <option>Select Vendor</option>
+                        @foreach (var item in emails)
+                        {
+                            <option asp-for="AssignedToEmailAddress">@item</option>
+                        }
+                                </select>
+@*                    <input asp-for="AssignedToEmailAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+*@                    <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="ExpectedStartDate" class="control-label">Expected Start Date: </label>
-                    <input asp-for="ExpectedStartDate" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ExpectedStartDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="ExpectedStartDate" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="ExpectedEndDate" class="control-label">Expected End Date: </label>
-                    <input asp-for="ExpectedEndDate" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ExpectedEndDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="ExpectedEndDate" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -178,7 +133,7 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="OrderDate" class="control-label"> Order Date: </label>
-                    <input asp-for="OrderDate" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="OrderDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="OrderDate" class="text-danger"></span>
                 </div>
 
@@ -215,7 +170,7 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="PreferredTime" class="control-label">Preferred Time: </label>
-                    <input asp-for="PreferredTime" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PreferredTime" type="time" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="PreferredTime" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -241,17 +196,17 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="EntryDate" class="control-label">Entry Date: </label>
-                    <input asp-for="EntryDate" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="EntryDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="EntryDate" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="TimeEntered" class="control-label">Time Entered: </label>
-                    <input asp-for="TimeEntered" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TimeEntered" type="time" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="TimeEntered" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="TimeDeparted" class="control-label">Time Departed: </label>
-                    <input asp-for="TimeDeparted" class="form-control" />
+                    <input asp-for="TimeDeparted" type="time" class="form-control" />
                     <span asp-validation-for="TimeDeparted" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -271,7 +226,7 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="DateOfApproval" class="control-label">Date: </label>
-                    <input asp-for="DateOfApproval" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="DateOfApproval" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="DateOfApproval" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -299,7 +254,7 @@
                     <input asp-for="Total" class="form-control" style="border: none; background-color:white; display:inline" />
                     <span asp-validation-for="Total" class="text-danger"></span>
                 </div>
-                <input type="hidden" asp-for="ClientId" />
+                <input type="hidden" asp-for="ClientId" value="@ViewBag.ClientId" />
                 <input type="hidden" asp-for="VendorId" />
                 @* <div class="form-group">
                 <label asp-for="ClientId" class="control-label">: </label>

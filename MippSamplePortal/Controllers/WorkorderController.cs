@@ -82,18 +82,31 @@ namespace MippSamplePortal.Controllers
             return NotFound();
         }
 
-        public ActionResult Create()
+        public ActionResult Create(string email)
         {
+            ViewBag.ClientID = _context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
+            int cId = ViewBag.ClientID;
+            var emailAddresses = new List<string>();
+            var vendors = _context.VendorInvites.Where(x => x.ClientId == cId);
+            foreach (var item in vendors)
+            {
+                emailAddresses.Add(item.VendorEmail);
+            }
+            ViewBag.EmailAddresses = emailAddresses;
+            //ViewBag.Vendors = new List<string>
+            //{
+                
+            //}
             return View();
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([Bind] WorkorderMasterModel workorder)
+        public async Task<ActionResult> Create(int clientId, [Bind] WorkorderMasterModel workorder)
         {
-            workorder.ClientId = 1;
+            workorder.ClientId = clientId;
             workorder.EnterCondition = "Call for availiablity";
-            workorder.VendorId = 1;
-
+            workorder.VendorId = _context.Vendors.FirstOrDefault(x=> x.Email == workorder.AssignedToEmailAddress).Id;
+            var email = _context.Clients.FirstOrDefault(x => x.Id == clientId).Email;
             WorkorderRequest workorderRequest = new WorkorderRequest();
             workorderRequest.ClientID = workorder.ClientId;
             workorderRequest.AdditionalComments = "";
@@ -138,9 +151,7 @@ namespace MippSamplePortal.Controllers
 
             try
             {
-                workorder.ClientId = 1;
-                workorder.EnterCondition = "Call for availiablity";
-                workorder.VendorId = 1;
+                
                 //workorder.Id = count + 1;
 
 
@@ -162,7 +173,7 @@ namespace MippSamplePortal.Controllers
                                 string apiResponse1 = await response.Content.ReadAsStringAsync();
                                 //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
                                 //return true;
-                                return RedirectToAction("Index", new { clientId = workorder.ClientId.ToString() });
+                                return RedirectToAction("Index", new { email = email });
                             }
                         }
 

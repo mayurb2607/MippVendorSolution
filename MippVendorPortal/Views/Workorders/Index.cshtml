@@ -118,8 +118,8 @@
 
             if (selectedRecords[0].Status == "Approved") {
                 var vendorID = selectedRecords[0].VendorId;
-
-                var url = document.location.origin + "/Bills/Index?vendorID=" + vendorID;
+                var id = selectedRecords[0].Id;
+                var url = document.location.origin + "/Bills/Index?vendorID=" + vendorID + "&woID=" + id;
 
                 window.location.replace(url);
             }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MippPortalWebAPI.Helpers;
-using MippSamplePortal.Models;
+using MippPortalWebAPI.Models;
 using MippVendorPortal.Areas.Identity.Data;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;

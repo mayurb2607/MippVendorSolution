@@ -25,7 +25,7 @@ namespace MippPortalWebAPI.Helpers
             email.Sender = MailboxAddress.Parse(_mailsettings.Mail);
             email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
             email.Subject = mailRequest.Subject;
-            if (mailRequest.Cc != null && mailRequest.Cc != null)
+            if (mailRequest.Cc != null && mailRequest.Cc.Count != 0)
             {
                 foreach (var item in mailRequest.Cc)
                 {
