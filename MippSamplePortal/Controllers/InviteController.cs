@@ -45,8 +45,8 @@ namespace MippSamplePortal.Controllers
 
             }
             //validate invite using Service class method
-            return "This Vendor has already joined Vendor Portal. Do you wish to send him an invite?";
-           
+            return await _emailService.SendAcceptanceEmail(_context, new SendEmailViewModel { ClientID = int.Parse(clientId), VendorID = invite.RootVendorId, ToEmail = invite.Email, Body = "", Cc = null, FromEmail = fromEmail, Subject = "" });
+
         }
 
       

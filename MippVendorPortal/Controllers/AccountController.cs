@@ -29,25 +29,39 @@ namespace MippVendorPortal.Controllers
 
         public async Task<IActionResult> Accept(string vendorID, string clientID)
         {
-            VendorClient vendorClient = new VendorClient();
-            vendorClient.VendorId = int.Parse(vendorID);
-            vendorClient.ClientId = int.Parse(clientID);
-            _context.VendorClients.Add(vendorClient);
-            await _context.SaveChangesAsync();
-            ViewBag.msg = "Thank you for your action. Redirecting you..";
-            return RedirectToAction("Index", "Homes");
+            try
+            {
+                var vendorclients = _context.VendorClients.Where(x => x.ClientId == int.Parse(clientID) && x.VendorId == int.Parse(vendorID));
+
+                if (vendorclients == null)
+                {
+                    VendorClient vendorClient = new VendorClient();
+                    vendorClient.VendorId = int.Parse(vendorID);
+                    vendorClient.ClientId = int.Parse(clientID);
+                    _context.VendorClients.Add(vendorClient);
+                    await _context.SaveChangesAsync();
+                    ViewBag.msg = "Thank you for your action. Redirecting you..";
+                    return Redirect("https://localhost:7250/Identity/Account/Login?ReturnUrl=%2F");
+                }
+                else
+                {
+                    ViewBag.msg = "You have already registered, please proceed to login";
+                    return Redirect("https://localhost:7250/Identity/Account/Login?ReturnUrl=%2F");
+                }
+
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
         public IActionResult Decline()
         {
             ViewBag.msg = "Thank you for your action. Redirecting you..";
-            return RedirectToAction("Index");
+            return Redirect("https://localhost:7250/Identity/Account/Login?ReturnUrl=%2F");
         }
 
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
 
         //[HttpPost]
         //public async Task<IActionResult> ForgotConfirmed(string email)
