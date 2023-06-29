@@ -1,301 +1,165 @@
-﻿@model IEnumerable<MippSamplePortal.ViewModel.WorkorderMasterModel>
+﻿@using Syncfusion.EJ2;
+@using Syncfusion.EJ2.Navigations;
+@using Syncfusion.EJ2.Grids;
+@model IEnumerable<MippSamplePortal.ViewModel.WorkorderMasterModel>
 
 @{
     ViewData["Title"] = "Index";
     var email = ViewBag.Email;
 }
-
+<html>
+<body>
 <h1>Workorders</h1>
 
 <p>
     <a asp-action="Create" asp-route-email="@email">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AssignedTo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PropertyManager)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExpectedEndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.AssignedToPhone)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.AssignedToEmailAddress)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.ExpectedStartDate)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.ExpectedEndDate)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.ServiceRequestNumber)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.AdditionalComments)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.ExpectedNoOfHoursToComplete)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.WorkPerformedBy)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.WorkCompletedAndMaterialsUsed)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TotalHoursSpent)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PropertyName)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PropertyAddress)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PropertyManager)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PropertyManagerPhone)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PropertyManagerEmail)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TenantName)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TenantEmailAddress)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TenantPhoneNumber)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.UnitName)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.UnitAddress)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Note)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PreferredTime)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.EnterCondition)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PermissionNote)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.EntryDate)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TimeEntered)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TimeDeparted)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.EntryNote)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.WorkorderCompiledBy)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.WorkorderApprovedBy)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.DateOfApproval)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Priority)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.CostOfLabor)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.CostOfMaterials)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.TaxesPaid)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Total)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.ClientId)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.VendorId)
-            </th>
-            *@
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AssignedTo)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PropertyManager)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ExpectedEndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-                @*<td>
-            @Html.DisplayFor(modelItem => item.AssignedToPhone)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.AssignedToEmailAddress)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.ExpectedStartDate)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.ExpectedEndDate)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.ServiceRequestNumber)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.AdditionalComments)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.ExpectedNoOfHoursToComplete)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.WorkPerformedBy)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.WorkCompletedAndMaterialsUsed)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TotalHoursSpent)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PropertyName)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PropertyAddress)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PropertyManager)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PropertyManagerPhone)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PropertyManagerEmail)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TenantName)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TenantEmailAddress)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TenantPhoneNumber)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.UnitName)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.UnitAddress)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Note)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PreferredTime)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.EnterCondition)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PermissionNote)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.EntryDate)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TimeEntered)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TimeDeparted)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.EntryNote)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.WorkorderCompiledBy)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.WorkorderApprovedBy)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.DateOfApproval)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Priority)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.CostOfLabor)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.CostOfMaterials)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.TaxesPaid)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Total)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.ClientId)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.VendorId)
-            </td>*@
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-email="@email">Update</a> |
 
-                </td>
-            </tr>
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+        @*        <button id="create" class="btn btn-default">Create New</button>
+        *@
+        <button id="edit" class="btn btn-default" disabled="true">Edit</button>
+        <button id="details" class="btn btn-default" disabled="true">Create Bill</button>
+        <button id="settings" class="btn btn-default">Settings</button>
+        <button id="assigned" class="btn btn-default">Assigned</button>
+        <button id="completed" class="btn btn-default">Completed</button>
+    </div>
+
+</div>
+
+
+<div id="Grid"></div>
+</body>
+
+@section Scripts {
+
+    <script src="~/dist/js/notify.js"></script>
+    <script src="~/dist/js/notify.min.js"></script>
+   @* <script>
+        if (@ViewBag.msg != null) {
+            $(document).ready(function () {
+                showNotification('success', @ViewBag.msg);
+            });
         }
-    </tbody>
-</table>
+        function showNotification(type, message) {
+            $.notify(message, type);
+        }
+    </script>*@
+    <script src="~/dist/js/notify.js"></script>
+    <script src="~/dist/js/notify.min.js"></script>
+    <script>
+
+        function showNotification(type, message) {
+            $.notify(message, type);
+        }
+
+        function rowSelected() {
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0].getSelectedRecords();
+            //var selectedRecords = grid.getSelectedRecords();
+            //var selectedRecordsCount = selectedRecords.length;
+            console.log(document.getElementsByClassName('e-grid')[0].ej2_instances[0].getSelectedRecords());
+            console.log("selectedRecord:", grid);
+
+
+            if (grid != null) {
+
+                document.getElementById("edit").disabled = false;
+                document.getElementById("details").disabled = false;
+            }
+            else {
+                document.getElementById("edit").disabled = true;
+                document.getElementById("details").disabled = true;
+            }
+
+        }
+
+
+        //document.getElementById('edit').onclick = function () {
+
+        //    var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+        //    console.log(grid);
+        //    var selectedRecords = grid.getSelectedRecords();
+        //    var id = selectedRecords[0].Id;
+
+        //    var url = document.location.origin + "/Workorders/Edit/" + id;
+        //    window.location.replace(url);
+
+        //};
+
+        //document.getElementById('settings').onclick = function () {
+
+
+        //    var vendorID = @ViewBag.VendorId
+
+        //    var url = document.location.origin + "/Settings/Index?vendorId=" + vendorID;
+        //    window.location.replace(url);
+
+        //};
+
+        //document.getElementById('assigned').onclick = function () {
+
+
+        //    var vendorID = @ViewBag.VendorId
+
+        //            var url = document.location.origin + "/Workorders/AssignedWorkorders?vendorId=" + vendorID;
+        //    window.location.replace(url);
+
+        //};
+        //document.getElementById('completed').onclick = function () {
+
+
+        //    var vendorID = @ViewBag.VendorId
+
+        //                    var url = document.location.origin + "/Workorders/CompletedWorkorders?vendorId=" + vendorID;
+        //    window.location.replace(url);
+
+        //};
+
+        //// document.getElementById('create').onclick = function () {
+        ////    var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0].currentViewData[0];
+
+        ////    var id = grid.VendorId;
+        ////    var url = document.location.origin + "/Workorders/Create/" + id;
+        ////        window.location.replace(url);
+
+
+        ////};
+
+
+        //document.getElementById('details').onclick = function () {
+
+        //    var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+        //    var selectedRecords = grid.getSelectedRecords();
+
+        //    if (selectedRecords[0].Status == "Approved") {
+        //        var vendorID = selectedRecords[0].VendorId;
+        //        var id = selectedRecords[0].Id;
+        //        var url = document.location.origin + "/Bills/Index?vendorID=" + vendorID + "&woID=" + id;
+
+        //        window.location.replace(url);
+        //    }
+        //    else {
+        //        showNotification('warning', 'Workorder is not approved for billing!');
+        //    }
+        //};
+    </script>
+
+    <ejs-grid id="Grid" allowPaging="true" allowSorting="true" toolbar="@(new List<string>() { "Add","Delete","Update","Cancel","ExcelExport","PdfExport"})" 
+        allowPdfExport="true" allowExcelExport="true" allow-selection=" true" rowSelected="rowSelected" datasource="@ViewBag.GridData">
+    <e-grid-pagesettings pageSize="5"></e-grid-pagesettings>
+        <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true"></e-grid-editSettings>
+        <e-grid-filtersettings type="Menu"></e-grid-filtersettings>
+        <e-grid-loadingIndicator indicatorType="Shimmer"></e-grid-loadingIndicator>
+        <e-grid-selectionsettings persistSelection="true" type="Multiple" checkboxOnly="true"></e-grid-selectionsettings>
+    <e-grid-columns>
+        <e-grid-column type="checkbox" width="50" />
+        <e-grid-column field="ServiceRequestNumber" header - text="Service Request Number" width="75" text-align="right"> </e-grid-column>
+        <e-grid-column field="PropertyManager" header-text="PropertyManager" width="80"> </e-grid-column>
+        <e-grid-column field="Status" header-text="Status" text-align="right" width="75"> </e-grid-column>
+        <e-grid-column field="ExpectedEndDate" header-text="ExpectedEndDate" text-align="right" width="75"> </e-grid-column>
+    </e-grid-columns>
+</ejs-grid>
+}
+</html>

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
+using MippSamplePortal.Models;
 using MippVendorPortal.Areas.Identity.Data;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
@@ -29,12 +30,51 @@ namespace MippVendorPortal.Controllers
         }
         // GET: Join
 
-        public IActionResult Index(string e, int cId, int rvId)
+        public async Task<IActionResult> Index(string e, int cId, int rvId)
         {
             CryptographyHelper cryptographyHelper = new CryptographyHelper();
             var mail = cryptographyHelper.DecryptString(e);
 
             var mailpresent = _context.Vendors.FirstOrDefault(x => x.VendorEmail == mail);
+
+            //get vendor details from vendorList
+            MippPortalWebAPI.Models.VendorList vendorSaved = null;
+            VendorRequest vendorRequest = new VendorRequest();
+            vendorRequest.email = mail;
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(vendorRequest), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Vendors/GetVendorData", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        vendorSaved = JsonConvert.DeserializeObject<MippPortalWebAPI.Models.VendorList>(apiResponse);
+
+                       
+                     
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
             if (mailpresent == null)
             {
                 if (e != null && cId != 0)
@@ -42,6 +82,8 @@ namespace MippVendorPortal.Controllers
                     ViewBag.Email = mail;
                     ViewBag.ClientId = cId;
                     ViewBag.RootVendorId = rvId;
+                    ViewBag.Company = vendorSaved.BusinessName;
+                    ViewBag.FullName = vendorSaved.VendorName;
                 }
 
                 return View();
@@ -90,7 +132,7 @@ namespace MippVendorPortal.Controllers
             ViewBag.VendorEmail = vendor1.VendorEmail;
             ViewBag.ClientId = viewModel.ClientId;
 
-            VendorInvite vendorInvite = new VendorInvite();
+            MippPortalWebAPI.Models.VendorInvite vendorInvite = new MippPortalWebAPI.Models.VendorInvite();
             vendorInvite.Id = vendor1.Id;
             vendorInvite.VendorId = vendor1.Id;
             vendorInvite.VendorEmail = vendor1.VendorEmail;
@@ -151,10 +193,10 @@ namespace MippVendorPortal.Controllers
             return result.Succeeded;
         }
 
-        public async Task<IActionResult> Register(int id, [Bind("VendorEmail, VendorPassword, VendorCompany, VendorPhone, ClientId, RootVendorId")] VendorClientViewModel vendor)
+        public async Task<IActionResult> Register(int id, [Bind("VendorEmail, VendorPassword, VendorName, VendorCompany, VendorPhone, ClientId, RootVendorId")] VendorClientViewModel vendor)
         {
 
-            VendorInvite vendorInvite = new VendorInvite();
+            MippPortalWebAPI.Models.VendorInvite vendorInvite = new MippPortalWebAPI.Models.VendorInvite();
             vendorInvite.Id = int.Parse(vendor.RootVendorId);
             vendorInvite.VendorId = int.Parse(vendor.RootVendorId);
             vendorInvite.VendorEmail = vendor.VendorEmail;
@@ -174,6 +216,24 @@ namespace MippVendorPortal.Controllers
             {
                 // Configure services for local environment
                 apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(vendorInvite), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "SendEmail/SendVendorOnboardedEmail", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
             }
             try
             {

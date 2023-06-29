@@ -4,6 +4,7 @@
     var email = ViewBag.Email;
     Layout = null;
 }
+
 <div class="detailBox">
     <div class="titleBox">
         <label>Add Comments (Visible to tenants)</label>
@@ -23,20 +24,19 @@
 </div>
 
 
-@section Scripts{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
 
-    <script>
-        const field = document.getElementById('text');
-        
-        // const comments = document.querySelector('#comment-box')
-        const comments = document.getElementById('comment-box');
+    <script type="text/javascript">
+    document.getElementById("myButton").addEventListener("click", AddComments, false);
 
-        // array to store the comments
-        const comments_arr = [];
+        //const comments = document.getElementById('comment-box');
 
-        $(document).on('click', '#myButton', function () {
+
+        function AddComments() {
+            debugger;
+            const field = document.getElementById('text');
             const content = field.value;
+            console.log("comment:", content);
             if (content.length > 0) { 
                 // if there is content
                 console.log("Comments");
@@ -56,12 +56,11 @@
                 //});
 
 
-                $.post('@Url.Action("SubmitComments", "Workorders")', { workorderId: id, "text": content, "email":email },
+                $.post('@Url.Action("SubmitComments", "Workorders")', { workorderId: id, "text": content, "email":@email },
                     function () {
                          $('#result').html('"PassThings()" successfully called.');
                     });
 
             }
-        });
+        }
     </script>
-}

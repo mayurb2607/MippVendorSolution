@@ -10,7 +10,7 @@ var connectionString = builder.Configuration.GetConnectionString("MippPortalWebA
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 // Add services to the container.
-builder.Services.AddTransient<MippTestContext>();
+builder.Services.AddScoped<MippTestContext>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

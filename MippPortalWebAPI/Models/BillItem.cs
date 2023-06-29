@@ -15,8 +15,6 @@ public partial class BillItem
 
     public string? Quantity { get; set; }
 
-    public int? Unit { get; set; }
-
     public string? Price { get; set; }
 
     public string? Subtotal { get; set; }
@@ -24,4 +22,6 @@ public partial class BillItem
     public string? Tax { get; set; }
 
     public string? Total { get; set; }
+
+    public string? Unit { get; set; }
 }

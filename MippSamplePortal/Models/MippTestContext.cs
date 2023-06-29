@@ -43,6 +43,8 @@ public partial class MippTestContext : DbContext
 
     public virtual DbSet<VendorInvite> VendorInvites { get; set; }
 
+    public virtual DbSet<VendorList> VendorLists { get; set; }
+
     public virtual DbSet<Workorder> Workorders { get; set; }
 
     public virtual DbSet<WorkorderComment> WorkorderComments { get; set; }
@@ -183,6 +185,7 @@ public partial class MippTestContext : DbContext
             entity.Property(e => e.Subtotal).HasMaxLength(50);
             entity.Property(e => e.Tax).HasMaxLength(50);
             entity.Property(e => e.Total).HasMaxLength(50);
+            entity.Property(e => e.Unit).HasMaxLength(50);
         });
 
         modelBuilder.Entity<BillItemTax>(entity =>
@@ -268,6 +271,17 @@ public partial class MippTestContext : DbContext
             entity.Property(e => e.VendorId).HasColumnName("VendorID");
         });
 
+        modelBuilder.Entity<VendorList>(entity =>
+        {
+            entity.ToTable("VendorList");
+
+            entity.Property(e => e.BusinessName).HasMaxLength(50);
+            entity.Property(e => e.ClientId).HasColumnName("ClientID");
+            entity.Property(e => e.VendorEmail).HasMaxLength(50);
+            entity.Property(e => e.VendorName).HasMaxLength(50);
+            entity.Property(e => e.VendorPhone).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<Workorder>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Workorde__3214EC07619A69F2");
@@ -329,13 +343,10 @@ public partial class MippTestContext : DbContext
 
         modelBuilder.Entity<WorkorderWorkDescription>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("WorkorderWorkDescription");
+            entity.ToTable("WorkorderWorkDescription");
 
             entity.Property(e => e.DescriptionOfWorkCompletedMaterialsUsed).HasColumnName("DescriptionOfWorkCompleted&MaterialsUsed");
             entity.Property(e => e.HoursSpent).HasMaxLength(50);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.WorkorderId).HasColumnName("WorkorderID");
         });
 

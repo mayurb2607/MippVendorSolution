@@ -14,7 +14,7 @@ builder.Services.AddDefaultIdentity<MippSamplePortalUser>(options => options.Sig
 
 
 builder.Services.AddTransient<EmailService>();
-builder.Services.AddTransient<MippTestContext>();
+builder.Services.AddScoped<MippTestContext>();
 builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowOrigin",

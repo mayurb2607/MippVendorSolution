@@ -4,6 +4,7 @@
     {
         public string VendorEmail { get; set; }
         public string VendorPassword { get; set; }
+        public string VendorName { get; set; }
         public string VendorCompany { get; set; }
         public string VendorPhone { get; set; }
         public string ClientId { get; set; }

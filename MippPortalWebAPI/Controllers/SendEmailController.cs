@@ -145,18 +145,15 @@ namespace MippPortalWebAPI.Controllers
             {
 
                 SendEmailViewModel request = new SendEmailViewModel();
-                var uriBuilder = new UriBuilder("https://localhost:7179/Workorders");
-                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-                query["VendorId"] = workorder.VendorId.ToString();
-                uriBuilder.Query = query.ToString();
+                
 
 
-                request.Body = "Workorder with Id: " + workorder.Id + " assigned to" + " " + workorder.AssignedTo + " " + "with comments:" + " " + workorder.AdditionalComments + "<br/>" +
-                    "Click here to access your dashboard: " + uriBuilder;
+                request.Body = "Workorder with Id: " + workorder.Id + " assigned to" + " " + workorder.AssignedTo + " " + "with updated status: " + workorder.Status + "with comments:" + " " + workorder.AdditionalComments + "<br/>" +
+                    "Login on Vendor Portal to access your dashboard: ";
                 request.ToEmail = workorder.AssignedToEmailAddress;
                 //request.Cc.Add(workorder.PropertyManagerEmail);
                 //request.ToEmail = workorder.PropertyManagerEmail;
-                request.Subject = "You have a new Workorder assigned to you, Id:" + " " + workorder.Id;
+                request.Subject = "Update: A new workorder update for you with, Id:" + " " + workorder.Id;
                 await _mailHelper.SendEmailAsync(request);
                 return Ok();
             }
@@ -190,13 +187,13 @@ namespace MippPortalWebAPI.Controllers
         [HttpPost("SendBillCreatedEmail")]
         public async Task<IActionResult> SendBillCreatedEmail(Bill bill)
         {
+            var vendorName = _context.Vendors.FirstOrDefault(x => x.Email == bill.VendorEmail).FirstName + " " + _context.Vendors.FirstOrDefault(x => x.Email == bill.VendorEmail).LastName;
             try
             {
                 SendEmailViewModel request = new SendEmailViewModel();
-                request.Body = "Bill" + " " + bill.Id + " " + "has been created for Workorder" + " " + bill.Wonumber + " " + "by" + " " + bill.VendorId;
+                request.Body = "Bill for Workorder" + " " + bill.Wonumber + "titled" + bill.Title + " " + "has been created for Workorder" + " " + bill.Wonumber + " " + "by" + " " + vendorName;
                 request.ToEmail = bill.ClientEmail;
                 request.Cc = new List<string>();
-                request.Cc.Add(bill.VendorEmail);
                 //request.Cc = bill.PropertyManagerEmail;
                 request.Subject = "Bill created for workorder:" + " " + bill.Wonumber;
                 await _mailHelper.SendEmailAsync(request);
@@ -214,11 +211,13 @@ namespace MippPortalWebAPI.Controllers
         {
             try
             {
+                var clientEmail = _context.Clients.FirstOrDefault(x => x.ClientId == workorder.ClientId).Email;
+
                 var cc = new List<string>();
                 cc.Add(workorder.PropertyManagerEmail); 
                 SendEmailViewModel request = new SendEmailViewModel();
-                request.Body = "Workorder" + " " + workorder.Id + " " + "updated with status" + " " + workorder.Status + " " + "by" + " " + workorder.AssignedTo;
-                request.ToEmail = workorder.AssignedToEmailAddress;
+                request.Body = "Workorder" + " " + workorder.Id + " " + "updated with status" + " " + workorder.Status + "and additional work descriptions" + " " + "by" + " " + workorder.AssignedTo;
+                request.ToEmail = clientEmail;
                 request.Cc = cc;
                 request.Subject = "Workorder Update for:" + " " + workorder.Id;
                 await _mailHelper.SendEmailAsync(request);
@@ -249,13 +248,15 @@ namespace MippPortalWebAPI.Controllers
         //call this API on Join from Vendor portal
         public async Task<Vendor> UpdateVendorInvite(VendorInvite vendorInvite)
         {
+            VendorList vendorList = _context.VendorLists.FirstOrDefault(x => x.VendorEmail == vendorInvite.VendorEmail);
             if (vendorInvite != null)
             {
                 Vendor vendor = new Vendor();
-                //vendor.Id = _context.Vendors.Count() + 1;
+                vendor.Id = _context.Vendors.Count() + 1;
                 vendor.Email = vendorInvite.VendorEmail;
-                vendor.BusinessName = "";
-                vendor.FirstName = vendorInvite.VendorEmail.Split("@")[0].ToString();
+                vendor.BusinessName = vendorList.BusinessName;
+                vendor.FirstName = vendorList.VendorName.Split("")[0].ToString();
+                vendor.LastName = vendorList.VendorName.Split(" ")[1].ToString();
                 if (_context.Vendors.FirstOrDefault(x => x.Email == vendorInvite.VendorEmail) == null)
                 {
                     _context.Vendors.Add(vendor);
@@ -274,5 +275,31 @@ namespace MippPortalWebAPI.Controllers
             return null;
 
         }
+
+
+        [EnableCors("AllowOrigin")]
+        [HttpPost("SendVendorOnboardedEmail")]
+        //call this API on Join from Vendor portal
+        public async Task<OkResult> SendVendorOnboardedEmail(VendorInvite vendorInvite)
+        {
+            try
+            {
+                var clientEmail = _context.Clients.FirstOrDefault(x => x.ClientId == vendorInvite.ClientId).Email;
+                var vendorName = _context.VendorLists.FirstOrDefault(x => x.VendorEmail == vendorInvite.VendorEmail).VendorName;
+                var cc = new List<string>();
+                SendEmailViewModel request = new SendEmailViewModel();
+                request.Body = "Vendor" + " " + vendorName + " " + "successfully onboarded on Vendor Portal!" ;
+                request.ToEmail = clientEmail;
+                request.Cc = cc;
+                request.Subject = "Your invite link has been accepted!!";
+                await _mailHelper.SendEmailAsync(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
     }
 }

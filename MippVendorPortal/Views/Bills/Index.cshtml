@@ -4,74 +4,14 @@
     ViewBag.Subtotal = "";
     ViewBag.Tax = "";
     ViewBag.Total = "";
+    var url = ViewBag.fileUrl;
     int tax = 0;
     int workorderId = ViewBag.woid;
 
 }
 
-<style>
-    .uploadSection {
-        background-color: #ffffff;
-        min-width: 27.5em;
-        padding: 3.12em 1.87em;
-        left: 50%;
-        top: 50%;
-        box-shadow: 0 1.25em 3.43em rgba(0, 0, 0, 0.08);
-        border-radius: 0.5em;
-    }
 
-    input[type="file"] {
-        display: none;
-    }
 
-    .label {
-        display: block;
-        position: relative;
-        background-color: #025bee;
-        color: #ffffff;
-        font-size: 1.1em;
-        text-align: center;
-        width: 16em;
-        padding: 1em 0;
-        border-radius: 0.3em;
-        margin: 0 auto 1em auto;
-        cursor: pointer;
-    }
-
-    #image-display {
-        position: relative;
-        width: 90%;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-evenly;
-        gap: 1.25em;
-        flex-wrap: wrap;
-    }
-
-        #image-display figure {
-            width: 45%;
-        }
-
-        #image-display img {
-            width: 100%;
-        }
-
-        #image-display figcaption {
-            font-size: 0.8em;
-            text-align: center;
-            color: #5a5861;
-        }
-
-    .active {
-        border: 0.2em dashed #025bee;
-    }
-
-    #error {
-        text-align: center;
-        color: #ff3030;
-    }
-
-</style>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -137,7 +77,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Workorder ID:</label>
-                                    <input type="text" class="form-control" value="@item.Id" id="woId" disabled>
+                                    <input type="text" class="form-control" value="@workorderId" id="woId" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="@item.BillDate">Bill Date:</label>
@@ -255,21 +195,15 @@
                 </div>
                 <br/>
                     <label id="document">Upload Document</label>
-                
-                <form asp-controller="Bills" asp-action="Upload" class="dropzone" id="myDropzone">
-                    <div class="uploadSection">
-                    <input type="file" id="upload-button" multiple accept="image/*" />
-                    <label class="label" for="upload-button">
-                        <i class="fa-solid fa-upload"></i>&nbsp; Choose Or Drop Photos
-                    </label>
-                    <div id="error"></div>
-                    <div id="image-display"></div>
-                    </div>
+
+                <form method="post" asp-action="Upload" asp-controller="Bills" enctype="multipart/form-data">
+                   <input type="file" name="file" id="fileInput" class="form-control" />
+                    <button class="btn btn-secondary" type="submit">Upload</button>
                 </form>
-                <button asp-controller="Bills" asp-action="Upload"class="btn btn-primary"  id="myDropzone">Remove</button>
-                
+                <button type="button" class="btn btn-danger" id="removeFile">Clear</button>
+
                 <br />
-                <br />
+                <br />  
 
                 <button id="save-btn" class="btn btn-primary">Save</button>
 
@@ -285,7 +219,23 @@
 
 
                 @section Scripts {
-                    <script>
+
+
+                 @*   <script type="text/javascript">
+                        function displayNames(input, target) {
+                            const output = document.getElementById(target);
+                            output.innerHTML = '';
+                            const files = input.files
+                            for (let i = 0; i < files.length; i++) {
+                                let file = files.item(i)
+                                let el = document.createElement('li');
+                                el.innerText = file.name;
+                                output.appendChild(el);
+                            }
+                        }
+                    </script>*@
+                    
+                  @*  <script>
                         // Initialize Dropzone
                         Dropzone.options.myDropzone = {
                             paramName: "files",
@@ -293,11 +243,26 @@
                             acceptedFiles: ".jpg,.jpeg,.png,.pdf", // Accepted file types
                             addRemoveLinks: true // Display remove links for uploaded files
                         };
-                    </script>
+                    </script>*@
                     <script src="~/dist/js/notify.js"></script>
                     <script src="~/dist/js/notify.min.js"></script>
                     <script>
-                        
+
+
+                        $("#removeFile").click(function () {
+                            debugger;
+                            var fileUrl = "@url";
+                            if (fileUrl) {
+                                console.log(fileUrl);
+                                $.post('@Url.Action("Remove", "Bills")', { url: fileUrl },
+                                    function () {
+                                        document.getElementById("fileInput").value = null;
+                                        $('#result').html('"PassThings()" successfully called.');
+                                    });
+                            }
+                            
+                        });
+                     
                         function showNotification(type, message) {
                             $.notify(message, type);
                         }
@@ -334,16 +299,16 @@
                                                                                                     <label>Description</label>
                                                                                                     <textarea class="form-control" id="description"></textarea>
                                                                                             </div>
-                                                                                                <div class="form-group col-md-2">
-                                                                                                    <label></label>
-                                                                                                                             <select class="form-control" onchange="CalculateTax(event)" id="taxOptions">
-                                                                                                         <option>Select Tax rate</option>
+                                                                                                                          <div class="form-group col-md-2">
+                                                        <label></label>
+                                                        <select class="form-control" onchange="CalculateTax(event)" id="taxOptions">
+                                                            <option>Select Tax rate</option>
                         @foreach (var item in ViewBag.taxList)
                         {
-                                                                                                                      <option>@item</option>
+                                                                    <option>@item.TaxRate</option>
                         }
-                                                                                                    </select>
-                                                                                                </div>
+                                                        </select>
+                                                    </div>
                                                                                                 <div class="form-group col-md-2">
                                                                                                     <label></label>
                                                                                                     <input type="number" step="0.01" class="form-control" id="taxedAmount">
@@ -418,15 +383,16 @@
                                 Zip: document.getElementById("zip").value,
                                 BillDate: document.getElementById("billDate").value,
                                 DueDate: document.getElementById("dueDate").value,
-                                Subtotal: document.getElementById("subtotals").value,
-                                Tax:document.getElementById("taxes").value,
-                                Total:document.getElementById("totals").value,
+                                Subtotal: document.getElementById("subtotals").innerHTML,
+                                Tax:document.getElementById("taxes").innerHTML,
+                                Total: document.getElementById("totals").innerHTML,
                                 Note: document.getElementById("note").value,
                                 Footer: document.getElementById("footer").value
                             });
 
                             var title = document.getElementById("billTitle");
                             var summary = document.getElementById("summary");
+                            console.log("Setting", testArrSettings);
 
                             $.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
                                 function () {
@@ -439,11 +405,7 @@
                     <script>
                    
 
-                        //$(document).ready(function () {
-                        //    $('#add-row-btn').click(function () {
-                        //        showNotification('success', 'Bill item added!');
-                        //    });
-                        //});
+                      
 
 
 
@@ -488,91 +450,7 @@
 
 
 
-                        let uploadButton = document.getElementById("upload-button");
-                        let chosenImage = document.getElementById("chosen-image");
-                        let fileName = document.getElementById("file-name");
-                        let container = document.querySelector(".uploadSection");
-                        let error = document.getElementById("error");
-                        let imageDisplay = document.getElementById("image-display");
-
-                        const fileHandler = (file, name, type) => {
-                            if (type.split("/")[0] !== "image") {
-                                //File Type Error
-                                error.innerText = "Please upload an image file";
-                                return false;
-                            }
-                            error.innerText = "";
-                            let reader = new FileReader();
-                            reader.readAsDataURL(file);
-                            reader.onloadend = () => {
-                                //image and file name
-                                let imageContainer = document.createElement("figure");
-                                let img = document.createElement("img");
-                                img.src = reader.result;
-                                imageContainer.appendChild(img);
-                                imageContainer.innerHTML += `<figcaption>${name}</figcaption>`;
-                                imageDisplay.appendChild(imageContainer);
-                            };
-                        };
-
-                        //Upload Button
-                        uploadButton.addEventListener("change", () => {
-                            imageDisplay.innerHTML = "";
-                            Array.from(uploadButton.files).forEach((file) => {
-                                fileHandler(file, file.name, file.type);
-                            });
-                        });
-
-                        container.addEventListener(
-                            "dragenter",
-                            (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                container.classList.add("active");
-                            },
-                            false
-                        );
-
-                        container.addEventListener(
-                            "dragleave",
-                            (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                container.classList.remove("active");
-                            },
-                            false
-                        );
-
-                        container.addEventListener(
-                            "dragover",
-                            (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                container.classList.add("active");
-                            },
-                            false
-                        );
-
-                        container.addEventListener(
-                            "drop",
-                            (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                container.classList.remove("active");
-                                let draggedData = e.dataTransfer;
-                                let files = draggedData.files;
-                                imageDisplay.innerHTML = "";
-                                Array.from(files).forEach((file) => {
-                                    fileHandler(file, file.name, file.type);
-                                });
-                            },
-                            false
-                        );
-
-                        window.onload = () => {
-                            error.innerText = "";
-                        };
-
+                        
                     </script>
                 }
 

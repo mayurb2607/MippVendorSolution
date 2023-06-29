@@ -376,44 +376,7 @@
                     
             </div>
         </div>
-        <div id="descriptions">
-            <form asp-action="PostWorkorderDescriptions" asp-controller="Workorders" >
-            @foreach (var description in descriptions)
-                    {
-                                    <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
-                      <div class="form-group" style="width: max-content;">
-                            <label class="control-label">Work completed & Materials used: </label>
-                            <input value="@description.DescriptionOfWorkCompletedMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label class="control-label">Total hours spent: </label>
-                            <input class="form-control" value="@description.HoursSpent" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-                        </div>
-                       <button id="add-row-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Add</button>&nbsp;&nbsp;
-                        <button id="remove-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Delete</button>
-                    </div>
-
-                    }
-                      <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
-                      <div class="form-group" style="width: max-content;">
-                            <label class="control-label">Work completed & Materials used: </label>
-                            <input  class="form-control" asp-for="Description" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label class="control-label">Total hours spent: </label>
-                            <input class="form-control" asp-for="TotalHoursSpent" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-                        </div>
-                       <button id="add-row-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Add</button>&nbsp;&nbsp;
-                        <button id="remove-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Delete</button>
-                    </div>
-
-                </form>
-               
-         </div>  
+ 
     </div>
 
         <div class="card-body">
@@ -493,33 +456,6 @@ the plugin.*@
 
             });
 
-                            $("#add-row-btn").click(function () {
-                                var newRow = `<div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
-                      <div class="form-group" style="width: max-content;">
-                            <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
-                            <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-                            <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="TotalHoursSpent" class="control-label">Total hours spent: </label>
-                            <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-                            <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
-                        </div>
-                       <button id="add-row-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Add</button>&nbsp;&nbsp;
-                        <button id="remove-btn" class="btn btn-primary" style="height: fit-content;
-    margin-top: 3%;">Delete</button>
-                    </div>
-`;
-                                $("#descriptions").append(newRow);
-
-
-                            });
-                             $("#remove-btn").click(function () {
-                                document.getElementById("descriptions").removeChild(document.getElementById("descriptions").children[1]);
-                            });
-
-
 
         window.onload = function () {
             var popup = document.getElementById('overlay');
@@ -534,6 +470,7 @@ the plugin.*@
             };
         };
         $('#commentsSection').click(function () {
+            console.log("Comments button click");
             $.ajax({
                 url: '/Workorders/OverlayPartial',
                 type: 'GET',
@@ -556,11 +493,7 @@ the plugin.*@
 
         }
 
-         function showNotification(type, message) {
-                            $.notify(message, type);
-                        }
-
-
+    
          $("#btnSave").click(function () {  
             var workorderArr = []
             var workorder = {};  

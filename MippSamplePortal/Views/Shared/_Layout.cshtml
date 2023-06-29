@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using Syncfusion.EJ2;
+@using System.Web.Optimization;
+@using System.Web;
+@using Syncfusion.Licensing;
+@using Syncfusion.EJ2.Grids;
+@using Microsoft.AspNetCore.Razor.TagHelpers;
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -39,11 +46,15 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Workorder" asp-route-email="@TempData["Email"]" asp-action="Index">Workorder</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="VendorLists" asp-route-email="@TempData["Email"]" asp-action="Index">Vendors</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Bills" asp-route-email="@TempData["Email"]" asp-action="Index">Bills</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Workorder" asp-route-email="@TempData["Email"]" asp-action="Index">Workorders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Bills" asp-route-email="@TempData["Email"]" asp-action="BillsIndex">Bills</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -71,6 +82,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @Html.EJS().ScriptManager()
+    @RenderSection("Scripts", required: false)
+    <ejs-scripts></ejs-scripts>
 </body>
 </html>

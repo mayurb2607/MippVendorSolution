@@ -1,8 +1,13 @@
 ﻿@model MippSamplePortal.ViewModel.WorkorderMasterModel
 @{
     ViewData["Title"] = "Create";
-    Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var emails = ViewBag.EmailAddresses;
+    var statuses = ViewBag.Status;
+    var vendor = ViewBag.Vendor;
+    var businessName = vendor[0].BusinessName;
+    var name = vendor[0].VendorName;
+
 }
 <div class="form-horizontal">
 
@@ -14,25 +19,25 @@
             <div class="col-sm-12">
                 <input type="hidden" asp-for="Id" />
                
-
+                @if(@vendor == null){
                 <div class="form-group">
                     <label asp-for="AssignedTo" class="control-label">Vendor: </label>
-                    <input asp-for="AssignedTo" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="AssignedTo" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="AssignedTo" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="AssignedToCompany" class="control-label">Company: </label>
-                    <input asp-for="AssignedToCompany" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="AssignedToCompany" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="AssignedToCompany" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="AssignedToAddress" class="control-label">Address: </label>
-                    <input asp-for="AssignedToAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="AssignedToAddress" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="AssignedToAddress" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="AssignedToPhone" class="control-label">Phone: </label>
-                    <input asp-for="AssignedToPhone" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="AssignedToPhone" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="AssignedToPhone" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -44,145 +49,196 @@
                             <option asp-for="AssignedToEmailAddress">@item</option>
                         }
                                 </select>
-@*                    <input asp-for="AssignedToEmailAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+@*                    <input asp-for="AssignedToEmailAddress" class="form-control" style="background-color:white; display:inline" />
 *@                    <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
                 </div>
+                    <div class="form-group">
+                        <label asp-for="Status" class="control-label">Status: </label>
+                        <select class="form-control" id="taxOptions">
+                            <option>Select Status</option>
+                            @foreach (var item in statuses)
+                            {
+                                <option asp-for="Status" value="@item">@item</option>
+                            }
+                        </select>
+                        @*                    <input asp-for="AssignedToEmailAddress" class="form-control" style="background-color:white; display:inline" />
+                    *@                    <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+
+                }
 
                 <div class="form-group">
+                    <label asp-for="AssignedTo" class="control-label">Vendor: </label>
+                    <input asp-for="AssignedTo" value="@vendor[0].VendorName" class="form-control" style="background-color:white; display:inline" />
+                    <span asp-validation-for="AssignedTo" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AssignedToCompany" class="control-label">Company: </label>
+                    <input asp-for="AssignedToCompany" value="@vendor[0].BusinessName" class="form-control" style="background-color:white; display:inline" />
+                    <span asp-validation-for="AssignedToCompany" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AssignedToAddress" class="control-label">Address: </label>
+                    <input asp-for="AssignedToAddress" value="@vendor[0].Location" class="form-control" style="background-color:white; display:inline" />
+                    <span asp-validation-for="AssignedToAddress" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AssignedToPhone" class="control-label">Phone: </label>
+                    <input asp-for="AssignedToPhone" value="@vendor[0].VendorPhone" class="form-control" style="background-color:white; display:inline" />
+                    <span asp-validation-for="AssignedToPhone" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AssignedToEmailAddress" class="control-label">Vendor: </label>
+                    <input asp-for="AssignedToEmailAddress" value="@vendor[0].VendorEmail" class="form-control" style="background-color:white; display:inline" />
+                    <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
                     <label asp-for="ExpectedStartDate" class="control-label">Expected Start Date: </label>
-                    <input asp-for="ExpectedStartDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ExpectedStartDate" type="date" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="ExpectedStartDate" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="ExpectedEndDate" class="control-label">Expected End Date: </label>
-                    <input asp-for="ExpectedEndDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ExpectedEndDate" type="date" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="ExpectedEndDate" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="ServiceRequestNumber" class="control-label">Service Request Number: </label>
-                    <input asp-for="ServiceRequestNumber" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ServiceRequestNumber" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="ServiceRequestNumber" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Status" class="control-label">Status: </label>
-                    <input asp-for="Status" class="form-control" style="border: none; background-color:white; display:inline" />
-                    <span asp-validation-for="Status" class="text-danger"></span>
+                    <select class="form-control" id="taxOptions">
+                        <option>Select Status</option>
+                        @foreach (var item in statuses)
+                        {
+                            <option asp-for="Status" value="@item">@item</option>
+                        }
+                    </select>
+                    @*                    <input asp-for="AssignedToEmailAddress" class="form-control" style="background-color:white; display:inline" />
+                    *@                    <span asp-validation-for="Status" class="text-danger"></span>
                 </div>
+                
                 <div class="form-group">
                     <label asp-for="Description" class="control-label">Description: </label>
-                    <input asp-for="Description" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="Description" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="AdditionalComments" class="control-label">Additional Comments: </label>
-                    <input asp-for="AdditionalComments" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="AdditionalComments" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="AdditionalComments" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="ExpectedNoOfHoursToComplete" class="control-label">Expected Hours To Complete: </label>
-                    <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="WorkPerformedBy" class="control-label">Work Performed By: </label>
-                    <input asp-for="WorkPerformedBy" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="WorkPerformedBy" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="WorkPerformedBy" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work Completed And Materials Used: </label>
-                    <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group"style="display:none">
                     <label asp-for="TotalHoursSpent" class="control-label">Total Hours Spent: </label>
-                    <input asp-for="TotalHoursSpent" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
                 </div>
                 <div class="form-group">
+                     <div class="form-group">
                     <label asp-for="PropertyName" class="control-label">Property Name: </label>
-                    <input asp-for="PropertyName" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PropertyName" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PropertyName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="PropertyAddress" class="control-label"> Property Address: </label>
-                    <input asp-for="PropertyAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PropertyAddress" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PropertyAddress" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="PropertyManager" class="control-label">Property Manager: </label>
-                    <input asp-for="PropertyManager" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PropertyManager" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PropertyManager" class="text-danger"></span>
                 </div>
+
+            </div>
+            </div>
+            <div class="col-sm-12">
+               
                 <div class="form-group">
                     <label asp-for="PropertyManagerPhone" class="control-label"> Property Manager Phone: </label>
-                    <input asp-for="PropertyManagerPhone" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PropertyManagerPhone" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PropertyManagerPhone" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="PropertyManagerEmail" class="control-label">Property Manager Email: </label>
-                    <input asp-for="PropertyManagerEmail" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PropertyManagerEmail" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PropertyManagerEmail" class="text-danger"></span>
                 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <div class="form-group">
+                    <div class="form-group">
                     <label asp-for="OrderNumber" class="control-label">Order Number: </label>
-                    <input asp-for="OrderNumber" class="form-control" style="border: none; background-color:white; display:inline" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="OrderNumber" class="form-control" style="background-color:white; display:inline" style="background-color:white; display:inline" />
                     <span asp-validation-for="OrderNumber" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="OrderDate" class="control-label"> Order Date: </label>
-                    <input asp-for="OrderDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="OrderDate" type="date" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="OrderDate" class="text-danger"></span>
                 </div>
 
 
                 <div class="form-group">
                     <label asp-for="TenantName" class="control-label">Tenant Name: </label>
-                    <input asp-for="TenantName" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TenantName" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TenantName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="TenantEmailAddress" class="control-label">Email: </label>
-                    <input asp-for="TenantEmailAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TenantEmailAddress" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TenantEmailAddress" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="TenantPhoneNumber" class="control-label">Phone: </label>
-                    <input asp-for="TenantPhoneNumber" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TenantPhoneNumber" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TenantPhoneNumber" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="UnitName" class="control-label">Unit: </label>
-                    <input asp-for="UnitName" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="UnitName" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="UnitName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="UnitAddress" class="control-label">Location: </label>
-                    <input asp-for="UnitAddress" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="UnitAddress" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="UnitAddress" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Note" class="control-label">Note: </label>
-                    <input asp-for="Note" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="Note" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="Note" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="PreferredTime" class="control-label">Preferred Time: </label>
-                    <input asp-for="PreferredTime" type="time" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PreferredTime" type="time" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PreferredTime" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label style="font-weight:inherit">
                         Anytime
-                        <input id="catswitch1" type="checkbox" checked="checked" />
+                        <input id="anytime" name="anytime" type="checkbox" checked="checked" />
                         <label for="thing" style="cursor: pointer"></label>
                     </label>
                     <br />
                     <label style="font-weight:inherit">
                         By Appointment
-                        <input id="catswitch1" type="checkbox" />
+                        <input id="byAppointment" name="byAppointment" type="checkbox" />
                         <label for="thing" style="cursor: pointer"></label>
                     </label>
                     @*<span><input class="form-control" type="checkbox" name="Anytime" value="Anytime" />Anytime</span>
@@ -191,67 +247,67 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="PermissionNote" class="control-label">Note: </label>
-                    <input asp-for="PermissionNote" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="PermissionNote" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="PermissionNote" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="EntryDate" class="control-label">Entry Date: </label>
-                    <input asp-for="EntryDate" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="EntryDate" type="date" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="EntryDate" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="TimeEntered" class="control-label">Time Entered: </label>
-                    <input asp-for="TimeEntered" type="time" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TimeEntered" type="time" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TimeEntered" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="TimeDeparted" class="control-label">Time Departed: </label>
                     <input asp-for="TimeDeparted" type="time" class="form-control" />
                     <span asp-validation-for="TimeDeparted" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="EntryNote" class="control-label">Entry Note: </label>
-                    <input asp-for="EntryNote" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="EntryNote" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="EntryNote" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="WorkorderCompiledBy" class="control-label">Compiled By: </label>
-                    <input asp-for="WorkorderCompiledBy" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="WorkorderCompiledBy" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="WorkorderCompiledBy" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="WorkorderApprovedBy" class="control-label">Approved By: </label>
-                    <input asp-for="WorkorderApprovedBy" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="WorkorderApprovedBy" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="WorkorderApprovedBy" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="DateOfApproval" class="control-label">Date: </label>
-                    <input asp-for="DateOfApproval" type="date" class="form-control" style="border: none; background-color:white; display:inline" />
+                <div class="form-group" style="display:none">
+                    <label asp-for="DateOfApproval"  class="control-label">Date: </label>
+                    <input asp-for="DateOfApproval" type="date" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="DateOfApproval" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Priority" class="control-label">Priority: </label>
-                    <input asp-for="Priority" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="Priority" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="Priority" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="CostOfLabor" class="control-label">Labour Cost: </label>
-                    <input asp-for="CostOfLabor" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="CostOfLabor" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="CostOfLabor" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="CostOfMaterials" class="control-label">Material Cost: </label>
-                    <input asp-for="CostOfMaterials" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="CostOfMaterials" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="CostOfMaterials" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="TaxesPaid" class="control-label">Taxes: </label>
-                    <input asp-for="TaxesPaid" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="TaxesPaid" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="TaxesPaid" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label asp-for="Total" class="control-label">Total: </label>
-                    <input asp-for="Total" class="form-control" style="border: none; background-color:white; display:inline" />
+                    <input asp-for="Total" class="form-control" style="background-color:white; display:inline" />
                     <span asp-validation-for="Total" class="text-danger"></span>
                 </div>
                 <input type="hidden" asp-for="ClientId" value="@ViewBag.ClientId" />
@@ -263,7 +319,7 @@
                 </div>
                 <div class="form-group">
                 <label asp-for="VendorId" class="control-label">: </label>
-                <input asp-for="VendorId" class="form-control" style="border: none; background-color:white; display:inline" />
+                <input asp-for="VendorId" class="form-control" style="background-color:white; display:inline" />
                 <span asp-validation-for="VendorId" class="text-danger"></span>
                 </div>*@
                 <br />
@@ -271,6 +327,10 @@
     text-align: center;">
                     <input type="submit" value="Save" class="btn btn-primary" style="display: inline-block;" />
                 </div>
+                      <br />
+                <br />
+                <br />
+
             </div>
 
         </form>
@@ -282,4 +342,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        console.log(@vendor);
+    </script>
 }
