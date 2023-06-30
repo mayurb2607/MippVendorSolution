@@ -52,7 +52,7 @@ namespace MippVendorPortal.Controllers
             }
             catch(Exception ex)
             {
-
+                throw ex;
             }
         }
 

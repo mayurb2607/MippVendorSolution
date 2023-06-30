@@ -24,7 +24,7 @@ namespace MippPortalWebAPI.Controllers
         [HttpPost("GetVendors")]
         public async Task<List<string>> GetVendors(Helpers.WorkorderRequest workorderRequest)
         {
-            workorderRequest.ClientID = 1;
+            //workorderRequest.ClientID = 1;
             if (workorderRequest.ClientID != 0)
             {
                 var clients = _context.VendorInvites.Where(x => x.ClientId == workorderRequest.ClientID);
@@ -133,6 +133,157 @@ namespace MippPortalWebAPI.Controllers
 
         }
 
+
+        [HttpPost("GetAssignedWorkorders")]
+        public async Task<ActionResult<IEnumerable<Workorder>>> GetAssignedWorkorders(Helpers.WorkorderRequest workorderRequest)
+        {
+            if (workorderRequest.VendorID != 0)
+            {
+                var workorders = await _context.Workorders.Where(x => x.VendorId == workorderRequest.VendorID).ToListAsync();
+
+                var workorder = new Workorder();
+                if (workorderRequest.Id != 0)
+                {
+                    workorder = workorders.FirstOrDefault(x => x.Id == workorderRequest.Id);
+                }
+                var productList = new List<Workorder>();
+
+                foreach (var item in workorders)
+                {
+                    if(item.Status == "Assigned")
+                        productList.Add(item);
+                }
+
+                foreach (var item in productList)
+                {
+                    if (item.VendorId != Convert.ToInt32(workorderRequest.VendorID))
+                    {
+                        productList.Remove(item);
+                    }
+
+                }
+                return productList;
+
+            }
+            else
+            {
+                var workorders = await _context.Workorders.FindAsync(workorderRequest.Id);
+                var productList = new List<Workorder> { workorders };
+                //foreach (var item in productList)
+                //{
+                //if (item.ClientId != Convert.ToInt32(workorderRequest.ClientID))
+                //{
+                //    productList.Remove(item);
+                //}
+
+                //}
+                return productList;
+
+            }
+
+        }
+
+
+        [HttpPost("GetCompletedWorkorders")]
+        public async Task<ActionResult<IEnumerable<Workorder>>> GetCompletedWorkorders(Helpers.WorkorderRequest workorderRequest)
+        {
+            if (workorderRequest.VendorID != 0)
+            {
+                var workorders = await _context.Workorders.Where(x => x.VendorId == workorderRequest.VendorID).ToListAsync();
+
+                var workorder = new Workorder();
+                if (workorderRequest.Id != 0)
+                {
+                    workorder = workorders.FirstOrDefault(x => x.Id == workorderRequest.Id);
+                }
+                var productList = new List<Workorder>();
+
+                foreach (var item in workorders)
+                {
+                    if (item.Status == "Completed")
+                        productList.Add(item);
+                }
+
+                foreach (var item in productList)
+                {
+                    if (item.VendorId != Convert.ToInt32(workorderRequest.VendorID))
+                    {
+                        productList.Remove(item);
+                    }
+
+                }
+                return productList;
+
+            }
+            else
+            {
+                var workorders = await _context.Workorders.FindAsync(workorderRequest.Id);
+                var productList = new List<Workorder> { workorders };
+                //foreach (var item in productList)
+                //{
+                //if (item.ClientId != Convert.ToInt32(workorderRequest.ClientID))
+                //{
+                //    productList.Remove(item);
+                //}
+
+                //}
+                return productList;
+
+            }
+
+        }
+
+        [HttpPost("GetDeclinedWorkorders")]
+        public async Task<ActionResult<IEnumerable<Workorder>>> GetDeclinedWorkorders(Helpers.WorkorderRequest workorderRequest)
+        {
+            if (workorderRequest.VendorID != 0)
+            {
+                var workorders = await _context.Workorders.Where(x => x.VendorId == workorderRequest.VendorID).ToListAsync();
+
+                var workorder = new Workorder();
+                if (workorderRequest.Id != 0)
+                {
+                    workorder = workorders.FirstOrDefault(x => x.Id == workorderRequest.Id);
+                }
+                var productList = new List<Workorder>();
+
+                foreach (var item in workorders)
+                {
+                    if (item.Status == "Declined")
+                        productList.Add(item);
+                }
+
+                foreach (var item in productList)
+                {
+                    if (item.VendorId != Convert.ToInt32(workorderRequest.VendorID))
+                    {
+                        productList.Remove(item);
+                    }
+
+                }
+                return productList;
+
+            }
+            else
+            {
+                var workorders = await _context.Workorders.FindAsync(workorderRequest.Id);
+                var productList = new List<Workorder> { workorders };
+                //foreach (var item in productList)
+                //{
+                //if (item.ClientId != Convert.ToInt32(workorderRequest.ClientID))
+                //{
+                //    productList.Remove(item);
+                //}
+
+                //}
+                return productList;
+
+            }
+
+        }
+
+
+
         [HttpPost("GetWorkorderComments")]
         public async Task<ActionResult<IEnumerable<WorkorderComment>>> GetWorkorderComments (Helpers.WorkorderRequest workorderRequest)
         {
@@ -197,24 +348,24 @@ namespace MippPortalWebAPI.Controllers
         // PUT: api/Workorders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PutWorkorder")]
-        public async Task<IActionResult> PutWorkorder(WorkorderMasterModel workorderRequest)
+        public async Task<IActionResult> PutWorkorder(WorkorderMasterModel workorderMaster)
         {
             //if (id != workorder.Id)
             //{
             //    return BadRequest();
             //}
-            Workorder workorder = _context.Workorders.Find(workorderRequest.Id);
-            string fname = workorderRequest.AssignedTo.Split(" ")[0];
+            Workorder workorder = _context.Workorders.Find(workorderMaster.Id);
+            string fname = workorderMaster.AssignedTo.Split(" ")[0];
 
             _context.Entry(workorder).State = EntityState.Modified;
-            workorder.Status = workorderRequest.Status;
-            workorder.AdditionalComments = workorderRequest.AdditionalComments;
-            workorder.AssignedTo = workorderRequest.AssignedTo;
-            workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == workorderRequest.AssignedTo).Email;
+            workorder.Status = workorderMaster.Status;
+            workorder.AdditionalComments = workorderMaster.AdditionalComments;
+            workorder.AssignedTo = workorderMaster.AssignedTo;
+            workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == workorderMaster.AssignedTo).Email;
             //workorder.AssignedToPhone = _context.VendorInvites.FirstOrDefault(x => x. == workorderRequest.AssignedTo).P
-            workorder.VendorId = workorderRequest.VendorId;
+            workorder.VendorId = workorderMaster.VendorId;
             //workorder.VendorId = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Id;
-            workorder.AssignedToEmailAddress = workorderRequest.AssignedToEmailAddress;
+            workorder.AssignedToEmailAddress = workorderMaster.AssignedToEmailAddress;
             //workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Email;
             try
             {
@@ -222,7 +373,7 @@ namespace MippPortalWebAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!WorkorderExists(workorderRequest.Id))
+                if (!WorkorderExists(workorderMaster.Id))
                 {
                     return NotFound();
                 }

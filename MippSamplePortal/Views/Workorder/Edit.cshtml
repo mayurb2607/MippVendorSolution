@@ -4,6 +4,10 @@
     ViewData["Title"] = "Edit";
     var id = ViewData["VendorId"];
     var email = ViewBag.Email;
+    var workorderId = ViewBag.Id;
+    var clientId = ViewBag.clientId;
+    var descriptions = ViewBag.Descriptions;
+    var status = "";
 
 }
 
@@ -24,19 +28,9 @@
         @Html.HiddenFor(model => model.OrderDate)
         <div class="form-group">
             @Html.LabelFor(model => model.AssignedTo, htmlAttributes: new { @class = "control-label col-md-2" })
+
             <div class="col-md-10">
-                @*                @Html.EditorFor(model => model.AssignedTo, new { htmlAttributes = new { @class = "form-control" } })
-            *@
-                <select id="assignedTo" style="width: 82%;
-    max-inline-size: max-content;" asp-for="AssignedTo" class="form-control">
-                    @foreach (var vendor in ViewBag.Vendors)
-                    {
-
-                        <option asp-for="AssignedTo" class="form-control">@vendor</option>
-
-                    }
-                </select>
-
+                @Html.EditorFor(model => model.AssignedTo, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.AssignedTo, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -61,6 +55,7 @@
                 @Html.ValidationMessageFor(model => model.AdditionalComments, "", new { @class = "text-danger" })
             </div>
         </div>
+       
         @Html.HiddenFor(model => model.ExpectedNoOfHoursToComplete)
         @Html.HiddenFor(model => model.WorkPerformedBy)
         @Html.HiddenFor(model => model.WorkCompletedAndMaterialsUsed)
@@ -104,314 +99,141 @@
     </div>
 }
 
+<div id="descriptions">
+    @foreach (var description in descriptions)
+    {
+        <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+            <div class="form-group" style="width: max-content; display:none">
+                <label class="control-label">Id: </label>
+                <input value="@description.Id" id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Work completed & Materials used: </label>
+                <input value="@description.DescriptionOfWorkCompletedMaterialsUsed" id="descriptionText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+            <label class="control-label">Total hours spent: </label>
+            <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+        </div>
+        </div>
 
+    }
+    <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+        <div class="form-group" style="width: max-content; display:none">
+            <label class="control-label">Id: </label>
+            <input id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+        </div>
+        <div class="form-group" style="width: max-content;">
+            <label class="control-label">Work completed & Materials used: </label>
+            <input class="form-control" id="descriptionText" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+        </div>
+        <div class="form-group" style="width: max-content;">
+            <label class="control-label">Total hours spent: </label>
+            <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+        </div>
+        <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Add
+            </button>&nbsp;&nbsp;
+        <button id="remove-btn" onclick="RemoveLine()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Delete
+            </button>&nbsp;&nbsp;
+        <button id="save-row-btn" onclick="SaveDescription()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Save
+            </button>
+    </div>
 
-
-
-
-
-
-
-
-
-@*<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="OrderNumber" />
-            <input type="hidden" asp-for="OrderDate" />
-            <input type="hidden" asp-for="AssignedTo" />
-            <input type="hidden" asp-for="AssignedToCompany" />
-            <input type="hidden" asp-for="AssignedToAddress" />
-            <div class="form-group">
-                <label asp-for="AssignedTo" class="control-label"></label>
-                <input name="AssignedTo" class="form-control" />
-                <span asp-validation-for="AssignedTo" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="AssignedToEmailAddress" />
-            <input type="hidden" asp-for="ExpectedStartDate" />
-            <input type="hidden" asp-for="ExpectedEndDate" />
-            <input type="hidden" asp-for="ServiceRequestNumber" />
-            <input type="hidden" asp-for="Status" />
-            <input type="hidden" asp-for="Description" />
-            <div class="form-group">
-                <label asp-for="AdditionalComments" class="control-label"></label>
-                <input name="AdditionalComments" class="form-control" />
-                <span asp-validation-for="AdditionalComments" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="ExpectedNoOfHoursToComplete" />
-            <input type="hidden" asp-for="WorkPerformedBy" />
-            <input type="hidden" asp-for="WorkCompletedAndMaterialsUsed" />
-            <input type="hidden" asp-for="TotalHoursSpent" />
-            <input type="hidden" asp-for="PropertyName" />
-            <input type="hidden" asp-for="PropertyAddress" />
-            <input type="hidden" asp-for="PropertyManager" />
-            <input type="hidden" asp-for="PropertyManagerPhone" />
-            <input type="hidden" asp-for="PropertyManagerEmail" />
-            <input type="hidden" asp-for="TenantName" />
-            <input type="hidden" asp-for="TenantEmailAddress" />
-            <input type="hidden" asp-for="TenantPhoneNumber" />
-            <input type="hidden" asp-for="UnitName" />
-            <input type="hidden" asp-for="UnitAddress" />
-            <input type="hidden" asp-for="Note" />
-            <input type="hidden" asp-for="PreferredTime" />
-            <input type="hidden" asp-for="EnterCondition" />
-            <input type="hidden" asp-for="PermissionNote" />
-            <input type="hidden" asp-for="EntryDate" />
-            <input type="hidden" asp-for="TimeEntered" />
-            <input type="hidden" asp-for="TimeDeparted" />
-            <input type="hidden" asp-for="EntryNote" />
-            <input type="hidden" asp-for="WorkorderCompiledBy" />
-            <input type="hidden" asp-for="WorkorderApprovedBy" />
-            <input type="hidden" asp-for="DateOfApproval" />
-            <input type="hidden" asp-for="Priority" />
-            <input type="hidden" asp-for="CostOfLabor" />
-            <input type="hidden" asp-for="CostOfMaterials" />
-            <input type="hidden" asp-for="TaxesPaid" />
-            <input type="hidden" asp-for="Total" />
-            <input type="hidden" asp-for="ClientId" />
-            <input type="hidden" asp-for="VendorId" />
-            @*<div class="form-group">
-            <label asp-for="OrderNumber" class="control-label"></label>
-            <input asp-for="OrderNumber" class="form-control" />
-            <span asp-validation-for="OrderNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="OrderDate" class="control-label"></label>
-            <input asp-for="OrderDate" class="form-control" />
-            <span asp-validation-for="OrderDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AssignedTo" class="control-label"></label>
-            <input asp-for="AssignedTo" class="form-control" />
-            <span asp-validation-for="AssignedTo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AssignedToCompany" class="control-label"></label>
-            <input asp-for="AssignedToCompany" class="form-control" />
-            <span asp-validation-for="AssignedToCompany" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AssignedToAddress" class="control-label"></label>
-            <input asp-for="AssignedToAddress" class="form-control" />
-            <span asp-validation-for="AssignedToAddress" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AssignedToPhone" class="control-label"></label>
-            <input asp-for="AssignedToPhone" class="form-control" />
-            <span asp-validation-for="AssignedToPhone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AssignedToEmailAddress" class="control-label"></label>
-            <input asp-for="AssignedToEmailAddress" class="form-control" />
-            <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="ExpectedStartDate" class="control-label"></label>
-            <input asp-for="ExpectedStartDate" class="form-control" />
-            <span asp-validation-for="ExpectedStartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="ExpectedEndDate" class="control-label"></label>
-            <input asp-for="ExpectedEndDate" class="form-control" />
-            <span asp-validation-for="ExpectedEndDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="ServiceRequestNumber" class="control-label"></label>
-            <input asp-for="ServiceRequestNumber" class="form-control" />
-            <span asp-validation-for="ServiceRequestNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Status" class="control-label"></label>
-            <input asp-for="Status" class="form-control" />
-            <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Description" class="control-label"></label>
-            <input asp-for="Description" class="form-control" />
-            <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="AdditionalComments" class="control-label"></label>
-            <input asp-for="AdditionalComments" class="form-control" />
-            <span asp-validation-for="AdditionalComments" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="ExpectedNoOfHoursToComplete" class="control-label"></label>
-            <input asp-for="ExpectedNoOfHoursToComplete" class="form-control" />
-            <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="WorkPerformedBy" class="control-label"></label>
-            <input asp-for="WorkPerformedBy" class="form-control" />
-            <span asp-validation-for="WorkPerformedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label"></label>
-            <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" />
-            <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TotalHoursSpent" class="control-label"></label>
-            <input asp-for="TotalHoursSpent" class="form-control" />
-            <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PropertyName" class="control-label"></label>
-            <input asp-for="PropertyName" class="form-control" />
-            <span asp-validation-for="PropertyName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PropertyAddress" class="control-label"></label>
-            <input asp-for="PropertyAddress" class="form-control" />
-            <span asp-validation-for="PropertyAddress" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PropertyManager" class="control-label"></label>
-            <input asp-for="PropertyManager" class="form-control" />
-            <span asp-validation-for="PropertyManager" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PropertyManagerPhone" class="control-label"></label>
-            <input asp-for="PropertyManagerPhone" class="form-control" />
-            <span asp-validation-for="PropertyManagerPhone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PropertyManagerEmail" class="control-label"></label>
-            <input asp-for="PropertyManagerEmail" class="form-control" />
-            <span asp-validation-for="PropertyManagerEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TenantName" class="control-label"></label>
-            <input asp-for="TenantName" class="form-control" />
-            <span asp-validation-for="TenantName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TenantEmailAddress" class="control-label"></label>
-            <input asp-for="TenantEmailAddress" class="form-control" />
-            <span asp-validation-for="TenantEmailAddress" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TenantPhoneNumber" class="control-label"></label>
-            <input asp-for="TenantPhoneNumber" class="form-control" />
-            <span asp-validation-for="TenantPhoneNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="UnitName" class="control-label"></label>
-            <input asp-for="UnitName" class="form-control" />
-            <span asp-validation-for="UnitName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="UnitAddress" class="control-label"></label>
-            <input asp-for="UnitAddress" class="form-control" />
-            <span asp-validation-for="UnitAddress" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Note" class="control-label"></label>
-            <input asp-for="Note" class="form-control" />
-            <span asp-validation-for="Note" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PreferredTime" class="control-label"></label>
-            <input asp-for="PreferredTime" class="form-control" />
-            <span asp-validation-for="PreferredTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="EnterCondition" class="control-label"></label>
-            <input asp-for="EnterCondition" class="form-control" />
-            <span asp-validation-for="EnterCondition" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="PermissionNote" class="control-label"></label>
-            <input asp-for="PermissionNote" class="form-control" />
-            <span asp-validation-for="PermissionNote" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="EntryDate" class="control-label"></label>
-            <input asp-for="EntryDate" class="form-control" />
-            <span asp-validation-for="EntryDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TimeEntered" class="control-label"></label>
-            <input asp-for="TimeEntered" class="form-control" />
-            <span asp-validation-for="TimeEntered" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TimeDeparted" class="control-label"></label>
-            <input asp-for="TimeDeparted" class="form-control" />
-            <span asp-validation-for="TimeDeparted" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="EntryNote" class="control-label"></label>
-            <input asp-for="EntryNote" class="form-control" />
-            <span asp-validation-for="EntryNote" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="WorkorderCompiledBy" class="control-label"></label>
-            <input asp-for="WorkorderCompiledBy" class="form-control" />
-            <span asp-validation-for="WorkorderCompiledBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="WorkorderApprovedBy" class="control-label"></label>
-            <input asp-for="WorkorderApprovedBy" class="form-control" />
-            <span asp-validation-for="WorkorderApprovedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="DateOfApproval" class="control-label"></label>
-            <input asp-for="DateOfApproval" class="form-control" />
-            <span asp-validation-for="DateOfApproval" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Priority" class="control-label"></label>
-            <input asp-for="Priority" class="form-control" />
-            <span asp-validation-for="Priority" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="CostOfLabor" class="control-label"></label>
-            <input asp-for="CostOfLabor" class="form-control" />
-            <span asp-validation-for="CostOfLabor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="CostOfMaterials" class="control-label"></label>
-            <input asp-for="CostOfMaterials" class="form-control" />
-            <span asp-validation-for="CostOfMaterials" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="TaxesPaid" class="control-label"></label>
-            <input asp-for="TaxesPaid" class="form-control" />
-            <span asp-validation-for="TaxesPaid" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Total" class="control-label"></label>
-            <input asp-for="Total" class="form-control" />
-            <span asp-validation-for="Total" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="ClientId" class="control-label"></label>
-            <input asp-for="ClientId" class="form-control" />
-            <span asp-validation-for="ClientId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="VendorId" class="control-label"></label>
-            <input asp-for="VendorId" class="form-control" />
-            <span asp-validation-for="VendorId" class="text-danger"></span>
-            </div>*@
-@*   <br/>
-            <br/>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-   </div>
 </div>
-<div>
-</div>*@
+
+
+
+
+
+
+
+
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function AddLine() {
+            var newRow = `<div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
+                              <div class="form-group" style="width: max-content; display:none">
+                                    <label class="control-label">Id: </label>
+                                    <input id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+                                </div>
+                                        <div class="form-group" style="width: max-content;">
+                                    <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
+                                    <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+                                    <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
+                                </div>
+                                <div class="form-group" style="width: max-content;">
+                                    <label asp-for="TotalHoursSpent" class="control-label">Total hours spent: </label>
+                                    <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+                                    <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
+                                </div>
+                               <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary" style="height: fit-content;
+            margin-top: 3%;">Add</button>&nbsp;&nbsp;
+                                <button id="remove-btn" onclick="RemoveLine()" class="btn btn-primary" style="height: fit-content;
+            margin-top: 3%;">Delete</button>&nbsp;&nbsp;
+                                  <button id="save-row-btn" onclick="SaveDescription()" class="btn btn-primary" style="height: fit-content;
+            margin-top: 3%;">Save</button>
+                            </div>
+        `;
+            $("#descriptions").append(newRow);
+
+
+        }
+        function RemoveLine() {
+            document.getElementById("descriptions").removeChild(document.getElementById("descriptions").children[1]);
+        }
+
+        function SaveDescription() {
+            var descriptions = document.querySelectorAll("#descriptionText");
+            var hours = document.querySelectorAll("#hoursText");
+            console.log("564", descriptions);
+            console.log("565", hours);
+
+            var testArr = [];
+
+            for (let i = 0; i < document.querySelectorAll("#descriptionText").length; i++) {
+                if (document.querySelectorAll("#idText")[i] == null || document.querySelectorAll("#idText")[i] == undefined) {
+                    testArr.push({
+                        Id: i + 1,
+                        WorkorderWorkDescription: document.querySelectorAll("#descriptionText")[i].value,
+                        HoursSpent: document.querySelectorAll("#hoursText")[i].value,
+                        WorkorderId: @workorderId
+                        });
+                }
+                testArr.push({
+                    Id: document.querySelectorAll("#idText")[i].value,
+                    WorkorderWorkDescription: document.querySelectorAll("#descriptionText")[i].value,
+                    HoursSpent: document.querySelectorAll("#hoursText")[i].value,
+                    WorkorderId: @workorderId
+                        });
+            }
+            console.log(testArr);
+
+            $.post('@Url.Action("PostWorkorderDescriptions","Workorders")', { workDescriptions: testArr },
+                function () {
+                    showNotification('success', 'Workorder description updated!');
+                });
+
+        }
+
+        function showNotification(type, message) {
+            $.notify(message, type);
+        }
+
+</script>
 }
 
 

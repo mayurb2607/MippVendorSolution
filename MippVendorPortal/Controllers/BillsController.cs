@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using dotless.Core.Parser.Functions;
 using dotless.Core.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
+using MippSamplePortal.Models;
 using MippSamplePortal.ViewModel;
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
@@ -22,6 +24,7 @@ using Syncfusion.EJ2.Linq;
 
 namespace MippVendorPortal.Controllers
 {
+    [Authorize]
     public class BillsController : Controller
     {
         private readonly MippVendorTestContext _context;
@@ -41,9 +44,8 @@ namespace MippVendorPortal.Controllers
 
 
         [HttpPost("Upload")]
-        public async Task<IActionResult> Upload()
+        public void Upload(IFormFile file1)
         {
-            int clientId = 1;
             var files = Request.Form.Files; // Access the uploaded files here
             foreach (var file in files)
             {
@@ -81,27 +83,57 @@ namespace MippVendorPortal.Controllers
                     using (FileStream fileStream = new FileStream(file.FileName, FileMode.Open))
                     {
                         // Upload the file to Azure Blob Storage
-                        await blobClient.UploadAsync(fileStream, true);
+                        blobClient.Upload(fileStream, true);
                     }
                     // Get the public URL of the uploaded image
                     var fileUrl = blobClient.Uri.ToString();
-
+                    //TempData["fileUrl"] = fileUrl;
+                    ViewBag.fileUrl = fileUrl;
                     // Optionally, you can delete the local file after uploading it to Azure Blob Storage
                     System.IO.File.Delete(file.FileName);
 
-                    return RedirectToAction("Index", new { clientID = clientId });
 
 
                 }
             }
 
+            // If no file was selected or the file is empty, display an error message
+            ModelState.AddModelError("file", "Please select a file to upload.");
+
+            //int clientId = 1;
+
+
             // Process the uploaded files
 
-            return RedirectToAction("Bills", new { clientID = clientId });
+
         }
 
-     
+        [HttpPost("Remove")]
+        public async Task<IActionResult> Remove(string url)
+        {
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
+            string containerName = "mipp-bill-accounts"; // Replace with your container name
 
+            //CloudBlobClient blobClient = account.CreateCloudBlobClient();
+            //CloudBlobContainer container = blobClient.GetContainerReference("images");
+
+            // Create a BlobServiceClient object
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+
+            // Get a reference to the container
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Extract the blob name from the URL
+            var blobName = Path.GetFileName(url);
+
+            // Get the blob client using the blob name
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            // Delete the blob
+            blobClient.DeleteIfExists();
+
+            return Ok();
+        }
         public async Task<IActionResult> Index(int vendorID, int woID)
         {
             try
@@ -234,9 +266,9 @@ namespace MippVendorPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Insert(string woId, IEnumerable<BillDataViewModel> testArr, IEnumerable<SettingsViewModel> testArrSettings)
         {
-                    MippPortalWebAPI.Models.Bill bill = new MippPortalWebAPI.Models.Bill();
-            var clientID = _context.Workorder.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId;
-            var vendorID = _context.Workorder.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId;
+            MippPortalWebAPI.Models.Bill bill = new MippPortalWebAPI.Models.Bill();
+            var clientID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId;
+            var vendorID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId;
             MippPortalWebAPI.Helpers.WorkorderRequest workorderRequest = new MippPortalWebAPI.Helpers.WorkorderRequest();
             workorderRequest.ClientID = clientID;
             string clientEmail = "";
@@ -304,20 +336,26 @@ namespace MippVendorPortal.Controllers
                                 bill.BillTo = item1.BusinessName;
                                 bill.BillDate = item1.BillDate;
                                 bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
-                                bill.ClientEmail = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).PropertyManagerEmail.ToString();
+                                bill.ClientEmail = clientEmail;
                                 bill.SubTotal = item1.Subtotal;
                                 bill.TaxAmount = item1.Tax;
                                 bill.Total = item1.Total;
                                 bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.BillId == Id).Id.ToString(); ;
-                                bill.Summary = string.Empty;
+                                bill.Summary = item1.Summary;
+                                bill.Title= item1.Title;
+                                bill.PaymentDueOn = item1.DueDate;
                                 bill.Note = item1.Note;
+                                bill.InvoiceDate = item1.BillDate;
+                                bill.VendorId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId.ToString();
+                                bill.VendorEmail = _context.Vendors.FirstOrDefault(x => x.Id == int.Parse(bill.VendorId)).VendorEmail;
+                                //bill.Documents
                                 bill.Footer = item1.Footer;
 
                                 using (var httpClient2 = new HttpClient())
                                 {
                                     StringContent content2 = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
 
-                                    using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/AddBill", content1))
+                                    using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/AddBill", content2))
                                     {
                                         string apiResponse2 = await response2.Content.ReadAsStringAsync();
                                         try
@@ -402,7 +440,7 @@ namespace MippVendorPortal.Controllers
             BillRequest billRequest = new BillRequest();
             billRequest.Id = id;
 
-            Bill bill = new Bill(); 
+            MippPortalWebAPI.Models.Bill bill = new MippPortalWebAPI.Models.Bill(); 
             using (var httpClient2 = new HttpClient())
             {
                 StringContent content2 = new StringContent(JsonConvert.SerializeObject(billRequest), Encoding.UTF8, "application/json");
@@ -410,7 +448,7 @@ namespace MippVendorPortal.Controllers
                 using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/GetBillDetails", content2))
                 {
                     var apiResponse = await response2.Content.ReadAsStringAsync();
-                    bill = JsonConvert.DeserializeObject<Bill>(apiResponse);
+                    bill = JsonConvert.DeserializeObject<MippPortalWebAPI.Models.Bill>(apiResponse);
                 }
             }
             if(bill != null)

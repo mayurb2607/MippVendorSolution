@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using MippPortalWebAPI.Models;
-using MippVendorPortal.ViewModel;
 
 namespace MippVendorPortal.Models;
 
@@ -156,10 +154,4 @@ public partial class MippVendorTestContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    public DbSet<MippPortalWebAPI.Models.Workorder> Workorder { get; set; } = default!;
-
-    public DbSet<MippPortalWebAPI.Models.Bill> Bill { get; set; } = default!;
-
-    public DbSet<MippVendorPortal.ViewModel.WorkorderMasterModel> WorkorderMasterModel { get; set; } = default!;
 }

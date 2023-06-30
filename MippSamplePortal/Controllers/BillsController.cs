@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using MippSamplePortal.Models;
 
 namespace MippSamplePortal.Controllers
 {
+    [Authorize]
     public class BillsController : Controller
     {
         private readonly MippTestContext _context;
@@ -19,7 +21,7 @@ namespace MippSamplePortal.Controllers
         }
 
         // GET: Bills
-        public async Task<IActionResult> Index(string email)
+        public async Task<IActionResult> BillsIndex(string email)
         {
             int clientID = (int)_context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
 

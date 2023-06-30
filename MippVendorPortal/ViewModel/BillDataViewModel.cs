@@ -10,7 +10,7 @@
         public string tax { get; set; }
         public string total { get; set; }
 
-        public int unit { get; set; }
+        public string unit { get; set; }
         
         //public string title { get; set; }
         //public string summary { get; set; }

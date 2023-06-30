@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Newtonsoft.Json;
 
 namespace MippSamplePortal.Controllers
 {
+    [Authorize]
     public class WorkorderController : Controller
     {
         private readonly MippTestContext _context;
@@ -82,17 +84,33 @@ namespace MippSamplePortal.Controllers
             return NotFound();
         }
 
-        public ActionResult Create(string email)
+        public ActionResult Create(string email, string vendorEmail)
         {
             ViewBag.ClientID = _context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
             int cId = ViewBag.ClientID;
             var emailAddresses = new List<string>();
-            var vendors = _context.VendorInvites.Where(x => x.ClientId == cId);
-            foreach (var item in vendors)
+            var statuses = new List<string>();
+            if (vendorEmail == null)
             {
-                emailAddresses.Add(item.VendorEmail);
+                var vendors = _context.VendorLists.Where(x => x.ClientId == cId);
+                foreach (var item in vendors)
+                {
+                    emailAddresses.Add(item.VendorEmail);
+                }
+                ViewBag.Vendors = vendors;
             }
+            var vendor = _context.VendorLists.Where(x => x.VendorEmail == vendorEmail);
+            var status = _context.ClientStatuses.Where(x => x.ClientId == cId);
+
+            foreach (var item in status)
+            {
+                statuses.Add(item.Status);
+            }
+            
             ViewBag.EmailAddresses = emailAddresses;
+            ViewBag.Status = statuses;
+
+            ViewBag.Vendor = vendor.ToList();
             //ViewBag.Vendors = new List<string>
             //{
                 
@@ -104,12 +122,13 @@ namespace MippSamplePortal.Controllers
         public async Task<ActionResult> Create(int clientId, [Bind] WorkorderMasterModel workorder)
         {
             workorder.ClientId = clientId;
+            workorder.Status = "Assigned";
             workorder.EnterCondition = "Call for availiablity";
-            workorder.VendorId = _context.Vendors.FirstOrDefault(x=> x.Email == workorder.AssignedToEmailAddress).Id;
+            workorder.VendorId = _context.VendorLists.FirstOrDefault(x=> x.VendorEmail == workorder.AssignedToEmailAddress).Id;
             var email = _context.Clients.FirstOrDefault(x => x.Id == clientId).Email;
             WorkorderRequest workorderRequest = new WorkorderRequest();
             workorderRequest.ClientID = workorder.ClientId;
-            workorderRequest.AdditionalComments = "";
+            workorderRequest.AdditionalComments = workorder.Status;
             workorderRequest.Status = "";
 
             var env = _hostEnvironment.EnvironmentName;
@@ -196,7 +215,8 @@ namespace MippSamplePortal.Controllers
             {
                 return View(null);
             }
-
+            IEnumerable<ClientStatus> workorderStatus = null;
+            IEnumerable<WorkorderWorkDescription> workorderWorkDescription = null;
             var env = _hostEnvironment.EnvironmentName;
             string apiUrl = string.Empty;
             if (env == "Development")
@@ -215,30 +235,23 @@ namespace MippSamplePortal.Controllers
             workorderRequest.Id = (int)id;
             //workorderRequest.ClientID = 0;
             workorderRequest.Status = String.Empty;
+            workorderRequest.ClientID = (int)_context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
             workorderRequest.AdditionalComments = String.Empty;
-            IEnumerable<Workorder> workorder;
+            Workorder workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
 
-                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorders", content))
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorder", content))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     try
                     {
-                        workorder = JsonConvert.DeserializeObject<IEnumerable<Workorder>>(apiResponse);
-                        var list = workorder.ToList();
-                        Workorder workorder1 = new Workorder();
-                        foreach (var item in list)
-                        {
-                            workorder1 = item;
-                        }
+                        workorder = JsonConvert.DeserializeObject<Workorder>(apiResponse);
+                        
 
                         using (var httpClient1 = new HttpClient())
                         {
-                            workorderRequest.ClientID = 1;
-                            workorderRequest.Status = String.Empty;
-                            workorderRequest.AdditionalComments = String.Empty;
                             StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
 
                             using (var response1 = await httpClient.PostAsync(apiUrl+ "Workorders/GetVendors", content))
@@ -252,18 +265,9 @@ namespace MippSamplePortal.Controllers
 
 
                                     ViewBag.Vendors = data;
-
-
-                                    //foreach (var item in data)
-                                    //{
-                                    //    vendorList.Add(item.ToString());
-                                    //}
-
-                                    //foreach (var item in vendorList)
-                                    //{
-                                    //    vendors.Add(item.Split("/n")[0]);
-                                    //}
-
+                                    ViewBag.Id = id;
+                                    ViewBag.clientId = workorderRequest.ClientID;
+                                    
                                     ViewData["Vendors"] = data;
                                     TempData["Email"] = email;
                                 }
@@ -276,8 +280,55 @@ namespace MippSamplePortal.Controllers
 
                         }
 
+                        using (var httpClient2 = new HttpClient())
+                        {
+                            StringContent content2 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
 
-                        return View(workorder1);
+                            using (var response2 = await httpClient2.PostAsync(apiUrl + "Workorders/GetWorkorderStatuses", content2))
+                            {
+                                string apiResponse2 = await response2.Content.ReadAsStringAsync();
+                                try
+                                {
+                                    workorderStatus = JsonConvert.DeserializeObject
+                                        <IEnumerable<ClientStatus>>(apiResponse2);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+
+                        var status = new List<string>();
+                        foreach (var stat in workorderStatus)
+                        {
+                            status.Add(stat.Status);
+                        }
+
+                        ViewBag.Statuses = status;
+                        ViewBag.Status = workorder.Status;
+
+                        using (var httpClient3 = new HttpClient())
+                        {
+                            StringContent content3 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                            using (var response3 = await httpClient3.PostAsync(apiUrl + "Workorders/GetWorkorderWorkDescription", content3))
+                            {
+                                string apiResponse3 = await response3.Content.ReadAsStringAsync();
+                                try
+                                {
+                                    workorderWorkDescription = JsonConvert.DeserializeObject
+                                        <IEnumerable<WorkorderWorkDescription>>(apiResponse3);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+
+                        ViewBag.Descriptions = workorderWorkDescription;
+                        return View(workorder);
 
                     }
                     catch (Exception ex)
@@ -307,7 +358,7 @@ namespace MippSamplePortal.Controllers
             workorderRequest.AdditionalComments = workorder.AdditionalComments;
             workorderRequest.Status = workorder.Status;
             workorderRequest.Id = workorder.Id;
-            
+
 
             var env = _hostEnvironment.EnvironmentName;
             string apiUrl = string.Empty;
@@ -338,10 +389,11 @@ namespace MippSamplePortal.Controllers
                         workorderMaster = workorder1.FirstOrDefault(x => x.Id == id);
                         workorderMaster.AssignedTo = workorder.AssignedTo;
                         workorderMaster.AdditionalComments = workorder.AdditionalComments;
-                        workorderMaster.VendorId = _context.Vendors.FirstOrDefault(x => x.FirstName == workorder.AssignedTo).Id;
+                        workorderMaster.VendorId = _context.VendorLists.FirstOrDefault(x => x.VendorEmail == workorder.AssignedToEmailAddress).Id;
                         workorderMaster.Status = workorder.Status;
+                        //workorderMaster.Id = _context.Workorders.Count() + 1;
                         //workorderMaster.AssignedToPhone = _context.V
-                        
+
                     }
                     catch (Exception ex)
                     {
@@ -350,32 +402,31 @@ namespace MippSamplePortal.Controllers
                 }
             }
 
+            string fname = workorderMaster.AssignedTo.Split(" ")[0];
 
-            using (var httpClient = new HttpClient())
+            _context.Entry(workorder).State = EntityState.Modified;
+            workorder.Status = workorderMaster.Status;
+            workorder.AdditionalComments = workorderMaster.AdditionalComments;
+            workorder.AssignedTo = workorderMaster.AssignedTo;
+            //workorder.AssignedToPhone = _context.VendorInvites.FirstOrDefault(x => x. == workorderRequest.AssignedTo).P
+            workorder.VendorId = workorderMaster.VendorId;
+            //workorder.VendorId = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Id;
+            workorder.AssignedToEmailAddress = workorderMaster.AssignedToEmailAddress;
+            //workorder.AssignedToEmailAddress = _context.Vendors.FirstOrDefault(x => x.FirstName == fname).Email;
+
+            await _context.SaveChangesAsync();
+
+
+            using (var httpClient1 = new HttpClient())
             {
-                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderMaster), Encoding.UTF8, "application/json");
-                using (var response = httpClient.PostAsync(apiUrl + "Workorders/PutWorkorder", content).Result)
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseContent = response.Content.ReadAsStringAsync();
-                        using (var httpClient1 = new HttpClient())
-                        {
-                            StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderMaster), Encoding.UTF8, "application/json");
+                StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderMaster), Encoding.UTF8, "application/json");
 
-                            using (var response1 = await httpClient.PostAsync(apiUrl + "SendEmail/SendWorkorderUpdateEmail", content))
-                            {
-                                string apiResponse = await response.Content.ReadAsStringAsync();
-                                //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
-                                //return true;
-                                return RedirectToAction("Index", new { email = email});
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception($"Failed to retrieve data from {apiUrl + "Workorder/UpdateWorkorderDetails"}. Response status code: {response.StatusCode}");
-                    }
+                using (var response1 = await httpClient1.PostAsync(apiUrl + "SendEmail/SendWorkorderUpdateEmail", content1))
+                {
+                    string apiResponse = await response1.Content.ReadAsStringAsync();
+                    //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                    //return true;
+                    return RedirectToAction("Index", new { email = email });
                 }
             }
         }
