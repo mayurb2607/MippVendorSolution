@@ -4,7 +4,7 @@
     ViewBag.Subtotal = "";
     ViewBag.Tax = "";
     ViewBag.Total = "";
-    var url = ViewBag.fileUrl;
+    var fileUrl = ViewBag.fileUrl;
     int tax = 0;
     int workorderId = ViewBag.woid;
 
@@ -156,9 +156,9 @@
                     <label>Footer:</label>
                     <textarea class="form-control" id="footer"></textarea>
                 </div>
-                <div class="row">
-
-@*                    <div class="col-6">
+                <div id="inputContainer" class="row">
+@*                    <input type="text" value="@ViewBag.fileUrl" id="viewBagValue" style="display:none" class="form-control" />
+*@@*                    <div class="col-6">
                         <p class="lead">Payment Methods:</p>
                         <img src="../../dist/img/credit/visa.png" alt="Visa">
                         <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
@@ -195,12 +195,17 @@
                 </div>
                 <br/>
                     <label id="document">Upload Document</label>
-
-                <form method="post" asp-action="Upload" asp-controller="Bills" enctype="multipart/form-data">
+                <form id="myForm" class="row" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" id="fileInput" class="form-control " style="margin-right: 1%; width: 30%;" multiple />
+                    <button type="submit" class="btn btn-secondary">Upload</button>
+                    <button type="button" class="btn btn-danger" style="margin-left: 1%;" id="removeFile">
+                        Clear
+                    </button>
+                </form>
+                @*<form method="post" asp-action="Upload" asp-controller="Bills" enctype="multipart/form-data">
                    <input type="file" name="file" id="fileInput" class="form-control" />
                     <button class="btn btn-secondary" type="submit">Upload</button>
-                </form>
-                <button type="button" class="btn btn-danger" id="removeFile">Clear</button>
+                </form>*@
 
                 <br />
                 <br />  
@@ -221,51 +226,79 @@
                 @section Scripts {
 
 
-                 @*   <script type="text/javascript">
-                        function displayNames(input, target) {
-                            const output = document.getElementById(target);
-                            output.innerHTML = '';
-                            const files = input.files
-                            for (let i = 0; i < files.length; i++) {
-                                let file = files.item(i)
-                                let el = document.createElement('li');
-                                el.innerText = file.name;
-                                output.appendChild(el);
-                            }
-                        }
-                    </script>*@
-                    
-                  @*  <script>
-                        // Initialize Dropzone
-                        Dropzone.options.myDropzone = {
-                            paramName: "files",
-                            maxFilesize: 50, // Maximum file size in MB
-                            acceptedFiles: ".jpg,.jpeg,.png,.pdf", // Accepted file types
-                            addRemoveLinks: true // Display remove links for uploaded files
-                        };
-                    </script>*@
+                 
                     <script src="~/dist/js/notify.js"></script>
                     <script src="~/dist/js/notify.min.js"></script>
                     <script>
+                         function showNotification(type, message) {
+                            $.notify(message, type);
+                        }
 
+                        $(document).ready(function () {
+
+                            
+                        });
+                            $('#myForm').submit(function (e) {
+                                e.preventDefault(); // Prevent the default form submission
+
+                                var formData = new FormData(this);
+                                console.log("formData", formData);
+                                debugger;
+                                $.ajax({
+                                    url: '/Bills/Upload',
+                                    type: 'POST',
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function (response) {
+                                        // Handle success
+                                        //myValue = response.updatedValue;
+                                        console.log(response);
+                                        //alert(response.message);
+                                        showNotification('success', "File(s) uploaded successfully!!");
+
+                                        $.each(response, function (index, item) {
+                                        var inputElement = $('<input>', {
+                                            type: 'text',
+                                            name: 'viewBagValue',
+                                            id: 'viewBagValue',
+                                            style: 'display:none',
+                                            value: item // Set the value from the AJAX response
+                                        });
+                                        $('#inputContainer').append(inputElement);
+                                        //document.getElementById("viewBagValue").innerText = response.updatedValue;
+                                        //document.getElementById("viewBagValue").value = response.updatedValue;
+
+                                    });
+                                       
+                                    
+                                        
+
+                                        
+                                        // Update the ViewBag value dynamically
+                                    },
+                                    error: function () {
+                                        // Handle error
+                                        alert('Error uploading file.');
+                                    }
+                                });
+                            });
 
                         $("#removeFile").click(function () {
                             debugger;
-                            var fileUrl = "@url";
-                            if (fileUrl) {
-                                console.log(fileUrl);
-                                $.post('@Url.Action("Remove", "Bills")', { url: fileUrl },
+                            var files = [];
+                            for(i=0; i<document.querySelectorAll('#viewBagValue').length; i++){
+                                files.push(document.querySelectorAll('#viewBagValue')[i].value);
+                            }
+                                $.post('@Url.Action("Remove", "Bills")', { urls: files },
                                     function () {
                                         document.getElementById("fileInput").value = null;
-                                        $('#result').html('"PassThings()" successfully called.');
+                                        showNotification('success', "File(s) deleted!");
                                     });
-                            }
                             
                         });
                      
-                        function showNotification(type, message) {
-                            $.notify(message, type);
-                        }
+                       
 
                         function AddLine(){
                             var newRow = `

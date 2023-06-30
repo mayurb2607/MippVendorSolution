@@ -26,7 +26,7 @@
         public string PropertyManager { get; set; }
         public string PropertyManagerPhone { get; set; }
         public string PropertyManagerEmail { get; set; }
-
+        public string Client { get; set;}
         public string TenantName { get; set; }
         public string TenantEmailAddress { get; set; }
         public string TenantPhoneNumber { get; set; }

@@ -13,6 +13,7 @@
         public string ExpectedStartDate { get; set; }
         public string ExpectedEndDate { get; set; }
         public string ServiceRequestNumber { get; set; }
+        public string Vendor { get; set; }
         public string Status { get; set; }
         public string Description { get; set; }
         public string AdditionalComments { get; set; }

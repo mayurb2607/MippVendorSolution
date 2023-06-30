@@ -203,8 +203,12 @@ namespace MippVendorPortal.Controllers
                         ViewBag.Tax = "";
                         ViewBag.Subtotal = "";
                         ViewBag.Total = "";
-                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.RootVendorId == rootvendorId).Id;
+                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.Id == rootvendorId).Id;
 
+                        foreach (var item in workorder)
+                        {
+                            item.Client = _context1.Clients.FirstOrDefault(x => x.ClientId == item.ClientId).ClientName;
+                        }
                         return View(workorder);
 
                     }

@@ -73,6 +73,18 @@ namespace MippSamplePortal.Controllers
                         ViewBag.ClientID = workorderRequest.ClientID;
                         TempData["Email"] = email;
                         ViewBag.Email = email;
+                        foreach (var item in workorder)
+                        {
+                            if(_context.VendorLists.FirstOrDefault(x => x.Id == item.VendorId) != null)
+                            {
+                                item.Vendor = _context.VendorLists.FirstOrDefault(x => x.Id == item.VendorId).VendorName;
+
+                            }
+                            else
+                            {
+                                item.Vendor = "NA";
+                            }
+                        }
                         return View(workorder.ToList());
                     }
                     catch (Exception ex)

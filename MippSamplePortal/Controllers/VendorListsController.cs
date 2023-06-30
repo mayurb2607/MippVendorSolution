@@ -26,9 +26,10 @@ namespace MippSamplePortal.Controllers
         public async Task<IActionResult> Index(string email)
         {
             int clientID = (int)_context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
-              return _context.VendorLists != null ? 
-                          View(await _context.VendorLists.Where(x=> x.ClientId == clientID).ToListAsync()) :
-                          Problem("Entity set 'MippTestContext.VendorLists'  is null.");
+            ViewData["GridData"] = _context.VendorLists.Where(x => x.ClientId == clientID).ToList();
+            ViewBag.GridData = _context.VendorLists.Where(x => x.ClientId == clientID).ToList();
+            ViewBag.Email = email;
+            return View(_context.VendorLists.Where(x => x.ClientId == clientID).ToList());
         }
 
         // GET: VendorLists/Details/5
@@ -58,7 +59,7 @@ namespace MippSamplePortal.Controllers
 
 
 
-        public async Task<ContentResult> Invite(int? id)
+        public async void Invite(int? id)
         {
             var vendorDetails = _context.VendorLists.FirstOrDefault(x => x.Id == id);
             InviteViewModel invite = new InviteViewModel()
@@ -74,19 +75,19 @@ namespace MippSamplePortal.Controllers
             if (vendorInvite == null)
             {
                 await _emailService.SendInviteForNewVendor(_context, new SendEmailViewModel { ClientID = invite.ClientId, VendorID = invite.RootVendorId, ToEmail = invite.Email, Body = "", Cc = null, FromEmail = fromEmail, Subject = "" });
+                ViewBag.msg = "An invite link has been shared!";
                 //Call SendEmail API endpoint for valid invite
-                return Content("<script language='javascript' type='text/javascript'>alert('Invite link has been shared!');</script>");
-
             }
             //validate invite using Service class method
             await _emailService.SendAcceptanceEmail(_context, new SendEmailViewModel { ClientID = invite.ClientId, VendorID = invite.RootVendorId, ToEmail = invite.Email, Body = "", Cc = null, FromEmail = fromEmail, Subject = "" });
-            return Content("<script language='javascript' type='text/javascript'>alert('Invite link has been shared!');</script>");
+            ViewBag.msg = "An invite link has been shared!";
 
         }
 
         // GET: VendorLists/Create
-        public IActionResult Create()
+        public IActionResult Create(string email)
         {
+            ViewBag.Email = email;
             return View();
         }
 
@@ -101,7 +102,8 @@ namespace MippSamplePortal.Controllers
             {
                 _context.Add(vendorList);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                string email = _context.Clients.FirstOrDefault(x => x.ClientId == vendorList.ClientId).Email;
+                return RedirectToAction("Index", new {email = email});
             }
             return View(vendorList);
         }

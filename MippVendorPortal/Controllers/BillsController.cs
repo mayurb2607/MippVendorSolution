@@ -43,10 +43,11 @@ namespace MippVendorPortal.Controllers
 
 
 
-        [HttpPost("Upload")]
-        public void Upload(IFormFile file1)
+        [HttpPost]
+        public IActionResult Upload(IFormFile file1)
         {
             var files = Request.Form.Files; // Access the uploaded files here
+            List<string> filesUrl = new List<string>();
             foreach (var file in files)
             {
                 if (file.Length > 0)
@@ -87,10 +88,11 @@ namespace MippVendorPortal.Controllers
                     }
                     // Get the public URL of the uploaded image
                     var fileUrl = blobClient.Uri.ToString();
+                    filesUrl.Add(fileUrl);
                     //TempData["fileUrl"] = fileUrl;
                     ViewBag.fileUrl = fileUrl;
                     // Optionally, you can delete the local file after uploading it to Azure Blob Storage
-                    System.IO.File.Delete(file.FileName);
+                    //System.IO.File.Delete(file.FileName);
 
 
 
@@ -102,6 +104,8 @@ namespace MippVendorPortal.Controllers
 
             //int clientId = 1;
 
+            return Json(filesUrl);
+
 
             // Process the uploaded files
 
@@ -109,28 +113,32 @@ namespace MippVendorPortal.Controllers
         }
 
         [HttpPost("Remove")]
-        public async Task<IActionResult> Remove(string url)
+        public async Task<IActionResult> Remove(IEnumerable<string> urls)
         {
-            string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
-            string containerName = "mipp-bill-accounts"; // Replace with your container name
+            foreach (var item in urls)
+            {
+                string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
+                string containerName = "mipp-bill-accounts"; // Replace with your container name
 
-            //CloudBlobClient blobClient = account.CreateCloudBlobClient();
-            //CloudBlobContainer container = blobClient.GetContainerReference("images");
+                //CloudBlobClient blobClient = account.CreateCloudBlobClient();
+                //CloudBlobContainer container = blobClient.GetContainerReference("images");
 
-            // Create a BlobServiceClient object
-            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+                // Create a BlobServiceClient object
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
 
-            // Get a reference to the container
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+                // Get a reference to the container
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
-            // Extract the blob name from the URL
-            var blobName = Path.GetFileName(url);
+                // Extract the blob name from the URL
+                var blobName = Path.GetFileName(item);
 
-            // Get the blob client using the blob name
-            var blobClient = containerClient.GetBlobClient(blobName);
+                // Get the blob client using the blob name
+                var blobClient = containerClient.GetBlobClient(blobName);
 
-            // Delete the blob
-            blobClient.DeleteIfExists();
+                // Delete the blob
+                blobClient.DeleteIfExists();
+            }
+           
 
             return Ok();
         }
