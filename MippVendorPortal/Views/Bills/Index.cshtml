@@ -7,7 +7,7 @@
     var fileUrl = ViewBag.fileUrl;
     int tax = 0;
     int workorderId = ViewBag.woid;
-
+    var disabled = true;
 }
 
 
@@ -140,7 +140,8 @@
                                 <input type="number" step="0.01" class="form-control" id="taxedAmount">
                             </div>
                         </div>
-                        <button id="remove-btn" class="btn btn-primary">Delete</button>
+@*                        <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
+*@
 
                     </div>
                 </div>
@@ -194,25 +195,49 @@
 
                 </div>
                 <br/>
-                    <label id="document">Upload Document</label>
-                <form id="myForm" class="row" method="post" enctype="multipart/form-data">
-                    <input type="file" name="file" id="fileInput" class="form-control " style="margin-right: 1%; width: 30%;" multiple />
-                    <button type="submit" class="btn btn-secondary">Upload</button>
-                    <button type="button" class="btn btn-danger" style="margin-left: 1%;" id="removeFile">
+                <label>Uploaded documents</label>
+                <div class="row d-flex col-sm-12" id="uploadedDocuments">
+                    @foreach (var item in ViewBag.ImageUrls)
+                    {
+                        <img src="@item" style="float: left;
+    width:  100px;
+    height: 100px;
+    object-fit: cover;" onclick="getImageData(this)" />
+
+                    }
+                    <button type="button" class="btn btn-danger" style="margin-left: 1%;height: fit-content;
+    align-self: center;" id="removeFile" disabled>
                         Clear
                     </button>
+                </div>
+
+
+
+                <br/>
+                    <label id="document">Upload Document</label>
+
+         @*       @using (Html.BeginForm("UploadFile", "Bills", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {*@
+                <form id="myForm" method="post" enctype="multipart/form-data">
+                    <div style="display: flex;">
+                        <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 30%;" multiple />
+                        <select name="fileType" style="display:none">
+                            <option value="@workorderId" selected>@workorderId</option>
+                        </select>
+                        <input type="text" class="form-control" value="@workorderId" id="fileType" name="fileType" disabled style="display:none">
+@*                        <button type="submit" class="btn btn-secondary">Upload</button>
+*@                       @* <button type="button" class="btn btn-danger" style="margin-left: 1%;" id="removeFile">
+                            Clear
+                        </button>*@
+
+                    </div>
+               
+                        <br />
+                        <br />
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+
                 </form>
-                @*<form method="post" asp-action="Upload" asp-controller="Bills" enctype="multipart/form-data">
-                   <input type="file" name="file" id="fileInput" class="form-control" />
-                    <button class="btn btn-secondary" type="submit">Upload</button>
-                </form>*@
-
-                <br />
-                <br />  
-
-                <button id="save-btn" class="btn btn-primary">Save</button>
-
-
 
 
 
@@ -230,19 +255,44 @@
                     <script src="~/dist/js/notify.js"></script>
                     <script src="~/dist/js/notify.min.js"></script>
                     <script>
+
+                        function getImageData(image){
+                            console.log(image);
+                            image.style.border = "2px solid black";
+                            image.style.opacity = "0.5";
+                            image.style.cursor = "pointer";
+
+                            var inputElement = $('<input>', {
+                                type: 'text',
+                                name: 'viewBagValue',
+                                id: 'viewBagValue',
+                                style: 'display:none',
+                                value: image.src // Set the value from the AJAX response
+                            });
+                            $('#inputContainer').append(inputElement);
+
+                            document.getElementById("removeFile").disabled = false;
+                        }
                          function showNotification(type, message) {
                             $.notify(message, type);
                         }
 
-                        $(document).ready(function () {
-
-                            
-                        });
+   
                             $('#myForm').submit(function (e) {
                                 e.preventDefault(); // Prevent the default form submission
-
+                                var workorderID = document.getElementById('fileType').value;
                                 var formData = new FormData(this);
                                 console.log("formData", formData);
+
+                            var fileInput = document.getElementById('file');
+                                //Iterating through each files selected in fileInput
+                                //for (i = 0; i < fileInput.files.length; i++) {
+                                //    //Appending each file to FormData object
+                                //    formData.append(fileInput.files[i].name, fileInput.files[i]);
+                                //}
+                                formData.append(workorderID, workorderID);
+                                console.log("formData", formData);
+
                                 debugger;
                                 $.ajax({
                                     url: '/Bills/Upload',
@@ -268,6 +318,111 @@
                                         $('#inputContainer').append(inputElement);
                                         //document.getElementById("viewBagValue").innerText = response.updatedValue;
                                         //document.getElementById("viewBagValue").value = response.updatedValue;
+
+
+                                        var testArr = [];
+
+                                        for (let i = 0; i < document.querySelectorAll("#unit").length; i++) {
+                                            testArr.push({
+                                                item: document.querySelectorAll("#item")[i].value,
+                                                description: document.querySelectorAll("#description")[i].value,
+                                                quantity: document.querySelectorAll("#quantity")[i].value,
+                                                unit: document.querySelectorAll("#unit")[i].value,
+                                                price: document.querySelectorAll("#price")[i].value,
+                                                tax: document.querySelectorAll("#taxOptions")[i].value,
+                                                subtotal: document.querySelectorAll("#amount")[i].value,
+                                                total: document.querySelectorAll("#taxedAmount")[i].value
+                                            });
+                                        }
+                                        console.log("save button clicked");
+                                        console.log("test", testArr);
+                                        console.log(@workorderId);
+                                        console.log(testArr);
+
+                                        var testArrSettings = [];
+                                        testArrSettings.push({
+                                            Title: document.getElementById("billTitle").value,
+                                            Summary: document.getElementById("summary").value,
+                                            Id: document.getElementById("invoice").value,
+                                            BusinessName: document.getElementById("billTo").value,
+                                            CareOf: document.getElementById("careOf").value,
+                                            //document.getElementById("woId").value,
+                                            AddressLine1: document.getElementById("inputAddress").value,
+                                            AddressLine2: document.getElementById("inputAddress2").value,
+                                            City: document.getElementById("city").value,
+                                            Province: document.getElementById("province").value,
+                                            Zip: document.getElementById("zip").value,
+                                            BillDate: document.getElementById("billDate").value,
+                                            DueDate: document.getElementById("dueDate").value,
+                                            Subtotal: document.getElementById("subtotals").innerHTML,
+                                            Tax: document.getElementById("taxes").innerHTML,
+                                            Total: document.getElementById("totals").innerHTML,
+                                            Note: document.getElementById("note").value,
+                                            Footer: document.getElementById("footer").value
+                                        });
+
+                                        var title = document.getElementById("billTitle");
+                                        var summary = document.getElementById("summary");
+                                        console.log("Setting", testArrSettings);
+
+                                        //$.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
+                                        //    function () {
+
+                                        $.ajax({
+                                            url: '/Bills/Insert',
+                                            type: 'POST',
+                                            data: {
+                                                woId: @workorderId,
+                                                testArr: testArr,
+                                                testArrSettings: testArrSettings
+                                            },
+                                            success: function (response) {
+
+                                                //$.ajax({
+                                                //    url: '/Bills/Upload',
+                                                //    type: 'POST',
+                                                //    data: formData,
+                                                //    processData: false,
+                                                //    contentType: false,
+                                                //    success: function (response) {
+                                                //        // Handle success
+                                                //        //myValue = response.updatedValue;
+                                                //        console.log(response);
+                                                //        //alert(response.message);
+                                                //        showNotification('success', "File(s) uploaded successfully!!");
+
+                                                //        $.each(response, function (index, item) {
+                                                //            var inputElement = $('<input>', {
+                                                //                type: 'text',
+                                                //                name: 'viewBagValue',
+                                                //                id: 'viewBagValue',
+                                                //                style: 'display:none',
+                                                //                value: item // Set the value from the AJAX response
+                                                //            });
+                                                //            $('#inputContainer').append(inputElement);
+                                                //            //document.getElementById("viewBagValue").innerText = response.updatedValue;
+                                                //            //document.getElementById("viewBagValue").value = response.updatedValue;
+
+                                                //        });
+
+
+
+
+
+                                                //        // Update the ViewBag value dynamically
+                                                //    },
+                                                //    error: function () {
+                                                //        // Handle error
+                                                //        alert('Error uploading file.');
+                                                //    }
+                                                //});
+                                                //$('#result').html('"PassThings()" successfully called.');
+                                            },
+                                            error: function () {
+                                                // Handle error
+                                                alert('Error saving data.');
+                                            }
+                                        })
 
                                     });
                                        
@@ -356,27 +511,10 @@
 
                         function DeleteLine(){
                             var quanLen = document.querySelectorAll("#quantity").length;
-                            var taxString = document.querySelectorAll("#taxOptions")[quanLen - 1].value;
-                            var tax = parseFloat(taxString.split("-")[1].split("%")[0]) / 100;
+                            //var taxString = document.querySelectorAll("#taxOptions")[quanLen - 1].value;
 
-                            if ( 
-                            document.querySelectorAll("#taxOptions")[quanLen - 1].value == "Select Tax rate") 
-                            {
-                                document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
-                            }
-                            else{
-                                document.getElementById("subtotals").innerText = parseFloat(parseFloat(document.getElementById("subtotals").innerHTML) - parseFloat(document.querySelectorAll("#amount")[quanLen - 1].value)).toFixed(2);
+                            document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
 
-                                document.getElementById('taxes').innerHTML =
-
-                                    parseFloat(parseFloat(document.getElementById("taxes").innerHTML) - tax * parseFloat(document.querySelectorAll('#amount')[quanLen - 1].value)).toFixed(2)
-
-                                document.getElementById('totals').innerHTML =
-                                    parseFloat(parseFloat(document.getElementById("totals").innerHTML) - parseFloat(document.querySelectorAll("#taxedAmount")[quanLen - 1].value)).toFixed(2);
-
-                                document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
-
-                            }
 
 
                         }
@@ -427,10 +565,66 @@
                             var summary = document.getElementById("summary");
                             console.log("Setting", testArrSettings);
 
-                            $.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
-                                function () {
-                                    $('#result').html('"PassThings()" successfully called.');
-                                });
+                            //$.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
+                            //    function () {
+
+                            $.ajax({
+                                url:'/Bills/Insert',
+                                type: 'POST',
+                                data:{
+                                            woId: @workorderId,
+                                            testArr: testArr,
+                                            testArrSettings: testArrSettings
+                                },
+                                success: function (response) {
+
+                                            //$.ajax({
+                                            //    url: '/Bills/Upload',
+                                            //    type: 'POST',
+                                            //    data: formData,
+                                            //    processData: false,
+                                            //    contentType: false,
+                                            //    success: function (response) {
+                                            //        // Handle success
+                                            //        //myValue = response.updatedValue;
+                                            //        console.log(response);
+                                            //        //alert(response.message);
+                                            //        showNotification('success', "File(s) uploaded successfully!!");
+
+                                            //        $.each(response, function (index, item) {
+                                            //            var inputElement = $('<input>', {
+                                            //                type: 'text',
+                                            //                name: 'viewBagValue',
+                                            //                id: 'viewBagValue',
+                                            //                style: 'display:none',
+                                            //                value: item // Set the value from the AJAX response
+                                            //            });
+                                            //            $('#inputContainer').append(inputElement);
+                                            //            //document.getElementById("viewBagValue").innerText = response.updatedValue;
+                                            //            //document.getElementById("viewBagValue").value = response.updatedValue;
+
+                                            //        });
+
+
+
+
+
+                                            //        // Update the ViewBag value dynamically
+                                            //    },
+                                            //    error: function () {
+                                            //        // Handle error
+                                            //        alert('Error uploading file.');
+                                            //    }
+                                            //});
+                                            //$('#result').html('"PassThings()" successfully called.');
+                                },
+                                error: function () {
+                                    // Handle error
+                                    alert('Error saving data.');
+                                }
+                            })
+                                    
+                                //});
                         });
 
 

@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippSamplePortal.ViewModel;
@@ -152,6 +154,7 @@ namespace MippVendorPortal.Controllers
             //return PartialView("_FeedbackPartial");
         }
 
+        
 
         [Authorize]
         public async Task<IActionResult> Index(int rootvendorId, string msg)
