@@ -133,7 +133,7 @@ namespace MippVendorPortal.Controllers
 
         public IActionResult SubmitComments(int workorderId, string text, string email)
         {
-            var commentsObj = new MippPortalWebAPI.Models.WorkorderComment();
+            var commentsObj = new WorkorderComment();
             commentsObj.Email = email;
             commentsObj.Text = text;
             commentsObj.WorkorderId = workorderId;
@@ -212,7 +212,11 @@ namespace MippVendorPortal.Controllers
                         {
                             item.Client = _context1.Clients.FirstOrDefault(x => x.ClientId == item.ClientId).ClientName;
                         }
-                        return View(workorder);
+
+                        var commandsObj = new string[4];
+                    
+
+                        return View();
 
                     }
                     catch (Exception ex)
@@ -280,7 +284,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -325,7 +329,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -336,7 +340,7 @@ namespace MippVendorPortal.Controllers
                     try
                     {
                         workorder = JsonConvert.DeserializeObject
-                            <IEnumerable<MippPortalWebAPI.Models.Workorder>>(apiResponse);
+                            <IEnumerable<Workorder>>(apiResponse);
                         return View();
 
                     }
@@ -373,7 +377,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -384,7 +388,7 @@ namespace MippVendorPortal.Controllers
                     try
                     {
                         workorder = JsonConvert.DeserializeObject
-                            <IEnumerable<MippPortalWebAPI.Models.Workorder>>(apiResponse);
+                            <IEnumerable<Workorder>>(apiResponse);
                         return View();
 
                     }

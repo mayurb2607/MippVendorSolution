@@ -18,8 +18,8 @@
 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
 
     <div class="btn-group mr-2" role="group" aria-label="First group">
-        @*        <button id="create" class="btn btn-default">Create New</button>
-        *@
+        <button id="create" class="btn btn-default">Create New</button>
+        
         <button id="edit" class="btn btn-default" disabled="true">Update</button>
 @*        <button id="details" class="btn btn-default" disabled="true">Create Bill</button>
         <button id="settings" class="btn btn-default">Settings</button>
@@ -55,11 +55,9 @@
             if (grid != null) {
 
                 document.getElementById("edit").disabled = false;
-                document.getElementById("details").disabled = false;
             }
             else {
                 document.getElementById("edit").disabled = true;
-                document.getElementById("details").disabled = true;
             }
 
         }
@@ -72,7 +70,7 @@
             var selectedRecords = grid.getSelectedRecords();
             var id = selectedRecords[0].Id;
 
-            var url = document.location.origin + "/Workorders/Edit/" + id;
+            var url = document.location.origin + "/Workorder/Edit/" + id;
             window.location.replace(url);
 
         };
@@ -101,20 +99,20 @@
 
         //    var vendorID = @ViewBag.VendorId
 
-        //                    var url = document.location.origin + "/Workorders/CompletedWorkorders?vendorId=" + vendorID;
+        //    var url = document.location.origin + "/Workorders/CompletedWorkorders?vendorId=" + vendorID;
         //    window.location.replace(url);
 
         //};
 
-        //// document.getElementById('create').onclick = function () {
-        ////    var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0].currentViewData[0];
+         document.getElementById('create').onclick = function () {
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0].currentViewData[0];
 
-        ////    var id = grid.VendorId;
-        ////    var url = document.location.origin + "/Workorders/Create/" + id;
-        ////        window.location.replace(url);
+            var id = grid.VendorId;
+            var url = document.location.origin + "/Workorders/Create/" + id;
+                window.location.replace(url);
 
 
-        ////};
+        };
 
 
         //document.getElementById('details').onclick = function () {
@@ -135,13 +133,13 @@
         //};
     </script>
 
-    <ejs-grid id="Grid" allowPaging="true" allowSorting="true" toolbar="@(new List<string>() { "Add","Delete","Update","Cancel","ExcelExport","PdfExport"})" 
-        allowPdfExport="true" allowExcelExport="true" allow-selection=" true" rowSelected="rowSelected" datasource="@ViewBag.GridData">
+    <ejs-grid id="Grid" allowPaging="true" allowSorting="true" 
+        allowPdfExport="true" allowExcelExport="true" allowselection=" true" rowSelected="rowSelected" datasource="@ViewBag.GridData">
     <e-grid-pagesettings pageSize="5"></e-grid-pagesettings>
-        <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true"></e-grid-editSettings>
+        @*<e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true"></e-grid-editSettings>
         <e-grid-filtersettings type="Menu"></e-grid-filtersettings>
         <e-grid-loadingIndicator indicatorType="Shimmer"></e-grid-loadingIndicator>
-        <e-grid-selectionsettings persistSelection="true" type="Multiple" checkboxOnly="true"></e-grid-selectionsettings>
+        <e-grid-selectionsettings persistSelection="true" type="Multiple" checkboxOnly="true"></e-grid-selectionsettings>*@
     <e-grid-columns>
         <e-grid-column type="checkbox" width="50" />
         <e-grid-column field="ServiceRequestNumber" header - text="Request Number" width="75" text-align="right"> </e-grid-column>
