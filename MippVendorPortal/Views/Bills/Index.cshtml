@@ -358,7 +358,8 @@
                                             Tax: document.getElementById("taxes").innerHTML,
                                             Total: document.getElementById("totals").innerHTML,
                                             Note: document.getElementById("note").value,
-                                            Footer: document.getElementById("footer").value
+                                            Footer: document.getElementById("footer").value,
+                                            Document: document.getElementById('viewBagValue').value
                                         });
 
                                         var title = document.getElementById("billTitle");
@@ -546,7 +547,6 @@
                                 Id: document.getElementById("invoice").value,
                                 BusinessName: document.getElementById("billTo").value,
                                 CareOf: document.getElementById("careOf").value,
-                                //document.getElementById("woId").value,
                                 AddressLine1: document.getElementById("inputAddress").value,
                                 AddressLine2: document.getElementById("inputAddress2").value,
                                 City: document.getElementById("city").value,
@@ -558,11 +558,13 @@
                                 Tax:document.getElementById("taxes").innerHTML,
                                 Total: document.getElementById("totals").innerHTML,
                                 Note: document.getElementById("note").value,
-                                Footer: document.getElementById("footer").value
+                                Footer: document.getElementById("footer").value,
+                                Document: document.getElementById('viewBagValue').innerHTML
                             });
 
                             var title = document.getElementById("billTitle");
                             var summary = document.getElementById("summary");
+                            console.log("566",document.getElementById('viewBagValue').value);
                             console.log("Setting", testArrSettings);
 
                             //$.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
@@ -617,6 +619,7 @@
                                             //    }
                                             //});
                                             //$('#result').html('"PassThings()" successfully called.');
+                                    showNotification('success', "Bill created successfully!!");
                                 },
                                 error: function () {
                                     // Handle error

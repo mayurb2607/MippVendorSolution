@@ -99,53 +99,7 @@
 
         };
 
-        document.getElementById('view').onclick = function () {
-            console.log("Inside view button");
-            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
-            console.log(grid);
-            var selectedRecords = grid.getSelectedRecords();
-            var id = selectedRecords[0].Id;
-
-            var url = document.location.origin + "/Workorders/Edit/" + id;
-            window.location.replace(url);
-
-        };
-
-        document.getElementById('view').onclick = function () {
-            console.log("Inside view button");
-            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
-            console.log(grid);
-            var selectedRecords = grid.getSelectedRecords();
-            var id = selectedRecords[0].Id;
-
-            var url = document.location.origin + "/Workorders/Edit/" + id;
-            window.location.replace(url);
-
-        };
-
-         document.getElementById('accept').onclick = function () {
-            console.log("Inside view button");
-            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
-            console.log(grid);
-            var selectedRecords = grid.getSelectedRecords();
-            var id = selectedRecords[0].Id;
-
-            var url = document.location.origin + "/Workorders/Accept/" + id;
-            window.location.replace(url);
-
-        };
-
-        document.getElementById('decline').onclick = function () {
-            console.log("Inside view button");
-            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
-            console.log(grid);
-            var selectedRecords = grid.getSelectedRecords();
-            var id = selectedRecords[0].Id;
-
-            var url = document.location.origin + "/Workorders/Decline/" + id;
-            window.location.replace(url);
-
-        };
+        
 
         document.getElementById('settings').onclick = function () {
 
@@ -210,7 +164,7 @@
                @*<button title="Accept" class="btn btn-success"><i class="fa-sharp fa-solid fa-check"></i></button>
                <button title="Decline" class="btn btn-danger"><i class="fa-sharp fa-solid fa-circle-xmark"></i></button>
 *@               
-                <button title="View" id="view" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                <button title="View" id="button_view" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
            </div>
           
     </script>
@@ -289,7 +243,47 @@
         </e-grid-columns>
     </ejs-grid>
 
+    <script>
+        window.onload = function(e){ 
 
+            document.querySelector('#button_view').onclick = function () {
+
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Edit/" + id;
+            window.location.replace(url);
+
+        };
+    }
+
+        document.getElementById('accept').onclick = function () {
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Accept/" + id;
+            window.location.replace(url);
+
+        };
+
+        document.getElementById('decline').onclick = function () {
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Decline/" + id;
+            window.location.replace(url);
+
+        };
+</script>
 
 @*    <script>
         ej.base.enableRipple(true)

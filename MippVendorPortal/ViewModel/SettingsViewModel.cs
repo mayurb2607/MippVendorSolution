@@ -26,5 +26,6 @@
         public string Total { get; set;}
         public string Note { get; set; }
         public string Footer { get; set; }
+        public string Document { get; set; }
     }
 }
