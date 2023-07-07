@@ -100,13 +100,49 @@
         };
 
         document.getElementById('view').onclick = function () {
-
+            console.log("Inside view button");
             var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
             console.log(grid);
             var selectedRecords = grid.getSelectedRecords();
             var id = selectedRecords[0].Id;
 
             var url = document.location.origin + "/Workorders/Edit/" + id;
+            window.location.replace(url);
+
+        };
+
+        document.getElementById('view').onclick = function () {
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Edit/" + id;
+            window.location.replace(url);
+
+        };
+
+         document.getElementById('accept').onclick = function () {
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Accept/" + id;
+            window.location.replace(url);
+
+        };
+
+        document.getElementById('decline').onclick = function () {
+            console.log("Inside view button");
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/Workorders/Decline/" + id;
             window.location.replace(url);
 
         };
@@ -184,19 +220,19 @@
     <script id="template" type="text/x-template">
         ${if(Status == "Assigned" || Status == "Re-work requested")}
             <div id="templateElement" style = "display: flex;">
-                <button title="Accept" class="btn btn-success"><i class="fa-sharp fa-solid fa-check"></i></button>
-                <button title="Decline" class="btn btn-danger"><i class="fa-sharp fa-solid fa-circle-xmark"></i></button>
-                <button title="View" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                <button title="Accept" id="accept" class="btn btn-success"><i class="fa-sharp fa-solid fa-check"></i></button>
+                <button title="Decline" id="decline" class="btn btn-danger"><i class="fa-sharp fa-solid fa-circle-xmark"></i></button>
+                <button title="View" id="view" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
             </div>
 
         ${else if(Status == "In Progress")}
             <div id="templateElement" style = "display: flex;">
-                <button title="Edit" class="btn btn-light"><i class="fa-sharp fa-solid fa-pen-to-square"></i></button>
-                <button title="View" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                <button title="Edit" id="edit" class="btn btn-light"><i class="fa-sharp fa-solid fa-pen-to-square"></i></button>
+                <button title="View" id="view" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
             </div>
         ${else}
             <div id="templateElement" style = "display: flex;">
-                <button title="View" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                <button title="View" id="view" class="btn btn-light"><i class="fa-sharp fa-solid fa-eye"></i></button>
             </div>
     </script>
 
@@ -255,7 +291,7 @@
 
 
 
-    <script>
+@*    <script>
         ej.base.enableRipple(true)
         var grid = new ej.grids.Grid({
             dataSource: @ViewBag.GridData,
@@ -276,7 +312,7 @@
         });
 
         grid.appendTo('#Grid')
-    </script>
+    </script>*@
 
 
 }
