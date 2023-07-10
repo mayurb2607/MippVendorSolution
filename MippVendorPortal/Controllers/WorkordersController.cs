@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippSamplePortal.ViewModel;
@@ -25,11 +27,11 @@ namespace MippVendorPortal.Controllers
     public class WorkordersController : Controller
     {
         private readonly MippVendorTestContext _context;
-        private readonly MippTestContext _context1;
+        private readonly MippPortalWebAPI.Models.MippTestContext _context1;
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _hostEnvironment;
 
-        public WorkordersController(MippVendorTestContext context, MippTestContext context1, IConfiguration configuration, IHostEnvironment hostEnvironment)
+        public WorkordersController(MippVendorTestContext context, MippPortalWebAPI.Models.MippTestContext context1, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _context = context;
             _configuration = configuration;
@@ -131,7 +133,7 @@ namespace MippVendorPortal.Controllers
 
         public IActionResult SubmitComments(int workorderId, string text, string email)
         {
-            var commentsObj = new MippPortalWebAPI.Models.WorkorderComment();
+            var commentsObj = new WorkorderComment();
             commentsObj.Email = email;
             commentsObj.Text = text;
             commentsObj.WorkorderId = workorderId;
@@ -152,6 +154,7 @@ namespace MippVendorPortal.Controllers
             //return PartialView("_FeedbackPartial");
         }
 
+        
 
         [Authorize]
         public async Task<IActionResult> Index(int rootvendorId, string msg)
@@ -203,9 +206,17 @@ namespace MippVendorPortal.Controllers
                         ViewBag.Tax = "";
                         ViewBag.Subtotal = "";
                         ViewBag.Total = "";
-                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.RootVendorId == rootvendorId).Id;
+                        ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.Id == rootvendorId).Id;
 
-                        return View(workorder);
+                        foreach (var item in workorder)
+                        {
+                            item.Client = _context1.Clients.FirstOrDefault(x => x.ClientId == item.ClientId).ClientName;
+                        }
+
+                        var commandsObj = new string[4];
+                    
+
+                        return View();
 
                     }
                     catch (Exception ex)
@@ -273,7 +284,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -318,7 +329,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -329,7 +340,7 @@ namespace MippVendorPortal.Controllers
                     try
                     {
                         workorder = JsonConvert.DeserializeObject
-                            <IEnumerable<MippPortalWebAPI.Models.Workorder>>(apiResponse);
+                            <IEnumerable<Workorder>>(apiResponse);
                         return View();
 
                     }
@@ -366,7 +377,7 @@ namespace MippVendorPortal.Controllers
                 VendorID = vendorId
             };
 
-            IEnumerable<MippPortalWebAPI.Models.Workorder> workorder;
+            IEnumerable<Workorder> workorder;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -377,7 +388,7 @@ namespace MippVendorPortal.Controllers
                     try
                     {
                         workorder = JsonConvert.DeserializeObject
-                            <IEnumerable<MippPortalWebAPI.Models.Workorder>>(apiResponse);
+                            <IEnumerable<Workorder>>(apiResponse);
                         return View();
 
                     }
@@ -549,6 +560,153 @@ namespace MippVendorPortal.Controllers
 
         }
 
+
+        public async Task<IActionResult> Accept(int? id)
+        {
+            WorkorderRequest workorderRequest = new WorkorderRequest();
+            workorderRequest.Id = id;
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+
+
+
+            MippPortalWebAPI.Models.Workorder workorder;
+
+            using (var httpClient = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorder", content))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        workorder = JsonConvert.DeserializeObject
+                            <MippPortalWebAPI.Models.Workorder>(apiResponse);
+                        workorder.Status = "In Progress";
+
+                        _context1.Workorders.Update(workorder);
+                        _context1.SaveChanges();
+
+                        try
+                        {
+
+                            ViewBag.saveMsg = "Changes saved successfully!!";
+
+                            using (var httpClient1 = new HttpClient())
+                            {
+                                StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorder), Encoding.UTF8, "application/json");
+
+                                using (var response1 = await httpClient1.PostAsync(apiUrl + "SendEmail/SendWorkorderStatusUpdateEmail", content1))
+                                {
+                                    string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                                    //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                                    //return true;
+                                    if (response1.IsSuccessStatusCode)
+                                        return RedirectToAction("Index", new { rootVendorId = workorder.VendorId, msg = "" });
+                                }
+                            }
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+
+                        }
+                        return RedirectToAction("Index", new { rootVendorId = workorder.VendorId, msg = "" });
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+
+        public async Task<IActionResult> Decline(int? id)
+        {
+            WorkorderRequest workorderRequest = new WorkorderRequest();
+            workorderRequest.Id = id;
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+            }
+
+
+
+            MippPortalWebAPI.Models.Workorder workorder;
+
+            using (var httpClient = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorder", content))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        workorder = JsonConvert.DeserializeObject
+                            <MippPortalWebAPI.Models.Workorder>(apiResponse);
+                        workorder.Status = "Declined";
+
+                        _context1.Workorders.Update(workorder);
+                        _context1.SaveChanges();
+
+                        try
+                        {
+
+                            ViewBag.saveMsg = "Changes saved successfully!!";
+
+                            using (var httpClient1 = new HttpClient())
+                            {
+                                StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorder), Encoding.UTF8, "application/json");
+
+                                using (var response1 = await httpClient1.PostAsync(apiUrl + "SendEmail/SendWorkorderStatusUpdateEmail", content1))
+                                {
+                                    string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                                    //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                                    //return true;
+                                    if (response1.IsSuccessStatusCode)
+                                        return RedirectToAction("Index", new { rootVendorId = workorder.VendorId, msg = "" });
+                                }
+                            }
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+
+                        }
+                        return RedirectToAction("Index", new { rootVendorId = workorder.VendorId, msg = "" });
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+            }
+        }
         // POST: Workorders/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -574,7 +732,7 @@ namespace MippVendorPortal.Controllers
             workorderRequest.Id = work.Id;
 
 
-            Workorder workorder1;
+            MippPortalWebAPI.Models.Workorder workorder1;
             using (var httpClient = new HttpClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -585,7 +743,7 @@ namespace MippVendorPortal.Controllers
                     try
                     {
                         workorder1 = JsonConvert.DeserializeObject
-                            <Workorder>(apiResponse);
+                            <MippPortalWebAPI.Models.Workorder>(apiResponse);
                     }
                     catch (Exception ex)
                     {

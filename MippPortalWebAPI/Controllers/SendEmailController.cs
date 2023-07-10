@@ -252,7 +252,7 @@ namespace MippPortalWebAPI.Controllers
             if (vendorInvite != null)
             {
                 Vendor vendor = new Vendor();
-                vendor.Id = _context.Vendors.Count() + 1;
+                //vendor.Id = _context.Vendors.Count() + 1;
                 vendor.Email = vendorInvite.VendorEmail;
                 vendor.BusinessName = vendorList.BusinessName;
                 vendor.FirstName = vendorList.VendorName.Split("")[0].ToString();

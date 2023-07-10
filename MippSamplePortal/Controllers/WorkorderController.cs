@@ -73,6 +73,18 @@ namespace MippSamplePortal.Controllers
                         ViewBag.ClientID = workorderRequest.ClientID;
                         TempData["Email"] = email;
                         ViewBag.Email = email;
+                        foreach (var item in workorder)
+                        {
+                            if(_context.VendorLists.FirstOrDefault(x => x.Id == item.VendorId) != null)
+                            {
+                                item.Vendor = _context.VendorLists.FirstOrDefault(x => x.Id == item.VendorId).VendorName;
+
+                            }
+                            else
+                            {
+                                item.Vendor = "NA";
+                            }
+                        }
                         return View(workorder.ToList());
                     }
                     catch (Exception ex)
@@ -235,7 +247,7 @@ namespace MippSamplePortal.Controllers
             workorderRequest.Id = (int)id;
             //workorderRequest.ClientID = 0;
             workorderRequest.Status = String.Empty;
-            workorderRequest.ClientID = (int)_context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
+            workorderRequest.ClientID = (int)_context.Workorders.FirstOrDefault(x => x.Id == id).ClientId;
             workorderRequest.AdditionalComments = String.Empty;
             Workorder workorder;
             using (var httpClient = new HttpClient())
@@ -426,7 +438,8 @@ namespace MippSamplePortal.Controllers
                     string apiResponse = await response1.Content.ReadAsStringAsync();
                     //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
                     //return true;
-                    return RedirectToAction("Index", new { email = email });
+                    var clientEmail = _context.Clients.FirstOrDefault(x => x.Id == workorderMaster.ClientId).Email;
+                    return RedirectToAction("Index", new { email = clientEmail });
                 }
             }
         }

@@ -23,8 +23,8 @@ namespace MippVendorPortal.Controllers
             try
             {
                 string emails = TempData["Email"].ToString();
-                ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.VendorEmail == emails).Id;
-                return RedirectToAction("Index", "Workorders", new { rootVendorId = _context.Vendors.FirstOrDefault(x => x.VendorEmail == emails).Id, msg = "" });
+                ViewBag.VendorId = _context.Vendors.FirstOrDefault(x => x.VendorEmail == emails).RootVendorId;
+                return RedirectToAction("Index", "Workorders", new { rootVendorId = _context.Vendors.FirstOrDefault(x => x.VendorEmail == emails).RootVendorId, msg = "" });
             }
             catch (Exception ex)
             {

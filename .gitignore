@@ -365,3 +365,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/MippVendorPortal/1_Output (3).pdf
+/MippVendorPortal/Controllers/WorkordersController.cs
+/MippVendorPortal/3_Output.pdf
+/MippVendorPortal/road-sign-361513_960_720.jpg

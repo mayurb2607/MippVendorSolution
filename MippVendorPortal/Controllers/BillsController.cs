@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using dotless.Core.Parser.Functions;
 using dotless.Core.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippSamplePortal.Models;
@@ -20,6 +23,9 @@ using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
 using Syncfusion.EJ2.Charts;
 using Syncfusion.EJ2.Linq;
+using dotless.Core.Parser.Infrastructure;
+using NuGet.ContentModel;
+using System.ComponentModel.Design;
 
 
 namespace MippVendorPortal.Controllers
@@ -42,11 +48,12 @@ namespace MippVendorPortal.Controllers
         }
 
 
-
-        [HttpPost("Upload")]
-        public void Upload(IFormFile file1)
+        [HttpPost]
+        public IActionResult UploadFile(IFormCollection file1, string fileType)
         {
             var files = Request.Form.Files; // Access the uploaded files here
+            
+            List<string> filesUrl = new List<string>();
             foreach (var file in files)
             {
                 if (file.Length > 0)
@@ -58,7 +65,7 @@ namespace MippVendorPortal.Controllers
                     {
                         file.CopyTo(fileStream);
                     }
-
+                    //is exists,
                     string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
                     string containerName = "mipp-bill-accounts"; // Replace with your container name
 
@@ -72,7 +79,7 @@ namespace MippVendorPortal.Controllers
                     BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
                     // Generate a unique blob name
-                    string blobName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string blobName = fileType + "/" + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     //CloudBlockBlob blockBlob = containerClient.GetBlockBlobReference("/JamesDon//1//" + blobName);
 
 
@@ -87,11 +94,13 @@ namespace MippVendorPortal.Controllers
                     }
                     // Get the public URL of the uploaded image
                     var fileUrl = blobClient.Uri.ToString();
+                    filesUrl.Add(fileUrl);
                     //TempData["fileUrl"] = fileUrl;
                     ViewBag.fileUrl = fileUrl;
                     // Optionally, you can delete the local file after uploading it to Azure Blob Storage
-                    System.IO.File.Delete(file.FileName);
-
+                    //System.IO.File.Delete(file.FileName);
+                    BlobClient blobClient1 = new BlobClient(connectionString, containerName, fileUrl);
+                    //blobClient1.DownloadContent();
 
 
                 }
@@ -102,14 +111,83 @@ namespace MippVendorPortal.Controllers
 
             //int clientId = 1;
 
+            return Json(filesUrl);
+
+        }
+
+
+        [HttpPost]
+        public IActionResult Upload(IFormCollection file1, string fileType)
+        {
+            var files = Request.Form.Files; // Access the uploaded files here
+            List<string> filesUrl = new List<string>();
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = Path.GetFileName(file.FileName);
+                    var filePath = Path.Combine("C:\\MiPP\\MippVendor\\MippVendorPortal", fileName); // Specify the desired directory path
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+                    //is exists,
+                    string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
+                    string containerName = "mipp-bill-accounts"; // Replace with your container name
+
+                    //CloudBlobClient blobClient = account.CreateCloudBlobClient();
+                    //CloudBlobContainer container = blobClient.GetContainerReference("images");
+
+                    // Create a BlobServiceClient object
+                    BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+
+                    // Get a reference to the container
+                    BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+                    // Generate a unique blob name
+                    string blobName = fileType + "/" + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    //CloudBlockBlob blockBlob = containerClient.GetBlockBlobReference("/JamesDon//1//" + blobName);
+
+
+                    // Create a new blob in the container
+                    BlobClient blobClient = containerClient.GetBlobClient(blobName);
+
+                    // Open a FileStream to read the file
+                    using (FileStream fileStream = new FileStream(file.FileName, FileMode.Open))
+                    {
+                        // Upload the file to Azure Blob Storage
+                        blobClient.Upload(fileStream, true);
+                    }
+                    // Get the public URL of the uploaded image
+                    var fileUrl = blobClient.Uri.ToString();
+                    filesUrl.Add(fileUrl);
+                    //TempData["fileUrl"] = fileUrl;
+                    ViewBag.fileUrl = fileUrl;
+                    // Optionally, you can delete the local file after uploading it to Azure Blob Storage
+                    //System.IO.File.Delete(file.FileName);
+                    BlobClient blobClient1 = new BlobClient(connectionString, containerName, "Np346/" + fileUrl);
+                    
+
+
+                }
+            }
+
+            // If no file was selected or the file is empty, display an error message
+            ModelState.AddModelError("file", "Please select a file to upload.");
+
+            //int clientId = 1;
+
+            return Json(filesUrl);
+
 
             // Process the uploaded files
 
 
         }
 
-        [HttpPost("Remove")]
-        public async Task<IActionResult> Remove(string url)
+
+        public void download_FromBlob(string filetoDownload)
         {
             string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
             string containerName = "mipp-bill-accounts"; // Replace with your container name
@@ -122,18 +200,112 @@ namespace MippVendorPortal.Controllers
 
             // Get a reference to the container
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            containerClient.GetBlobClient(filetoDownload);
 
-            // Extract the blob name from the URL
-            var blobName = Path.GetFileName(url);
 
-            // Get the blob client using the blob name
-            var blobClient = containerClient.GetBlobClient(blobName);
+            //BlobDownloadResult downloadResult = containerClient.GetBlobClient();
+            //string blobContents = downloadResult.Content.ToString();
+            //// provide the file download location below            
+            //Stream file = File.OpenWrite(@ "E:\Tools\BlobFile\" +filetoDownload);    
+          
 
-            // Delete the blob
-            blobClient.DeleteIfExists();
+            // cloudBlockBlob.DownloadToStream(file);
+
+            Console.WriteLine("Download completed!");
+
+        }
+
+
+        [HttpPost("Remove")]
+        public async Task<IActionResult> Remove(IEnumerable<string> urls)
+        {
+            foreach (var item in urls)
+            {
+                string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
+                string containerName = "mipp-bill-accounts"; // Replace with your container name
+                var link = item.Split('/')[5];
+                string woId = "1";
+                //CloudBlobClient blobClient = account.CreateCloudBlobClient();
+                //CloudBlobContainer container = blobClient.GetContainerReference("images");
+
+                // Create a BlobServiceClient object
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+
+                // Get a reference to the container
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+                // Extract the blob name from the URL
+                var blobName = Path.GetFileName(link);
+
+                // Get the blob client using the blob name
+                //var blobClient = containerClient.GetBlobClient(blobName);
+                var blobClient = containerClient.GetBlobClient($"{woId}/{blobName}");
+
+                //BlobContainerClient subfolderClient = containerClient.GetSubContainerClient("1");
+
+
+                // Delete the blob
+                blobClient.DeleteIfExists();
+
+                var blobitem = containerClient.GetBlobs(prefix: "1");
+
+                foreach (var blob in blobitem)
+                {
+                    if(blob.Name == blobName)
+                    {
+                        blobClient.Delete(Azure.Storage.Blobs.Models.DeleteSnapshotsOption.None);
+                        blobClient.DeleteIfExists();
+                    }
+                }
+            }
+           
 
             return Ok();
         }
+
+
+        public async Task<List<string>> GetAllFiles(string woId)
+        {
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
+            string containerName = "mipp-bill-accounts"; // Replace with your container name
+
+
+            List<string> dir = new List<string>();
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            var blobitem = containerClient.GetBlobs(prefix: woId.ToString());
+
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+            List<string> files = new List<string>();
+            // Create the blob client.
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+
+            // Retrieve reference to a previously created container.
+            CloudBlobContainer container = blobClient.GetContainerReference(containerName);
+            //The specified container does not exist
+
+            try
+            {
+                //root directory
+                //CloudBlobDirectory dira = container.GetDirectoryReference(string.Empty);
+                ////true for all sub directories else false 
+                //var rootDirFolders = dira.ListBlobsSegmentedAsync(true, BlobListingDetails.Metadata, null, null, null, null).Result;
+
+                foreach (var blob in blobitem)
+                {
+                    files.Add("https://mippbills.blob.core.windows.net/mipp-bill-accounts/" + blob.Name);
+                }
+
+            }
+            catch (Exception e)
+            {
+                //  Block of code to handle errors
+                Console.WriteLine("Error", e);
+
+            }
+            return files;
+        }
+
         public async Task<IActionResult> Index(int vendorID, int woID)
         {
             try
@@ -195,6 +367,8 @@ namespace MippVendorPortal.Controllers
 
 
                 ViewBag.woid = woID;
+                var images = GetAllFiles(woID.ToString());
+                ViewBag.ImageUrls = images.Result;
                 return View(enumerable);
             }
             catch (Exception ex)
