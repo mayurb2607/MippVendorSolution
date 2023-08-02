@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<MippVendorPortal.Models.Setting>
 @{
     Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
+
     ViewBag.Subtotal = "";
     ViewBag.Tax = "";
     ViewBag.Total = "";
@@ -8,6 +9,7 @@
     int tax = 0;
     int workorderId = ViewBag.woid;
     var disabled = true;
+    var taxes=@ViewBag.taxList;
 }
 
 
@@ -19,17 +21,18 @@
                 <h5><i class="fas fa-info"></i> Note:</h5>
                 This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
             </div>
-
+            <form id="myForm" method="post" enctype="multipart/form-data">
             <div class="invoice p-3 mb-3" id="invoice">
                 @foreach (var item in Model)
                 {
 
                     <div class="row invoice-info" id="invoice-table">
-                        <form style="width: 65%; margin-left: auto;">
+                        <div style="width: 65%; margin-left: auto;">
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Title:</label>
-                                    <input type="text" class="form-control" id="billTitle">
+                                    <input type="text" class="form-control" id="billTitle" value="Bill for workorder #@ViewBag.WONumber" required>
+
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>Summary(optional):</label>
@@ -37,58 +40,55 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="@item.BusinessName">Bill To:</label>
-                                    <input type="text" class="form-control" value="@item.BusinessName" id="billTo">
+                                    <input type="text" class="form-control" value="@item.BusinessName" id="billTo" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="@item.CareOf">Care Of:</label>
-                                    <input type="text" class="form-control" value="@item.CareOf" id="careOf">
+                                    <input type="text" class="form-control" value="@item.CareOf" id="careOf" required>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="@item.AddressLine1">Address</label>
-                                <input type="text" class="form-control" value="@item.AddressLine1" id="inputAddress">
+                                <input type="text" class="form-control" value="@item.AddressLine1" id="inputAddress" required>
                             </div>
                             <div class="form-group">
                                 <label for="inputAddress2">Address 2</label>
-                                <input type="text" class="form-control" value="@item.AddressLine2" id="inputAddress2">
+                                <input type="text" class="form-control" value="@item.AddressLine2" id="inputAddress2" required>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="inputCity">City</label>
-                                    <input type="text" class="form-control" value="@item.City" id="city">
+                                    <input type="text" class="form-control" value="@item.City" id="city" required>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputState">Province</label>
-                                    <input type="text" class="form-control" value="@item.Province" id="province">
+                                    <input type="text" class="form-control" value="@item.Province" id="province" required>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputZip">Zip</label>
-                                    <input type="text" class="form-control" value="@item.Zip" id="zip">
+                                    <input type="text" class="form-control" value="@item.Zip" id="zip" required>
                                 </div>
                             </div>
-                        </form>
+                        </div>
 
                         <div class="col-sm-4 invoice-col">
-                            <form>
+                           
 
-                                <div class="form-group">
-                                    <label>Invoice:</label>
-                                    <input type="text" class="form-control"value="@item.Id" id="invoice" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label>Workorder ID:</label>
-                                    <input type="text" class="form-control" value="@workorderId" id="woId" disabled>
-                                </div>
+                                
+                                
+                                   
+                                <input type="text" class="form-control" value="@workorderId" id="woId" disabled hidden>
+                                
                                 <div class="form-group">
                                     <label for="@item.BillDate">Bill Date:</label>
-                                    <input type="date" class="form-control" value="@item.BillDate" id="billDate">
+                                    <input type="date" class="form-control" value="@item.BillDate" id="billDate" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="@item.DueDate">Due Date:</label>
-                                    <input type="date" class="form-control" value="@item.DueDate" id="dueDate">
+                                    <input type="date" class="form-control" value="@item.DueDate" id="dueDate" required>
                                 </div>
 
-                            </form>
+                            
                         </div>
 
                     </div>
@@ -96,48 +96,77 @@
                 }
 
                 <div id="billItems">
-                    <div style="border:solid 2px gray; padding: 1%;" id="billItem">
+                    <div style="border:solid 2px gray; padding: 1%;margin-bottom:1%" id="billItem">
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label>Item</label>
-                                <input type="text" class="form-control" id="item">
+                                <select class="form-control" id="item" onchange="populateFields(event,this)" required>
+                                 <option disabled selected value="">Select Product And Services</option>
+                                    @foreach (var item in ViewBag.services)
+                                    {
+                                        <option value=@item.Id data-title=@item.ItemName>@item.ItemName</option>
+                                    }
+                                </select>
                             </div>
 
                             <div class="form-group col-md-2">
                                 <label>Unit</label>
-                                <input type="text" class="form-control" id="unit">
+                                <input type="text" class="form-control" id="unit" required>
                             </div>
                             <div class="form-group col-md-2">
                                 <label>Quantity</label>
-                                <input type="number" class="form-control" id="quantity">
+                                <input type="number" class="form-control" id="quantity" onchange="UpdateAmount(this)" required>
                             </div>
                             <div class="form-group col-md-3">
                                 <label>Price</label>
-                                <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(event)">
+                                <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(this)" readonly>
                             </div>
                             <div class="form-group col-md-2">
                                 <label>Amount</label>
-                                <input type="number" step="0.01" class="form-control" id="amount">
+                                <input type="number" step="0.01" class="form-control" id="amount" readonly>
                             </div>
                         </div>
+                       
                         <div class="form-row">
                             <div class="form-group col-md-8">
                                 <label>Description</label>
                                 <textarea class="form-control" id="description"></textarea>
                             </div>
-                            <div class="form-group col-md-2">
-                                <label></label>
-                                <select class="form-control" onchange="CalculateTax(event)" id="taxOptions">
-                                    <option>Select Tax rate</option>
-                                    @foreach (var item in ViewBag.taxList)
-                                    {
-                                        <option>@item.TaxRate</option>
-                                    }
-                                </select>
+                            <div class="col">
+                                <div class="row">
+                               <div class="col">
+                                        <label></label>
+                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions1">
+                                            <option>Select Tax rate</option>
+                                            @foreach (var item in ViewBag.taxList)
+                                            {
+                                                <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                
+                                    <div class="col">
+                                        <label></label>
+                                        <input type="number" step="0.01" class="form-control" id="taxedAmount1" readonly>
+                                    </div>
                             </div>
-                            <div class="form-group col-md-2">
-                                <label></label>
-                                <input type="number" step="0.01" class="form-control" id="taxedAmount">
+                            <div class="row">
+                                    <div class="col">
+                                        <label></label>
+                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions2">
+                                            <option>Select Tax rate</option>
+                                            @foreach (var item in ViewBag.taxList)
+                                            {
+                                                 <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                
+                                    <div class="col">
+                                        <label></label>
+                                        <input type="number" step="0.01" class="form-control" id="taxedAmount2" readonly>
+                                    </div>
+
                             </div>
                         </div>
 @*                        <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
@@ -145,9 +174,32 @@
 
                     </div>
                 </div>
-                <br />
-                <br />
+                </div>
                 <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary">Add Item</button>
+                <div>
+                    <div class="col" style="width: 40%; float : right" >
+                        <p class="lead">Amount Due </p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:50%">Subtotal:</th>
+                                        <td id="subtotals">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tax</th>
+                                        <td id="taxes">0.00</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Total:</th>
+                                        <td id="totals">0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label>Notes:</label>
@@ -170,28 +222,7 @@
                         </p>
                     </div>
 *@
-                    <div class="col-6">
-                        <p class="lead">Amount Due </p>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <tbody>
-                                    <tr>
-                                        <th style="width:50%">Subtotal:</th>
-                                        <td id="subtotals">0.00</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Tax</th>
-                                        <td id="taxes">0.00</td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>Total:</th>
-                                        <td id="totals">0.00</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                   
 
                 </div>
                 <br/>
@@ -218,7 +249,7 @@
 
          @*       @using (Html.BeginForm("UploadFile", "Bills", FormMethod.Post, new { enctype = "multipart/form-data" }))
                 {*@
-                <form id="myForm" method="post" enctype="multipart/form-data">
+                
                     <div style="display: flex;">
                         <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 30%;" multiple />
                         <select name="fileType" style="display:none">
@@ -246,14 +277,17 @@
                        
                     </div>
                 </div>
-
-
+            
+        
                 @section Scripts {
+                     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+                
 
 
                  
                     <script src="~/dist/js/notify.js"></script>
                     <script src="~/dist/js/notify.min.js"></script>
+
                     <script>
 
                         function getImageData(image){
@@ -279,12 +313,17 @@
 
    
                             $('#myForm').submit(function (e) {
+                                var form = document.getElementById('myForm')
+
+                                // check if the input is valid
+                                if(!form.reportValidity()) return false;
                                 e.preventDefault(); // Prevent the default form submission
+
                                 var workorderID = document.getElementById('fileType').value;
                                 var formData = new FormData(this);
                                 console.log("formData", formData);
 
-                            var fileInput = document.getElementById('file');
+                                var fileInput = document.getElementById('file');
                                 //Iterating through each files selected in fileInput
                                 //for (i = 0; i < fileInput.files.length; i++) {
                                 //    //Appending each file to FormData object
@@ -292,153 +331,122 @@
                                 //}
                                 formData.append(workorderID, workorderID);
                                 console.log("formData", formData);
-
-                                debugger;
-                                $.ajax({
-                                    url: '/Bills/Upload',
-                                    type: 'POST',
-                                    data: formData,
-                                    processData: false,
-                                    contentType: false,
-                                    success: function (response) {
-                                        // Handle success
-                                        //myValue = response.updatedValue;
-                                        console.log(response);
-                                        //alert(response.message);
-                                        showNotification('success', "File(s) uploaded successfully!!");
-
-                                        $.each(response, function (index, item) {
-                                        var inputElement = $('<input>', {
-                                            type: 'text',
-                                            name: 'viewBagValue',
-                                            id: 'viewBagValue',
-                                            style: 'display:none',
-                                            value: item // Set the value from the AJAX response
-                                        });
-                                        $('#inputContainer').append(inputElement);
-                                        //document.getElementById("viewBagValue").innerText = response.updatedValue;
-                                        //document.getElementById("viewBagValue").value = response.updatedValue;
-
-
-                                        var testArr = [];
+                                var billItems = [];
 
                                         for (let i = 0; i < document.querySelectorAll("#unit").length; i++) {
-                                            testArr.push({
-                                                item: document.querySelectorAll("#item")[i].value,
-                                                description: document.querySelectorAll("#description")[i].value,
-                                                quantity: document.querySelectorAll("#quantity")[i].value,
-                                                unit: document.querySelectorAll("#unit")[i].value,
-                                                price: document.querySelectorAll("#price")[i].value,
-                                                tax: document.querySelectorAll("#taxOptions")[i].value,
-                                                subtotal: document.querySelectorAll("#amount")[i].value,
-                                                total: document.querySelectorAll("#taxedAmount")[i].value
+                                            billItems.push({
+                                                Id:0,
+                                                ProductAndServiceId: document.querySelectorAll("#item")[i].value,
+                                                BillId:0,
+                                                Name: document.querySelectorAll("#item")[i].selectedOptions[0].dataset.ItemName,
+                                                Description: document.querySelectorAll("#description")[i].value,
+                                                Quantity: document.querySelectorAll("#quantity")[i].value,
+                                                Unit: document.querySelectorAll("#unit")[i].value,
+                                                Price: document.querySelectorAll("#price")[i].value,
+                                                TaxId1: document.querySelectorAll("#taxOptions1")[i].value,
+                                                Tax1: document.querySelectorAll("#taxedAmount1")[i].value,
+                                                TaxId2: document.querySelectorAll("#taxOptions2")[i].value,
+                                                Tax2: document.querySelectorAll("#taxedAmount2")[i].value,
+                                                subtotal :  document.querySelectorAll("#amount")[i].value ,
+                                                total: parseFloat( document.querySelectorAll("#amount")[i].value ) + parseFloat( document.querySelectorAll("#taxedAmount1")[i].value) + parseFloat( document.querySelectorAll("#taxedAmount2")[i].value)
                                             });
                                         }
-                                        console.log("save button clicked");
-                                        console.log("test", testArr);
-                                        console.log(@workorderId);
-                                        console.log(testArr);
-
-                                        var testArrSettings = [];
-                                        testArrSettings.push({
-                                            Title: document.getElementById("billTitle").value,
-                                            Summary: document.getElementById("summary").value,
-                                            Id: document.getElementById("invoice").value,
-                                            BusinessName: document.getElementById("billTo").value,
-                                            CareOf: document.getElementById("careOf").value,
-                                            //document.getElementById("woId").value,
-                                            AddressLine1: document.getElementById("inputAddress").value,
-                                            AddressLine2: document.getElementById("inputAddress2").value,
-                                            City: document.getElementById("city").value,
-                                            Province: document.getElementById("province").value,
-                                            Zip: document.getElementById("zip").value,
-                                            BillDate: document.getElementById("billDate").value,
-                                            DueDate: document.getElementById("dueDate").value,
-                                            Subtotal: document.getElementById("subtotals").innerHTML,
-                                            Tax: document.getElementById("taxes").innerHTML,
-                                            Total: document.getElementById("totals").innerHTML,
-                                            Note: document.getElementById("note").value,
-                                            Footer: document.getElementById("footer").value,
-                                            Document: document.getElementById('viewBagValue').value
-                                        });
-
-                                        var title = document.getElementById("billTitle");
-                                        var summary = document.getElementById("summary");
-                                        console.log("Setting", testArrSettings);
-
-                                        //$.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
-                                        //    function () {
-
-                                        $.ajax({
-                                            url: '/Bills/Insert',
-                                            type: 'POST',
-                                            data: {
-                                                woId: @workorderId,
-                                                testArr: testArr,
-                                                testArrSettings: testArrSettings
-                                            },
-                                            success: function (response) {
-
-                                                //$.ajax({
-                                                //    url: '/Bills/Upload',
-                                                //    type: 'POST',
-                                                //    data: formData,
-                                                //    processData: false,
-                                                //    contentType: false,
-                                                //    success: function (response) {
-                                                //        // Handle success
-                                                //        //myValue = response.updatedValue;
-                                                //        console.log(response);
-                                                //        //alert(response.message);
-                                                //        showNotification('success', "File(s) uploaded successfully!!");
-
-                                                //        $.each(response, function (index, item) {
-                                                //            var inputElement = $('<input>', {
-                                                //                type: 'text',
-                                                //                name: 'viewBagValue',
-                                                //                id: 'viewBagValue',
-                                                //                style: 'display:none',
-                                                //                value: item // Set the value from the AJAX response
-                                                //            });
-                                                //            $('#inputContainer').append(inputElement);
-                                                //            //document.getElementById("viewBagValue").innerText = response.updatedValue;
-                                                //            //document.getElementById("viewBagValue").value = response.updatedValue;
-
-                                                //        });
-
-
-
-
-
-                                                //        // Update the ViewBag value dynamically
-                                                //    },
-                                                //    error: function () {
-                                                //        // Handle error
-                                                //        alert('Error uploading file.');
-                                                //    }
-                                                //});
-                                                //$('#result').html('"PassThings()" successfully called.');
-                                            },
-                                            error: function () {
-                                                // Handle error
-                                                alert('Error saving data.');
-                                            }
-                                        })
-
-                                    });
                                        
+                                       
+
+                                var bill = 
+                                {
+                                    Id : 0,
+                                    Title: document.getElementById("billTitle").value,
+                                    Summary: document.getElementById("summary").value,
+                                            
+                                    BillTo: document.getElementById("billTo").value,
+                                    CareOf: document.getElementById("careOf").value,
+                                    WorderId: document.getElementById("woId").value,
+                                    AddressLine1: document.getElementById("inputAddress").value,
+                                    AddressLine2: document.getElementById("inputAddress2").value,
+                                    City: document.getElementById("city").value,
+                                    Province: document.getElementById("province").value,
+                                    Zip: document.getElementById("zip").value,
+                                    BillDate: document.getElementById("billDate").value,
+                                    InvoiceDate: document.getElementById("billDate").value,
+                                    PaymentDueOn: document.getElementById("dueDate").value,
+                                    Subtotal: document.getElementById("subtotals").innerHTML,
+                                    TaxAmount: document.getElementById("taxes").innerHTML,
+                                    Total: document.getElementById("totals").innerHTML,
+                                    Note: document.getElementById("note").value,
+                                    Footer: document.getElementById("footer").value,
+                                    ClientEmail:"@ViewBag.Clientmail",
+                                    VendorEmail:"@ViewBag.Vendormail",
+                                    ClientId:@ViewBag.CientId,
+                                    Ponumber:"",
+                                    Wonumber:@ViewBag.WONumber,
+                                    Documents:""
                                     
-                                        
+                                };
+
+                                console.log(bill,billItems);
+                                var title = document.getElementById("billTitle");
+                                var summary = document.getElementById("summary");
+                                
 
                                         
-                                        // Update the ViewBag value dynamically
+
+                                $.ajax({
+                                    url: '/Bills/Insert',
+                                    type: 'POST',
+                                    data: {
+                                        woId: @workorderId,
+                                        bill: bill,
+                                        billItems:billItems 
+                                    },
+                                    success: function (response) {
+
+                                                $.ajax({
+                                            url: '/Bills/Upload',
+                                            type: 'POST',
+                                            data: formData,
+                                            processData: false,
+                                            contentType: false,
+                                            success: function (response) {
+                                                // Handle success
+                                                //myValue = response.updatedValue;
+                                                console.log(response);
+                                                //alert(response.message);
+                                                showNotification('success', "File(s) uploaded successfully!!");
+
+                                                $.each(response, function (index, item) {
+                                                    var inputElement = $('<input>', {
+                                                        type: 'text',
+                                                        name: 'viewBagValue',
+                                                        id: 'viewBagValue',
+                                                        style: 'display:none',
+                                                        value: item // Set the value from the AJAX response
+                                                    });
+                                                    $('#inputContainer').append(inputElement);
+                                                           
+                                                    });   
+
+
+                                                     var url = document.location.origin + "/Workorders";
+                                                     window.location.replace(url);
+                                                        
+                                                },
+                                                error: function () {
+                                                // Handle error
+                                                alert('Error uploading file.');
+                                            }
+                                            });
+                                            
+                                            
+                                            
                                     },
                                     error: function () {
                                         // Handle error
-                                        alert('Error uploading file.');
+                                        alert('Error saving data.');
                                     }
                                 });
-                            });
+                        });
 
                         $("#removeFile").click(function () {
                             debugger;
@@ -459,54 +467,83 @@
                         function AddLine(){
                             var newRow = `
                                                                                
-                                                                                      <div style="border:solid 2px gray; padding: 1%;" id="billItem">
-                                                                                            <div class="form-row">
-                                                                                            <div class="form-group col-md-3">
-                                                                                                <label>Item</label>
-                                                                                                <input type="text" class="form-control" id="item">
-                                                                                            </div>
-                        
-                                                                                            <div class="form-group col-md-2">
-                                                                                                <label>Unit</label>
-                                                                                                <input type="text" class="form-control"id="unit">
-                                                                                            </div>
-                                                                                            <div class="form-group col-md-2">
-                                                                                                <label>Quantity</label>
-                                                                                                <input type="number" class="form-control" id="quantity">
-                                                                                            </div>
-                                                                                                <div class="form-group col-md-3">
-                                                                                                <label>Price</label>
-                                                                                                    <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(event)">
-                                                                                            </div>
-                                                                                                <div class="form-group col-md-2">
-                                                                                                <label>Amount</label>
-                                                                                                    <input type="number" step="0.01" class="form-control" id="amount">
-                                                                                            </div>
-                                                                                            </div>
-                                                                                            <div class="form-row">
-                                                                                                <div class="form-group col-md-8">
-                                                                                                    <label>Description</label>
-                                                                                                    <textarea class="form-control" id="description"></textarea>
-                                                                                            </div>
-                                                                                                                          <div class="form-group col-md-2">
+                                     <div style="border:solid 2px gray; padding: 1%; margin-bottom:1%" id="billItem">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-3">
+                                                <label>Item</label>
+                                                <select class="form-control" id="item" onchange="populateFields(event,this)" required>
+                                                 <option disabled selected value="">Select Product And Services</option>
+                                                    @foreach (var item in ViewBag.services)
+                                                    {
+                                                        <option value=@item.Id>@item.ItemName</option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group col-md-2">
+                                                <label>Unit</label>
+                                                <input type="text" class="form-control" id="unit" required>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label>Quantity</label>
+                                                <input type="number" class="form-control" id="quantity" onchange="UpdateAmount(this)" required>
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label>Price</label>
+                                                <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(this)" required>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label>Amount</label>
+                                                <input type="number" step="0.01" class="form-control" id="amount" readonly>
+                                            </div>
+                                        </div>
+                       
+                                        <div class="form-row">
+                                            <div class="form-group col-md-8">
+                                                <label>Description</label>
+                                                <textarea class="form-control" id="description"></textarea>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row">
+                                               <div class="col">
                                                         <label></label>
-                                                        <select class="form-control" onchange="CalculateTax(event)" id="taxOptions">
+                                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions1">
                                                             <option>Select Tax rate</option>
-                        @foreach (var item in ViewBag.taxList)
-                        {
-                                                                    <option>@item.TaxRate</option>
-                        }
+                                                            @foreach (var item in ViewBag.taxList)
+                                                            {
+                                                                <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                            }
                                                         </select>
                                                     </div>
-                                                                                                <div class="form-group col-md-2">
-                                                                                                    <label></label>
-                                                                                                    <input type="number" step="0.01" class="form-control" id="taxedAmount">
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
+                                
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <input type="number" step="0.01" class="form-control" id="taxedAmount1" readonly>
+                                                    </div>
+                                            </div>
+                                            <div class="row">
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions2">
+                                                            <option>Select Tax rate</option>
+                                                            @foreach (var item in ViewBag.taxList)
+                                                            {
+                                                                 <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <input type="number" step="0.01" class="form-control" id="taxedAmount2" readonly>
+                                                    </div>
 
- 
-                                                                                        </div>`;
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
+                                </div>
+                                `;
                             $("#billItems").append(newRow);
                         }
 
@@ -515,120 +552,13 @@
                             //var taxString = document.querySelectorAll("#taxOptions")[quanLen - 1].value;
 
                             document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
+                            UpdateTotalAmount();
 
 
 
                         }
 
-                        $("#save-btn").click(function () {
-                            var testArr = [];
-
-                            for(let i=0; i<document.querySelectorAll("#unit").length; i++){
-                                testArr.push({
-                                    item: document.querySelectorAll("#item")[i].value,
-                                    description : document.querySelectorAll("#description")[i].value,
-                                    quantity : document.querySelectorAll("#quantity")[i].value,
-                                    unit : document.querySelectorAll("#unit")[i].value,
-                                    price : document.querySelectorAll("#price")[i].value,
-                                    tax : document.querySelectorAll("#taxOptions")[i].value,
-                                    subtotal : document.querySelectorAll("#amount")[i].value,
-                                    total : document.querySelectorAll("#taxedAmount")[i].value
-                                });
-                            }
-                            console.log("save button clicked");
-                            console.log("test", testArr);
-                            console.log(@workorderId);
-                            console.log(testArr);
-
-                            var testArrSettings = [];
-                            testArrSettings.push({
-                                Title: document.getElementById("billTitle").value,
-                                Summary: document.getElementById("summary").value,
-                                Id: document.getElementById("invoice").value,
-                                BusinessName: document.getElementById("billTo").value,
-                                CareOf: document.getElementById("careOf").value,
-                                AddressLine1: document.getElementById("inputAddress").value,
-                                AddressLine2: document.getElementById("inputAddress2").value,
-                                City: document.getElementById("city").value,
-                                Province: document.getElementById("province").value,
-                                Zip: document.getElementById("zip").value,
-                                BillDate: document.getElementById("billDate").value,
-                                DueDate: document.getElementById("dueDate").value,
-                                Subtotal: document.getElementById("subtotals").innerHTML,
-                                Tax:document.getElementById("taxes").innerHTML,
-                                Total: document.getElementById("totals").innerHTML,
-                                Note: document.getElementById("note").value,
-                                Footer: document.getElementById("footer").value,
-                                Document: document.getElementById('viewBagValue').innerHTML
-                            });
-
-                            var title = document.getElementById("billTitle");
-                            var summary = document.getElementById("summary");
-                            console.log("566",document.getElementById('viewBagValue').value);
-                            console.log("Setting", testArrSettings);
-
-                            //$.post('@Url.Action("Insert","Bills")', { woId: @workorderId, testArr: testArr, testArrSettings: testArrSettings },
-                            //    function () {
-
-                            $.ajax({
-                                url:'/Bills/Insert',
-                                type: 'POST',
-                                data:{
-                                            woId: @workorderId,
-                                            testArr: testArr,
-                                            testArrSettings: testArrSettings
-                                },
-                                success: function (response) {
-
-                                            //$.ajax({
-                                            //    url: '/Bills/Upload',
-                                            //    type: 'POST',
-                                            //    data: formData,
-                                            //    processData: false,
-                                            //    contentType: false,
-                                            //    success: function (response) {
-                                            //        // Handle success
-                                            //        //myValue = response.updatedValue;
-                                            //        console.log(response);
-                                            //        //alert(response.message);
-                                            //        showNotification('success', "File(s) uploaded successfully!!");
-
-                                            //        $.each(response, function (index, item) {
-                                            //            var inputElement = $('<input>', {
-                                            //                type: 'text',
-                                            //                name: 'viewBagValue',
-                                            //                id: 'viewBagValue',
-                                            //                style: 'display:none',
-                                            //                value: item // Set the value from the AJAX response
-                                            //            });
-                                            //            $('#inputContainer').append(inputElement);
-                                            //            //document.getElementById("viewBagValue").innerText = response.updatedValue;
-                                            //            //document.getElementById("viewBagValue").value = response.updatedValue;
-
-                                            //        });
-
-
-
-
-
-                                            //        // Update the ViewBag value dynamically
-                                            //    },
-                                            //    error: function () {
-                                            //        // Handle error
-                                            //        alert('Error uploading file.');
-                                            //    }
-                                            //});
-                                            //$('#result').html('"PassThings()" successfully called.');
-                                    showNotification('success', "Bill created successfully!!");
-                                },
-                                error: function () {
-                                    // Handle error
-                                    alert('Error saving data.');
-                                }
-                            })
-                                    
-                                //});
-                        });
+                        
 
 
                     </script>
@@ -636,46 +566,130 @@
                    
 
                       
+                        function populateFields(event,element)
+                        {
+                                billItem = element.parentElement.parentElement.parentElement;
+                                var id =parseInt(event.target.value);
+                               
+                                $.ajax({
+                                    type: 'GET',
+                                    url: '/Bills/GetProductAndServiceDetails',
+
+                                    data: { serviceId: id },
+                                    success: function (data) {
+                                        billItem.querySelector("#price").value = parseFloat(data.price).toFixed(2);
+                                        billItem.querySelector("#unit").value = data.unit;
+                                        billItem.querySelector("#quantity").value = 1;
+                                        billItem.querySelector("#description").innerText = data.description;
+
+                                        var amount = parseFloat(1 * data.price).toFixed(3);
+                                        billItem.querySelector("#amount").value = amount;
+                                        
+                                        if(data.taxId1 != null)
+                                        {
+                                            billItem.querySelector("#taxOptions1").value = '' + data.taxId1;
+                                            var taxamout = parseFloat(amount) * parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                                            billItem.querySelector("#taxedAmount1").value=parseFloat(taxamout).toFixed(3)
+                                        }
+                                        if(data.taxId2 != null)
+                                        {
+                                            billItem.querySelector("#taxOptions2").value = '' + data.taxId2;
+                                            var taxamout = parseFloat(amount) * parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate)
+                                            billItem.querySelector("#taxedAmount2").value = parseFloat(taxamout).toFixed(3); 
+                                        }
+
+                                        UpdateTotalAmount();
+                                        
 
 
 
-                        function UpdateAmount(event) {
+                                    },
+                                    error: function (error) {
+                                    // Handle error
+                                    alert('Error getting details of item.');
+                                    }
+                                });
+                        }
+
+                        function UpdateAmount(element) 
+                        {
+                            billItem = element.parentElement.parentElement.parentElement;
+                            var price = parseFloat(billItem.querySelector("#price").value);
+                            var quantity= parseFloat(billItem.querySelector("#quantity").value);
+                            if(!isNaN(price) && !isNaN(quantity)  ){
+                                var amount = price * quantity;
+                                billItem.querySelector("#amount").value = parseFloat(amount).ToFixed(3);
+                                UpdateTax(billItem);
+                            }
+                        }
+
+                        
+
+                        function UpdateTotalAmount() {
                             console.log("338", event.target.value);
-                            var quanLen= document.querySelectorAll("#quantity").length
-                            var quantity = document.querySelectorAll('#quantity')[quanLen-1].value;
-                            var priceLen = document.querySelectorAll("#price").length
-                            var price = document.querySelectorAll('#price')[priceLen - 1].value;
-                            var amountLen = document.querySelectorAll("#amount").length;
-                            var amount = parseFloat(quantity * price).toFixed(2);
-                            document.querySelectorAll("#amount")[amountLen-1].value = amount;
+                            
+                            
                             var subtotal= 0.00;
+                            var tax=0.00;
+                            
                             for (let i = 0; i < document.querySelectorAll("#amount").length; i++)
-                              subtotal+= parseFloat(document.querySelectorAll("#amount")[i].value);
+                            {
+                                    var amount = parseFloat(document.querySelectorAll("#amount")[i].value)
+                                    subtotal = subtotal + amount;
+
+                                    var tax1 = parseFloat(document.querySelectorAll("#taxedAmount1")[i].value);
+                                    var tax2 = parseFloat(document.querySelectorAll("#taxedAmount2")[i].value);
+                                    if (isNaN(tax1)) {
+                                        tax1=0.00;
+                                    }
+                                    if (isNaN(tax2)) {
+                                        tax2=0.00;
+                                    }
+                                    tax=tax+tax1+tax2;
+
+                                    
+                            }
+                            var totalamout = subtotal + tax;
                             document.getElementById("subtotals").innerText= parseFloat(subtotal).toFixed(2);
+                            document.getElementById("taxes").innerText= parseFloat(tax).toFixed(2);
+                            document.getElementById("totals").innerText = parseFloat(totalamout).toFixed(2);
 
                         }
 
-
-
-                        function CalculateTax(event) {
+                        function UpdateTax(billItem) {
                             debugger;
                             
-                            var taxString = event.target.value;
-                            var tax = parseFloat(taxString.split("-")[1].split("%")[0]) / 100;
-                            var amountLen = document.querySelectorAll("#amount").length;
-                            var taxLen = document.querySelectorAll("#taxedAmount").length;
-                            document.querySelectorAll("#taxedAmount")[taxLen - 1].value = 
-                            parseFloat(parseFloat(tax * parseFloat(document.querySelectorAll('#amount')[amountLen - 1].value)) + parseFloat(document.querySelectorAll('#amount')[amountLen - 1].value)).toFixed(2);
-
-                            document.getElementById('taxes').innerHTML = 
-                           
-                            parseFloat(parseFloat(document.getElementById("taxes").innerHTML) + tax * parseFloat(document.querySelectorAll('#amount')[amountLen - 1].value)).toFixed(2)
+                            var rate1 = parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                            var rate2 = parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate);
+                            var amount = parseFloat(billItem.querySelector("#amount").value);
+                            debugger;
+                            if (!isNaN(rate1)) {
+                                        billItem.querySelector("#taxedAmount1").value  = parseFloat(amount*rate1).toFixed(3);
+                             }
+                            if (!isNaN(rate2)) {
+                                billItem.querySelector("#taxedAmount2").value  = parseFloat(amount*rate2).toFixed(3);
+                            }
                             
-                            
-                            //document.getElementById('subtotals').innerHTML = parseFloat(document.querySelectorAll("#subtotals").value) + parseFloat(document.querySelectorAll("#price").value) * parseFloat(document.querySelectorAll("#quantity").value);
-                            document.getElementById('totals').innerHTML = 
-                                parseFloat(parseFloat(document.getElementById("totals").innerHTML) + parseFloat(document.querySelectorAll("#taxedAmount")[taxLen - 1].value)).toFixed(2);
+                             
+                            UpdateTotalAmount();
+                        };
 
+                        function CalculateTax(element) {
+                            debugger;
+                            billItem = element.parentElement.parentElement.parentElement.parentElement.parentElement;;
+                            var rate1 = parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                            var rate2 = parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate);
+                            var amount = parseFloat(billItem.querySelector("#amount").value);
+                            debugger;
+                            if (!isNaN(rate1)) {
+                                        billItem.querySelector("#taxedAmount1").value  = parseFloat(amount*rate1).toFixed(3);
+                             }
+                            if (!isNaN(rate2)) {
+                                billItem.querySelector("#taxedAmount2").value  = parseFloat(amount*rate2).toFixed(3);
+                            }
+                            
+                             
+                            UpdateTotalAmount();
                         };
 
 

@@ -1,4 +1,6 @@
-﻿namespace MippPortalWebAPI.Helpers;
+﻿using MippPortalWebAPI.Models;
+
+namespace MippPortalWebAPI.Helpers;
 
 public class WorkorderMasterModel
 {
@@ -52,5 +54,8 @@ public class WorkorderMasterModel
     public int ClientId { get; set; }
 
     public int VendorId { get; set; }
+
+    public List<WorkorderWorkDescription> VendorWorkDescriptions { get; set; }
+
 
 }

@@ -1,0 +1,196 @@
+﻿@using MippVendorPortal.Models
+@model List<WorkorderWorkDescriptionDTO>;
+
+<div>
+  
+    
+
+
+    @for (var i = 0; i < Model.Count; i++)
+            {
+                @if (Model[i].IsDelete == true)
+                {
+                                <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 1%;" class="mx-2 my-3" id="WorkDescription">
+                                    <p>The recorde is Deleted By @Model[i].ModifideBy At @Model[i].ModifiedAt </p>
+                                 </div>
+                                 <form id="UpdateWorkOrderform" enctype="multipart/form-data">
+                                <input id="DescriptionID"  hidden  value=@Model[i].Id />
+                                <input id="WorkorderId"  hidden  value=@Model[i].WorkorderId />
+                                <input id="TaskId"  hidden />
+                                <input id="IsDelete" value=@Model[i].IsDelete hidden value="False" />
+                                <input id="CreatedBy" value=@Model[i].CreatedBy hidden type="text" />
+                                <input id="ModifideBy" value=@Model[i].ModifideBy  hidden type="text" />
+                                <input id="CreatedAt" value=@Model[i].CreatedAt hidden type="datetime" />
+                                <input id="ModifiedAt" value=@Model[i].ModifiedAt hidden type="datetime" />
+                                 <input id="WorkMaterials"  hidden type="datetime" />
+                                <input id="WorkMaterials" hidden type="datetime" />
+                                <input id="DescriptionOfWork"  hidden type="datetime" />
+                                <input id="HourSpent" hidden type="datetime" />
+                                <input id="AdditionalComment"  hidden type="datetime" />
+                                <input id="AdditionalComment"  hidden type="datetime" />
+                                <input id="file"  hidden type="datetime" />
+                                </form>
+
+                }
+                else
+                {
+                        <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 1%;" class="mx-2 my-5" id="WorkDescription">
+                             <span><a id="toggle_@i" class="fa-sharp fa-solid fa-chevron-up fa-rotate-180" data-bs-toggle="collapse" role="button"  data-bs-target="#details_@i" aria-expanded="false" aria-controls="details_@i" ></a></span>
+                            <form id="UpdateWorkOrderform" enctype="multipart/form-data">
+                            <div class="form-row">
+                                <input id="DescriptionID" name="Id"  hidden  value=@Model[i].Id />
+                                <input id="WorkorderId" name="WorkorderId"  hidden  value=@Model[i].WorkorderId />
+                                <input id="TaskId" name="TaskId"  hidden />
+                                <input id="IsDelete" name="IsDelete"  hidden value="False" />
+                                <input id="CreatedBy" name="CreatedBy" value='@Model[i].CreatedBy'  hidden type="text" />
+                                <input id="ModifideBy" name="ModifideBy"   hidden type="text" />
+                                <input id="CreatedAt" name="CreatedAt" value='@Model[i].CreatedAt' hidden type="datetime" />
+                                <input id="ModifiedAt"  hidden type="datetime" />
+                               
+
+                               
+                                <div class="form-group col-md-3" >
+                                    <label>Work Performed By</label>
+                                    <input type="text" value='@Model[i].WorkPerformedBy' required class="form-control" id="WorkPerformedBy" name="WorkPerformedBy">
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>Description Of Work</label>
+                                    <input type="text" value='@Model[i].DescriptionOfWork' required class="form-control"id="DescriptionOfWork" name="DescriptionOfWork">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Work Materials</label>
+                                    <input type="text" value='@Model[i].WorkMaterials' required class="form-control" id="WorkMaterials" name="WorkMaterials">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>HourSpent</label>
+                                    <input type="number" value='@Model[i].HourSpent' required id="HourSpent" name="HourSpent" step="0.5" class="form-control" >
+
+                                </div>
+                            </div>
+                            <div class="collapse" id="details_@i">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Additional Comment</label>
+                                    <textarea  class="form-control" id="AdditionalComment" name="AdditionalComment">@Model[i].AdditionalComment</textarea>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <div class="row">
+                                        <label>Upload Documents</label>
+                                        <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+                                    </div>
+                                                                            
+
+                                </div>
+
+                            </div>
+                            
+                            <div>
+                                @if (Model[i].Files.Count > 0)
+                                {
+                                    <label>Uploaded documents</label>
+                                    <div class="row d-flex col-sm-12" style="overflow-x:scroll" id="uploadedDocuments">
+                                        @foreach (var item in Model[i].Files)
+                                        {
+                                            <div class="m-1">
+                                                <img src="@item.url"  style="float: left;
+                                                                    width:  100px;
+                                                                    height: 100px;
+                                                                    object-fit: cover;" onclick="getImageData(this)">
+                                                <div style="align-items:center">
+                                                <a href="@item.url" class="m-1" ><i class="fas fa-download"></i></a>
+                                                <a href=# class="m-1" onclick='DeleteFile("@item.blobname")'  ><i class="fas fa-trash"></i></a>
+                                                </div>
+                                            </div>
+
+                                        }
+
+                                    </div>
+                                }
+                            </div>
+                            </div>
+                            </form>
+                            <div class="row">
+                                        <button id="btnUpdate" onclick="Update(@i)"  class="btn btn-primary m-1">Save</button>
+                                        <button id="remove-btn" onclick="Delete(@i)"  class="btn btn-danger m-1">Mark As Delete</button>
+                            </div>
+                                                                 
+                        </div>
+                }
+            }
+    </div>
+    
+</div>
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+<script src="~/dist/js/notify.js"></script>
+<script src="~/dist/js/notify.min.js"></script>
+
+
+
+<script type="text/javascript">
+    
+
+    window.onload = function () {
+        $('#loading').hide();
+     
+     
+
+
+    }
+        
+
+
+    //function DeleteLine(element) {
+    //    //$(element).parent().css("filter","blur(2px)");
+    //    $(element).parent().parent().find("*").each(function () {
+    //        //$(this).css("filter","blur(2px)");
+    //        $(this).attr('disabled', 'disabled');
+    //        $(this).attr('disabled', 'disabled');
+    //    });
+        
+    //    var message = `<span style="color: red"> Marked for deletion <span>`;
+    //    element.parentElement.parentElement.style.boxShadow = "10px 10px 5px red";
+    //    $(element).parent().parent().append(message);
+    //}
+
+   
+
+    function showNotification(type, message) {
+        $.notify(message, type);
+    }
+
+
+
+    
+        
+        
+
+
+    @*        $.post('@Url.Action("EditPost","Workorders")', { workorder: workorderArr },
+    //            function () {
+    //                showNotification('success', 'Workorder updated!');
+
+
+    //                //$.ajax({
+    //                //    url: '/Workorders/PostWorkorderWorkDescription',
+    //                //    type: 'POST',
+    //                //    data: formData,
+    //                //    success: function (response) {
+    //                //        showNotification('success', 'Workorder updated!');
+
+
+    //                //    },
+    //                //    error: function (error) {
+    //                //        showNotification('warning', error);
+    //                //    }
+    //                //});
+    //        });
+    //}*@
+
+    
+</script>
+
+

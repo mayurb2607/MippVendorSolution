@@ -5,34 +5,32 @@
 
 @{
     var email = ViewBag.Email;
-    var message = ViewBag.msg;
+  
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 
-<html>
-<body>
-    <h1>Vendors</h1>
+<h1>Vendors</h1>
 
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
 
-    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
 
-        <div class="btn-group mr-2" role="group" aria-label="First group">
-            @*        <button id="create" class="btn btn-default">Create New</button>
-            *@
-            <button id="create" class="btn btn-default">Create</button>
-            <button id="invite" class="btn btn-default" disabled>Invite to VP</button>
-            <button id="assign" class="btn btn-default" disabled>Assign a Workorder</button>
-        </div>
-
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+        @*        <button id="create" class="btn btn-default">Create New</button>
+        *@
+        <button id="create" class="btn btn-default">Create</button>
+        <button id="invite" class="btn btn-default" disabled>Invite to VP</button>
+        <button id="assign" class="btn btn-default" disabled>Assign a Workorder</button>
     </div>
 
+</div>
 
-    <div id="Grid"></div>
 
-</body>
+<div id="Grid"></div>
+
 
 @section Scripts{
 
@@ -48,7 +46,7 @@
             console.log(document.getElementsByClassName('e-grid')[0].ej2_instances[0].getSelectedRecords());
             console.log("selectedRecord:", grid);
 
-            if (grid != null) {
+            if (grid.length < 1) {
 
                 document.getElementById("assign").disabled = true;
                 document.getElementById("invite").disabled = true;
@@ -75,11 +73,56 @@
 
         };
 
+        document.getElementById('assign').onclick = function () {
+
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+
+            var url = document.location.origin + "/VendorLists/Assign/" + id;
+            window.location.replace(url);
+
+        };
+
+        document.getElementById('invite').onclick = function () {
+
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            console.log(grid);
+            var selectedRecords = grid.getSelectedRecords();
+            var id = selectedRecords[0].Id;
+            var email = ""+selectedRecords[0].VendorEmail;
+            var clientID = selectedRecords[0].ClientId;
+               
+           var url="@ViewBag.Url";
+                console.log(email);
+                debugger
+                $.ajax({
+                    type: "POST",
+                    url: url + "Invite/ValidateInvite",
+                    data: {
+                        "email": ""+email,
+                        "clientId": clientID,
+                        "rootVendorId": id
+                    },
+
+                    success: function (result) {
+                        if (result !== null) {
+                            alert("An invite link has been shared!")
+                        }
+                        else {
+                            alert("Failed to send an Invite! Please try again..")
+                        }
+                    }
+                });
+
+        };
+
 
         document.getElementById('create').onclick = function () {
 
 
-            var email = @email;
+            var email = '@email';
             var url = document.location.origin + "/VendorLists/Create?email=" + email;
             window.location.replace(url);
 

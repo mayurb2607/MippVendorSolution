@@ -9,5 +9,6 @@ namespace MippVendorPortal.Areas.Identity.Data;
 // Add profile data for application users by adding properties to the MippVendorPortalUser class
 public class MippVendorPortalUser : IdentityUser
 {
+    
 }
 

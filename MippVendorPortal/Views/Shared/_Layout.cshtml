@@ -30,11 +30,11 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.syncfusion.com/js/assets/external/jsrender.min.js"></script>
     <script src="https://cdn.syncfusion.com/21.1.41/js/web/ej.web.all.min.js"></script>
-    
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/22.1.41/dist/ej2.min.js"></script>
+    @*<script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
     <script src="~/dist/js/notify.js"></script>
-    <script src="~/dist//js/notify.min.js"></script>
+    <script src="~/dist/js/notify.min.js"></script>
 </head>
 <body>
     
@@ -78,8 +78,7 @@
             </ul>
         </div>
         <main role="main" class="pb-3">
-            <ej-script-manager></ej-script-manager>
-            <ejs-scripts></ejs-scripts>
+            
             @RenderBody()
         </main>
     </div>

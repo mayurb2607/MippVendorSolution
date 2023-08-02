@@ -35,7 +35,7 @@ public partial class MippVendorTestContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=L028;Database=MIppVendorTest;Trusted_Connection=True; User Id=ANAR\\Mayur.b;Password=Speak2m; MultipleActiveResultSets=true;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=tcp:vendorportal.database.windows.net,1433;Initial Catalog=MIppVendorTest;Persist Security Info=False;User ID=mipp-vendor-admin;Password=Password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,7 +113,7 @@ public partial class MippVendorTestContext : DbContext
 
         modelBuilder.Entity<Setting>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC0715315375");
+            entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC071D55FA15");
 
             entity.Property(e => e.AddressLine2).HasMaxLength(50);
             entity.Property(e => e.BillDate).HasMaxLength(50);
@@ -129,7 +129,7 @@ public partial class MippVendorTestContext : DbContext
 
         modelBuilder.Entity<Vendor>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Vendor__3214EC0743314E7B");
+            entity.HasKey(e => e.Id).HasName("PK__Vendor__3214EC0712472236");
 
             entity.ToTable("Vendor");
 
@@ -141,7 +141,7 @@ public partial class MippVendorTestContext : DbContext
 
         modelBuilder.Entity<VendorClient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__VendorCl__3214EC07825EA820");
+            entity.HasKey(e => e.Id).HasName("PK__VendorCl__3214EC07727867B2");
 
             entity.ToTable("VendorClient");
 

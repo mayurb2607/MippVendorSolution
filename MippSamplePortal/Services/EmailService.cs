@@ -46,7 +46,7 @@ namespace MippSamplePortal.Services
                 else
                 {
                     // Configure services for local environment
-                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
                 }
 
                 using (var httpClient = new HttpClient())
@@ -93,7 +93,7 @@ namespace MippSamplePortal.Services
                 else
                 {
                     // Configure services for local environment
-                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
                 }
 
                 using (var httpClient = new HttpClient())

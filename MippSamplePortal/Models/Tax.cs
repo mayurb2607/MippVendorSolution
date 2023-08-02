@@ -9,5 +9,7 @@ public partial class Tax
 
     public int? ClientId { get; set; }
 
-    public string? TaxRate { get; set; }
+    public string? TaxName { get; set; }
+
+    public decimal? TaxRate { get; set; }
 }

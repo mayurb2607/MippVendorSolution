@@ -109,28 +109,38 @@
             </div>
             <div class="form-group" style="width: max-content;">
                 <label class="control-label">Work completed & Materials used: </label>
-                <input value="@description.DescriptionOfWorkCompletedMaterialsUsed" id="descriptionText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+                <input value="@description.DescriptionOfWorkToComplete" id="descriptionText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Expected Hours to Complete: </label>
+                <input value="@description.ExpectedHours" class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
             </div>
             <div class="form-group" style="width: max-content;">
-            <label class="control-label">Total hours spent: </label>
-            <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-        </div>
+                <label class="control-label">Work completed & Materials used: </label>
+                <textarea  id="commentText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;">@description.AdditionalComment</textarea> 
+            </div>
         </div>
 
     }
     <div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
-        <div class="form-group" style="width: max-content; display:none">
-            <label class="control-label">Id: </label>
-            <input id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-        </div>
-        <div class="form-group" style="width: max-content;">
-            <label class="control-label">Work completed & Materials used: </label>
-            <input class="form-control" id="descriptionText" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-        </div>
-        <div class="form-group" style="width: max-content;">
-            <label class="control-label">Total hours spent: </label>
-            <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-        </div>
+            <div class="form-group" style="width: max-content; display:none">
+                <label class="control-label">Id: </label>
+                <input  id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Work completed & Materials used: </label>
+                <input  id="descriptionText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Expected Hours to Complete: </label>
+                <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Work completed & Materials used: </label>
+                <textarea  id="commentText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;"></textarea> 
+            </div>
         <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary" style="    width: fit-content;
     height: fit-content;
     margin-top: 3%;">
@@ -165,28 +175,38 @@
 
     <script>
         function AddLine() {
-            var newRow = `<div class="row d-flex ml-lg-2 ml-sm-1" id="description" style="display: flex;">
-                              <div class="form-group" style="width: max-content; display:none">
-                                    <label class="control-label">Id: </label>
-                                    <input id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-                                </div>
-                                        <div class="form-group" style="width: max-content;">
-                                    <label asp-for="WorkCompletedAndMaterialsUsed" class="control-label">Work completed & Materials used: </label>
-                                    <input asp-for="WorkCompletedAndMaterialsUsed" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
-                                    <span asp-validation-for="WorkCompletedAndMaterialsUsed" class="text-danger"></span>
-                                </div>
-                                <div class="form-group" style="width: max-content;">
-                                    <label asp-for="TotalHoursSpent" class="control-label">Total hours spent: </label>
-                                    <input asp-for="TotalHoursSpent" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
-                                    <span asp-validation-for="TotalHoursSpent" class="text-danger"></span>
-                                </div>
-                               <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary" style="height: fit-content;
-            margin-top: 3%;">Add</button>&nbsp;&nbsp;
-                                <button id="remove-btn" onclick="RemoveLine()" class="btn btn-primary" style="height: fit-content;
-            margin-top: 3%;">Delete</button>&nbsp;&nbsp;
-                                  <button id="save-row-btn" onclick="SaveDescription()" class="btn btn-primary" style="height: fit-content;
-            margin-top: 3%;">Save</button>
-                            </div>
+            var newRow = `<div class="form-group" style="width: max-content; display:none">
+                <label class="control-label">Id: </label>
+                <input  id="idText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Work completed & Materials used: </label>
+                <input  id="descriptionText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;" />
+            </div>
+            
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Expected Hours to Complete: </label>
+                <input class="form-control" id="hoursText" style="background-color:white; display:inline; margin-left: 1%; width: 83%;" />
+            </div>
+            <div class="form-group" style="width: max-content;">
+                <label class="control-label">Work completed & Materials used: </label>
+                <textarea  id="commentText" class="form-control" style="background-color:white; display:inline;margin-left: 1%; width: 62%;"></textarea> 
+            </div>
+        <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Add
+            </button>&nbsp;&nbsp;
+        <button id="remove-btn" onclick="RemoveLine()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Delete
+            </button>&nbsp;&nbsp;
+        <button id="save-row-btn" onclick="SaveDescription()" class="btn btn-primary" style="    width: fit-content;
+    height: fit-content;
+    margin-top: 3%;">
+                Save
+            </button>
         `;
             $("#descriptions").append(newRow);
 
@@ -205,26 +225,40 @@
             var testArr = [];
 
             for (let i = 0; i < document.querySelectorAll("#descriptionText").length; i++) {
-                if (document.querySelectorAll("#idText")[i] == null || document.querySelectorAll("#idText")[i] == undefined) {
+                if (document.querySelectorAll("#idText")[i] == null || document.querySelectorAll("#idText")[i] == undefined || document.querySelectorAll("#idText")[i] == "") {
                     testArr.push({
-                        Id: i + 1,
-                        WorkorderWorkDescription: document.querySelectorAll("#descriptionText")[i].value,
-                        HoursSpent: document.querySelectorAll("#hoursText")[i].value,
-                        WorkorderId: @workorderId
+                        Id: -1,
+                        DescriptionOfWorkToComplete: document.querySelectorAll("#descriptionText")[i].value,
+                        ExpectedHours: document.querySelectorAll("#hoursText")[i].value,
+                        AdditionalComment: document.querySelectorAll("#commentText")[i].value,
+                        WorkorderId: @workorderId,
+                        IsDelete: false,
+                        CreatedBy: "",
+                        ModifideBy:"",
+                        CreatedAt: null,
+                        ModifiedAt: null
                         });
                 }
                 testArr.push({
                     Id: document.querySelectorAll("#idText")[i].value,
-                    WorkorderWorkDescription: document.querySelectorAll("#descriptionText")[i].value,
-                    HoursSpent: document.querySelectorAll("#hoursText")[i].value,
-                    WorkorderId: @workorderId
-                        });
+                    DescriptionOfWorkToComplete: document.querySelectorAll("#descriptionText")[i].value,
+                    ExpectedHours: document.querySelectorAll("#hoursText")[i].value,
+                    AdditionalComment: document.querySelectorAll("#commentText")[i].value,
+                    WorkorderId: @workorderId,
+                    IsDelete: false,
+                    CreatedBy: "",
+                    ModifideBy:"",
+                    CreatedAt: null,
+                    ModifiedAt: null
+                    });
             }
             console.log(testArr);
 
-            $.post('@Url.Action("PostWorkorderDescriptions","Workorders")', { workDescriptions: testArr },
+            $.post('@Url.Action("PostWorkorderTasks","Workorder")', { workorderTasks: testArr },
                 function () {
                     showNotification('success', 'Workorder description updated!');
+                }).fail(function(response){
+                    showNotification('warning', response)
                 });
 
         }

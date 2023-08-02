@@ -28,9 +28,10 @@ namespace MippSamplePortal.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index(string email)
         {
-
+            email = User.Identity.Name;
             WorkorderRequest workorderRequest = new WorkorderRequest();
             workorderRequest.ClientID = _context.Clients.FirstOrDefault(x => x.Email == email).Id;
             workorderRequest.AdditionalComments = "";
@@ -47,7 +48,7 @@ namespace MippSamplePortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
 
             IEnumerable<WorkorderMasterModel> workorder;
@@ -154,7 +155,7 @@ namespace MippSamplePortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
 
 
@@ -193,7 +194,7 @@ namespace MippSamplePortal.Controllers
                     using (var response = await httpClient.PostAsync(apiUrl + "Workorders/PostWorkorder", content))
                     {
                         string apiResponse = await response.Content.ReadAsStringAsync();
-
+                        
 
                         using (var httpClient1 = new HttpClient())
                         {
@@ -228,7 +229,7 @@ namespace MippSamplePortal.Controllers
                 return View(null);
             }
             IEnumerable<ClientStatus> workorderStatus = null;
-            IEnumerable<WorkorderWorkDescription> workorderWorkDescription = null;
+            IEnumerable<WorkorderTask> workorderWorkDescription = null;
             var env = _hostEnvironment.EnvironmentName;
             string apiUrl = string.Empty;
             if (env == "Development")
@@ -240,7 +241,7 @@ namespace MippSamplePortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
 
             WorkorderRequest workorderRequest = new WorkorderRequest();
@@ -324,13 +325,13 @@ namespace MippSamplePortal.Controllers
                         {
                             StringContent content3 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
 
-                            using (var response3 = await httpClient3.PostAsync(apiUrl + "Workorders/GetWorkorderWorkDescription", content3))
+                            using (var response3 = await httpClient3.PostAsync(apiUrl + "Workorders/GetWorkorderTaskDescription", content3))
                             {
                                 string apiResponse3 = await response3.Content.ReadAsStringAsync();
                                 try
                                 {
                                     workorderWorkDescription = JsonConvert.DeserializeObject
-                                        <IEnumerable<WorkorderWorkDescription>>(apiResponse3);
+                                        <IEnumerable<WorkorderTask>>(apiResponse3);
                                 }
                                 catch (Exception ex)
                                 {
@@ -352,6 +353,33 @@ namespace MippSamplePortal.Controllers
 
             }
             return View(null);
+        }
+        [HttpPost]
+       
+        public async Task<IActionResult> PostWorkorderTasks(List<WorkorderTask> workorderTasks)
+        {
+            
+            try {
+                foreach (var task in workorderTasks)
+                {
+                   
+
+                    if(task.Id >=0)
+                    {
+                        
+                        _context.WorkorderTasks.Update(task);
+                    }
+                    else
+                    {
+                        _context.WorkorderTasks.Add(task);
+                    }
+                    _context.SaveChanges();
+                }
+            }
+            catch(Exception ex) { 
+                throw ex; 
+            }
+            return Ok();
         }
 
         [HttpPost]
@@ -383,7 +411,7 @@ namespace MippSamplePortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
 
             WorkorderMasterModel workorderMaster = new WorkorderMasterModel();
@@ -413,6 +441,8 @@ namespace MippSamplePortal.Controllers
                     }
                 }
             }
+
+
 
             string fname = workorderMaster.AssignedTo.Split(" ")[0];
 

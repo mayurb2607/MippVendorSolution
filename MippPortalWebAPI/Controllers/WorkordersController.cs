@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
+using Org.BouncyCastle.Crypto.Modes;
 
 namespace MippPortalWebAPI.Controllers
 {
@@ -57,12 +59,34 @@ namespace MippPortalWebAPI.Controllers
             }
         }
 
-        [HttpPost("GetWorkorderDescriptions")]
-        public List<WorkorderWorkDescription> GetWorkorderDescriptions (string workorderId)
+        [HttpGet("GetWorkorderStatus")]
+        public async Task<ActionResult<String>> GetWorkorderStatus(int workorderId)
         {
-            var descriptions = _context.WorkorderWorkDescriptions.Where(x => x.WorkorderId == int.Parse(workorderId)).ToList();
+            try
+            {
+                var workorder = _context.Workorders.FirstOrDefault(x => x.Id == workorderId);
+                if(workorder != null) {
+                    return Ok(workorder.Status);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpPost("GetWorkorderDescriptions")]
+        public List<Models.WorkorderTask> GetWorkorderDescriptions (string workorderId)
+        {
+            var descriptions = _context.WorkorderTasks.Where(x => x.WorkorderId == int.Parse(workorderId)).ToList();
             return descriptions;
         }
+        
+        
 
         [HttpPost("GetWorkorders")]
         public async Task<ActionResult<IEnumerable<Workorder>>> GetWorkorders(Helpers.WorkorderRequest workorderRequest)
@@ -302,13 +326,15 @@ namespace MippPortalWebAPI.Controllers
             return statuses;
         }
 
-        [HttpPost("GetWorkorderWorkDescription")]
-        public async Task<ActionResult<IEnumerable<WorkorderWorkDescription>>> GetWorkorderWorkDescription(Helpers.WorkorderRequest workorderRequest)
+        [HttpPost("GetWorkorderTaskDescription")]
+        public async Task<ActionResult<IEnumerable<WorkorderTask>>> GetWorkorderTaskDescription(Helpers.WorkorderRequest workorderRequest)
         {
             workorderRequest.ClientID = 1;
-            var workDescriptions = _context.WorkorderWorkDescriptions.Where(x => x.WorkorderId == workorderRequest.Id).ToList();
+            var workorderTasks = _context.WorkorderTasks.Where(x => x.WorkorderId == workorderRequest.Id).ToList();
 
-            return workDescriptions;
+
+
+            return workorderTasks;
         }
 
 
@@ -389,13 +415,13 @@ namespace MippPortalWebAPI.Controllers
         // POST: api/Workorders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostWorkorder")]
-        public async Task<ActionResult<Workorder>> PostWorkorder([Bind] Workorder workorder)
+        public async Task<ActionResult> PostWorkorder([Bind] Workorder workorder)
         {
             if (_context.Workorders == null)
             {
                 return Problem("Entity set 'MippdbContext.Workorders'  is null.");
             }
-            _context.Workorders.Add(workorder);
+            var newworkorder= _context.Workorders.Add(workorder);
             try
             {
                 await _context.SaveChangesAsync();
@@ -413,8 +439,119 @@ namespace MippPortalWebAPI.Controllers
             }
             Helpers.WorkorderRequest workorderRequest = new Helpers.WorkorderRequest();
             workorderRequest.ClientID = (int)workorder.ClientId;
+            workorderRequest.Id= workorder.Id;
             return CreatedAtAction("GetWorkorders", new { workorderRequest = workorderRequest });
         }
+        [HttpGet("GetWorkorderVendorWorkDescription")]
+        public async Task<ActionResult<List<WorkorderWorkDescription>>>GetWorkorderVendorWorkDecsription(int workorderId)
+        { 
+            var respone=new List<WorkorderWorkDescription>();
+            try
+            {
+                if(workorderId == 0) 
+                {
+                    throw new Exception("WorkOrderId does not exist");
+
+                }
+                var workorder=_context.Workorders.FirstOrDefault(x=>x.Id==workorderId);
+                if(workorder == null)
+                {
+                    throw new Exception("WorkOrderId does not exist");
+
+                }
+                respone = _context.WorkorderWorkDescriptions.Where(x=>x.WorkorderId==workorderId).ToList();
+
+                return respone;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+       
+
+        }
+
+        [HttpPost("PostWorkorderWorkDescription")]
+        public async Task<ActionResult<Workorder>> PostWorkorderWorkDecsription([Bind] WorkorderWorkDescription workorderWorkDescription)
+        {
+           
+            
+            var workorder = _context.Workorders.FirstOrDefault(x => x.Id == workorderWorkDescription.WorkorderId);
+            if (workorder == null)
+            {
+                throw new Exception("WorkOrderId does not exist");
+
+            }
+            if (workorder.Status != "In Progress")
+            {
+                throw new Exception("VenderDetails cannot beupdated");
+            }
+            try
+            {
+                
+                        _context.WorkorderWorkDescriptions.Add(workorderWorkDescription);
+                    
+            }
+            catch
+            {
+                throw;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                
+                
+                    throw;
+     
+            }
+            
+            return Ok(workorderWorkDescription);
+        }
+
+        [HttpPost("PutWorkorderWorkDescription")]
+        public async Task<ActionResult<Workorder>> PutWorkorderWorkDecsription([Bind] WorkorderWorkDescription workorderWorkDescription)
+        {
+
+
+            var workorder = _context.Workorders.FirstOrDefault(x => x.Id == workorderWorkDescription.WorkorderId);
+            if (workorder == null)
+            {
+                throw new Exception("WorkOrderId does not exist");
+
+            }
+            if (workorder.Status != "In Progress")
+            {
+                throw new Exception("VenderDetails cannot beupdated");
+            }
+            try
+            {
+
+                _context.WorkorderWorkDescriptions.Update(workorderWorkDescription);
+
+            }
+            catch
+            {
+                throw;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+
+
+                throw;
+
+            }
+
+            return Ok(workorderWorkDescription);
+        }
+
+
 
         // DELETE: api/Workorders/5
         [HttpDelete("{id}")]

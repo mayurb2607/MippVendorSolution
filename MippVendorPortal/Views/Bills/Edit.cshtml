@@ -1,167 +1,748 @@
-﻿@model MippPortalWebAPI.Models.Bill
-
+﻿@model MippVendorPortal.Models.Bill
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
+
+    ViewBag.Subtotal = "";
+    ViewBag.Tax = "";
+    ViewBag.Total = "";
+    var fileUrl = ViewBag.fileUrl;
+    int tax = 0;
+   
+    var disabled = true;
+    var taxes=@ViewBag.taxList;
 }
 
-<h1>Edit</h1>
 
-<h4>Bill</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="ClientId" class="control-label"></label>
-                <input asp-for="ClientId" class="form-control" />
-                <span asp-validation-for="ClientId" class="text-danger"></span>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="callout callout-info">
+                <h5><i class="fas fa-info"></i> Note:</h5>
+                This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
             </div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+            <form id="myForm" method="post" enctype="multipart/form-data">
+            <div class="invoice p-3 mb-3" id="invoice">
+                
+
+                    <div class="row invoice-info" id="invoice-table">
+                        <div style="width: 65%; margin-left: auto;">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Title:</label>
+                                    <input type="text" class="form-control" id="billTitle" value="@Model.Title" required>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Summary(optional):</label>
+                                    <input type="text" class="form-control" value="@Model.Summary" id="summary">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="@Model.BillTo">Bill To:</label>
+                                    <input type="text" class="form-control" value="@Model.BillTo" id="billTo" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="@Model.CareOf">Care Of:</label>
+                                    <input type="text" class="form-control" value="@Model.CareOf" id="careOf" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="@Model.AddressLine1">Address</label>
+                                <input type="text" class="form-control" value="@Model.AddressLine1" id="inputAddress" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputAddress2">Address 2</label>
+                                <input type="text" class="form-control" value="@Model.AddressLine2" id="inputAddress2" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="inputCity">City</label>
+                                    <input type="text" class="form-control" value="@Model.City" id="city" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputState">Province</label>
+                                    <input type="text" class="form-control" value="@Model.Province" id="province" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputZip">Zip</label>
+                                    <input type="text" class="form-control" value="@Model.Zip" id="zip" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 invoice-col">
+                           
+
+                                
+                                
+                                   
+                                <input type="text" class="form-control" value="@Model.WorderId" id="woId" disabled hidden>
+                                
+                                <div class="form-group">
+                                    <label for="@Model.BillDate">Bill Date:</label>
+                                    <input type="date" class="form-control" value="@Model.BillDate.Value.ToString("yyyy-MM-dd")" id="billDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="@Model.PaymentDueOn">Due Date:</label>
+                                    <input type="date" class="form-control" value="@Model.PaymentDueOn.Value.ToString("yyyy-MM-dd")" id="dueDate" required>
+                                </div>
+
+                            
+                        </div>
+
+                    </div>
+
+                
+
+                <div id="billItems">
+                    @for( int i=0;i<ViewBag.BillItems.Count; i++){
+                        <div style="border:solid 2px gray; padding: 1%;margin-bottom:1%" id="billItem">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label>Item</label>
+                                    <select  class="form-control" id="item" onchange="populateFields(event,this)" value=@ViewBag.BillItems[i]ProductAndServiceId required>
+                                     <option disabled selected value="">Select Product And Services</option>
+                                        @foreach (var item in ViewBag.services)
+                                        {
+                                            <option value=@item.Id data-title=@item.ItemName>@item.ItemName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label>Unit</label>
+                                    <input type="text" value="@ViewBag.BillItems[i].Unit" class="form-control" id="unit" required>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Quantity</label>
+                                    <input type="number" class="form-control" value="@ViewBag.BillItems[i].Quantity" id="quantity" onchange="UpdateAmount(this)" required>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Price</label>
+                                    <input type="number" id="price" step="0.01" class="form-control" value="@ViewBag.BillItems[i].Price" onchange="UpdateAmount(this)" readonly>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Amount</label>
+                                    <input type="number" step="0.01" class="form-control" value="@ViewBag.BillItems[i].Subtotal" id="amount" readonly>
+                                </div>
+                            </div>
+                       
+                            <div class="form-row">
+                                <div class="form-group col-md-8">
+                                    <label>Description</label>
+                                    <textarea class="form-control" id="description">@ViewBag.BillItems[i].Description</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                <label></label>
+                                                <select class="form-control" onchange="CalculateTax(this)" value="@ViewBag.BillItems[i].TaxId1" id="taxOptions1">
+                                                    <option>Select Tax rate</option>
+                                                    @foreach (var item in ViewBag.taxList)
+                                                    {
+                                                        <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                
+                                            <div class="col">
+                                                <label></label>
+                                                <input type="number" step="0.01" class="form-control" value="@ViewBag.BillItems[i].Tax1" id="taxedAmount1" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                
+                                            <div class="col">
+                                                <label></label>
+                                                <select class="form-control" onchange="CalculateTax(this)" value="@ViewBag.BillItems[i].TaxId2" id="taxOptions2">
+                                                    <option>Select Tax rate</option>
+                                                    @foreach (var item in ViewBag.taxList)
+                                                    {
+                                                         <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                
+                                            <div class="col">
+                                                <label></label>
+                                                <input type="number" step="0.01" class="form-control" value="@ViewBag.BillItems[i].Tax2" id="taxedAmount2" readonly>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                             </div>   
+                                @if (i > 0)
+                                {
+                                    <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
+                                }
+
+                            
+                        </div>
+                    }
+                </div>
+                <button id="add-row-btn" onclick="AddLine()" class="btn btn-primary">Add Item</button>
+                <div>
+                    <div class="col" style="width: 40%; float : right" >
+                        <p class="lead">Amount Due </p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:50%">Subtotal:</th>
+                                        <td  id="subtotals">@Model.SubTotal</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tax</th>
+                                        <td id="taxes">@Model.TaxAmount</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Total:</th>
+                                        <td id="totals">@Model.Total</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea class="form-control" id="note"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Footer:</label>
+                    <textarea class="form-control" id="footer"></textarea>
+                </div>
+                <div id="inputContainer" class="row">
+@*                    <input type="text" value="@ViewBag.fileUrl" id="viewBagValue" style="display:none" class="form-control" />
+*@@*                    <div class="col-6">
+                        <p class="lead">Payment Methods:</p>
+                        <img src="../../dist/img/credit/visa.png" alt="Visa">
+                        <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
+                        <img src="../../dist/img/credit/american-express.png" alt="American Express">
+                        <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
+                        <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                            All cards are accepted.
+                        </p>
+                    </div>
+*@
+                   
+
+                </div>
+                <br/>
+                <label>Uploaded documents</label>
+                <div class="row d-flex col-sm-12" id="uploadedDocuments">
+                    @foreach (var item in ViewBag.ImageUrls)
+                    {
+                        <div class="m-1">
+                        <img src="@item" id="image" style="float: left;
+                            width:  100px;
+                            height: 100px;
+                            object-fit: cover;"/>
+                        <div style="align-items:center">
+                            <a href="@item" class="m-1" ><i class="fas fa-download"></i></a>
+                            <a href=# class="m-1" onclick='getImageData(this)'  ><i class="fas fa-trash"></i></a>
+                        </div>
+                        </div>
+
+                    }
+                   @* <button type="button" class="btn btn-danger" style="margin-left: 1%;height: fit-content;
+                           align-self: center;" id="removeFile" disabled>
+                        Delete
+                    </button>*@
+                </div>
+
+
+
+                <br/>
+                    <label id="document">Upload Document</label>
+
+         @*       @using (Html.BeginForm("UploadFile", "Bills", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {*@
+                
+                    <div style="display: flex;">
+                        <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 30%;" multiple />
+                        <select name="fileType" style="display:none">
+                            <option value="@Model.WorderId" selected>@Model.WorderId</option>
+                        </select>
+                        <input type="text" class="form-control" value="@Model.WorderId" id="fileType" name="fileType" disabled style="display:none">
+@*                        <button type="submit" class="btn btn-secondary">Upload</button>
+*@                       @* <button type="button" class="btn btn-danger" style="margin-left: 1%;" id="removeFile">
+                            Clear
+                        </button>*@
+
+                    </div>
+               
+                        <br />
+                        <br />
+
+                    <button type="submit" class="btn btn-primary m-1">Save</button>
+                    <button id="Updatestatus" onclick="submitForApproval()" class="btn btn-primary m-1">Submit for approval</button>
+
+                </form>
+
+
+
+                <div class="row no-print">
+                    <div class="col-12">
+                       
+                    </div>
+                </div>
+            
+        
+                @section Scripts {
+                     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+                
+
+
+                 
+                    <script src="~/dist/js/notify.js"></script>
+                    <script src="~/dist/js/notify.min.js"></script>
+
+                    <script>
+                        
+                        window.onload = function () {
+
+                            items = @Json.Serialize(ViewBag.BillItems);
+
+                            
+                            debugger;
+                            for(var i=0;i<items.length; i++)
+                            {
+                                document.querySelectorAll("#item")[i].value=items[i].productAndServiceId;
+                            }
+                        }
+                        function submitForApproval(){
+                            form = document.getElementById('myForm');
+                            form.submit();
+                            $.ajax({
+                                    url: '/Bills/UpdateStatus',
+                                    type: 'POST',
+                                    data: {
+                                        workorderId: @Model.WorderId,
+                                        
+                                    },
+                                    success: function (response) {
+                                        showNotification('success', "Bill submited");
+                                        
+                                    },
+                                    error: function(error){
+                                        showNotification('Error', error);                                    
+                                    }
+                                   });
+
+
+                        }
+
+                        function getImageData(element){
+                            parent=element.parentElement.parentElement;
+                            var image = parent.getElementsByTagName("img")[0];
+                            console.log(image);
+                            image.style.border = "2px solid black";
+                            image.style.opacity = "0.5";
+                            image.style.cursor = "pointer";
+
+                            var inputElement = $('<input>', {
+                                type: 'text',
+                                name: 'viewBagValue',
+                                id: 'viewBagValue',
+                                style: 'display:none',
+                                value: image.src // Set the value from the AJAX response
+                            });
+                            $('#inputContainer').append(inputElement);
+
+                            //document.getElementById("removeFile").disabled = false;
+                        }
+                         function showNotification(type, message) {
+                            $.notify(message, type);
+                        }
+
+   
+                            $('#myForm').submit(function (e) {
+                                var form = document.getElementById('myForm')
+
+                                // check if the input is valid
+                                if(!form.reportValidity()) return false;
+                                e.preventDefault(); // Prevent the default form submission
+
+                                var workorderID = document.getElementById('fileType').value;
+                                var formData = new FormData(this);
+                                console.log("formData", formData);
+
+                                var fileInput = document.getElementById('file');
+                                //Iterating through each files selected in fileInput
+                                //for (i = 0; i < fileInput.files.length; i++) {
+                                //    //Appending each file to FormData object
+                                //    formData.append(fileInput.files[i].name, fileInput.files[i]);
+                                //}
+                                formData.append(workorderID, workorderID);
+                                console.log("formData", formData);
+                                var billItems = [];
+
+                                        for (let i = 0; i < document.querySelectorAll("#unit").length; i++) {
+                                            billItems.push({
+                                                Id:0,
+                                                ProductAndServiceId: document.querySelectorAll("#item")[i].value,
+                                                BillId:@Model.Id,
+                                                Name: document.querySelectorAll("#item")[i].selectedOptions[0].dataset.ItemName,
+                                                Description: document.querySelectorAll("#description")[i].value,
+                                                Quantity: document.querySelectorAll("#quantity")[i].value,
+                                                Unit: document.querySelectorAll("#unit")[i].value,
+                                                Price: document.querySelectorAll("#price")[i].value,
+                                                TaxId1: document.querySelectorAll("#taxOptions1")[i].value,
+                                                Tax1: document.querySelectorAll("#taxedAmount1")[i].value,
+                                                TaxId2: document.querySelectorAll("#taxOptions2")[i].value,
+                                                Tax2: document.querySelectorAll("#taxedAmount2")[i].value,
+                                                subtotal :  document.querySelectorAll("#amount")[i].value ,
+                                                total: parseFloat( document.querySelectorAll("#amount")[i].value ) + parseFloat( document.querySelectorAll("#taxedAmount1")[i].value) + parseFloat( document.querySelectorAll("#taxedAmount2")[i].value)
+                                            });
+                                        }
+                                       
+                                       
+
+                                var bill = 
+                                {
+                                    Id : @Model.Id,
+                                    Title: document.getElementById("billTitle").value,
+                                    Summary: document.getElementById("summary").value,
+                                            
+                                    BillTo: document.getElementById("billTo").value,
+                                    CareOf: document.getElementById("careOf").value,
+                                    WorderId: document.getElementById("woId").value,
+                                    AddressLine1: document.getElementById("inputAddress").value,
+                                    AddressLine2: document.getElementById("inputAddress2").value,
+                                    City: document.getElementById("city").value,
+                                    Province: document.getElementById("province").value,
+                                    Zip: document.getElementById("zip").value,
+                                    BillDate: document.getElementById("billDate").value,
+                                    InvoiceDate: document.getElementById("billDate").value,
+                                    PaymentDueOn: document.getElementById("dueDate").value,
+                                    Subtotal: document.getElementById("subtotals").innerHTML,
+                                    TaxAmount: document.getElementById("taxes").innerHTML,
+                                    Total: document.getElementById("totals").innerHTML,
+                                    Note: document.getElementById("note").value,
+                                    Footer: document.getElementById("footer").value,
+                                    ClientEmail:"@Model.ClientEmail",
+                                    VendorEmail:"@Model.VendorEmail",
+                                    ClientId:@Model.ClientId,
+                                    Ponumber:"",
+                                    Wonumber:@Model.Wonumber,
+                                    Documents:""
+                                    
+                                };
+
+                                console.log(bill,billItems);
+                                var title = document.getElementById("billTitle");
+                                var summary = document.getElementById("summary");
+                                
+
+                                        
+
+                                $.ajax({
+                                    url: '/Bills/Update',
+                                    type: 'POST',
+                                    data: {
+                                        woId: @Model.WorderId,
+                                        bill: bill,
+                                        billItems:billItems 
+                                    },
+                                    success: function (response) {
+
+                                                $.ajax({
+                                            url: '/Bills/Upload',
+                                            type: 'POST',
+                                            data: formData,
+                                            processData: false,
+                                            contentType: false,
+                                            success: function (response) {
+                                                // Handle success
+                                                //myValue = response.updatedValue;
+                                                console.log(response);
+                                                //alert(response.message);
+                                                showNotification('success', "File(s) uploaded successfully!!");
+
+                                                showNotification('success', "Data saved");
+                                                removeFile()
+
+
+                                                     
+                                                        
+                                                },
+                                                error: function () {
+                                                // Handle error
+                                                alert('Error uploading file.');
+                                            }
+                                            });
+                                            
+                                            
+                                            
+                                    },
+                                    error: function () {
+                                        // Handle error
+                                        alert('Error saving data.');
+                                    }
+                                });
+                        });
+
+                        function removeFile() {
+                            debugger;
+                            var files = [];
+                            for(i=0; i<document.querySelectorAll('#viewBagValue').length; i++){
+                                files.push(document.querySelectorAll('#viewBagValue')[i].value);
+                            }
+                                $.post('@Url.Action("Remove", "Bills")', { urls: files },
+                                    function () {
+                                        window.location.reload();
+                                    });
+                            
+                        }
+                     
+                       
+
+                        function AddLine(){
+                            var newRow = `
+                                                                               
+                                     <div style="border:solid 2px gray; padding: 1%; margin-bottom:1%" id="billItem">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-3">
+                                                <label>Item</label>
+                                                <select class="form-control" id="item" onchange="populateFields(event,this)" required>
+                                                 <option disabled selected value="">Select Product And Services</option>
+                                                    @foreach (var item in ViewBag.services)
+                                                    {
+                                                        <option value=@item.Id>@item.ItemName</option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group col-md-2">
+                                                <label>Unit</label>
+                                                <input type="text" class="form-control" id="unit" required>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label>Quantity</label>
+                                                <input type="number" class="form-control" id="quantity" onchange="UpdateAmount(this)" required>
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label>Price</label>
+                                                <input type="number" id="price" step="0.01" class="form-control" onchange="UpdateAmount(this)" required>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label>Amount</label>
+                                                <input type="number" step="0.01" class="form-control" id="amount" readonly>
+                                            </div>
+                                        </div>
+                       
+                                        <div class="form-row">
+                                            <div class="form-group col-md-8">
+                                                <label>Description</label>
+                                                <textarea class="form-control" id="description"></textarea>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row">
+                                               <div class="col">
+                                                        <label></label>
+                                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions1">
+                                                            <option>Select Tax rate</option>
+                                                            @foreach (var item in ViewBag.taxList)
+                                                            {
+                                                                <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <input type="number" step="0.01" class="form-control" id="taxedAmount1" readonly>
+                                                    </div>
+                                            </div>
+                                            <div class="row">
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <select class="form-control" onchange="CalculateTax(this)" id="taxOptions2">
+                                                            <option>Select Tax rate</option>
+                                                            @foreach (var item in ViewBag.taxList)
+                                                            {
+                                                                 <option value=@item.Id data-rate=@item.TaxRate>@item.TaxName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                
+                                                    <div class="col">
+                                                        <label></label>
+                                                        <input type="number" step="0.01" class="form-control" id="taxedAmount2" readonly>
+                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="remove-btn" onclick="DeleteLine()" class="btn btn-primary">Delete</button>
+                                </div>
+                                `;
+                            $("#billItems").append(newRow);
+                        }
+
+                        function DeleteLine(){
+                            var quanLen = document.querySelectorAll("#quantity").length;
+                            //var taxString = document.querySelectorAll("#taxOptions")[quanLen - 1].value;
+
+                            document.getElementById("billItems").removeChild(document.getElementById("billItems").children[quanLen - 1]);
+                            UpdateTotalAmount();
+
+
+
+                        }
+
+                        
+
+
+                    </script>
+                    <script>
+                   
+
+                      
+                        function populateFields(event,element)
+                        {
+                                billItem = element.parentElement.parentElement.parentElement;
+                                var id =parseInt(event.target.value);
+                               
+                                $.ajax({
+                                    type: 'GET',
+                                    url: '/Bills/GetProductAndServiceDetails',
+
+                                    data: { serviceId: id },
+                                    success: function (data) {
+                                        billItem.querySelector("#price").value = parseFloat(data.price).toFixed(2);
+                                        billItem.querySelector("#unit").value = data.unit;
+                                        billItem.querySelector("#quantity").value = 1;
+                                        billItem.querySelector("#description").innerText = data.description;
+
+                                        var amount = parseFloat(1 * data.price).toFixed(3);
+                                        billItem.querySelector("#amount").value = amount;
+                                        
+                                        if(data.taxId1 != null)
+                                        {
+                                            billItem.querySelector("#taxOptions1").value = '' + data.taxId1;
+                                            var taxamout = parseFloat(amount) * parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                                            billItem.querySelector("#taxedAmount1").value=parseFloat(taxamout).toFixed(3)
+                                        }
+                                        if(data.taxId2 != null)
+                                        {
+                                            billItem.querySelector("#taxOptions2").value = '' + data.taxId2;
+                                            var taxamout = parseFloat(amount) * parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate)
+                                            billItem.querySelector("#taxedAmount2").value = parseFloat(taxamout).toFixed(3); 
+                                        }
+
+                                        UpdateTotalAmount();
+                                        
+
+
+
+                                    },
+                                    error: function (error) {
+                                    // Handle error
+                                    alert('Error getting details of item.');
+                                    }
+                                });
+                        }
+
+                        function UpdateAmount(element) 
+                        {
+                            billItem = element.parentElement.parentElement.parentElement;
+                            var price = parseFloat(billItem.querySelector("#price").value);
+                            var quantity= parseFloat(billItem.querySelector("#quantity").value);
+                            if(!isNaN(price) && !isNaN(quantity)  ){
+                                var amount = price * quantity;
+                                billItem.querySelector("#amount").value = parseFloat(amount).ToFixed(3);
+                                UpdateTax(billItem);
+                            }
+                        }
+
+                        
+
+                        function UpdateTotalAmount() {
+                            console.log("338", event.target.value);
+                            
+                            
+                            var subtotal= 0.00;
+                            var tax=0.00;
+                            
+                            for (let i = 0; i < document.querySelectorAll("#amount").length; i++)
+                            {
+                                    var amount = parseFloat(document.querySelectorAll("#amount")[i].value)
+                                    subtotal = subtotal + amount;
+
+                                    var tax1 = parseFloat(document.querySelectorAll("#taxedAmount1")[i].value);
+                                    var tax2 = parseFloat(document.querySelectorAll("#taxedAmount2")[i].value);
+                                    if (isNaN(tax1)) {
+                                        tax1=0.00;
+                                    }
+                                    if (isNaN(tax2)) {
+                                        tax2=0.00;
+                                    }
+                                    tax=tax+tax1+tax2;
+
+                                    
+                            }
+                            var totalamout = subtotal + tax;
+                            document.getElementById("subtotals").innerText= parseFloat(subtotal).toFixed(2);
+                            document.getElementById("taxes").innerText= parseFloat(tax).toFixed(2);
+                            document.getElementById("totals").innerText = parseFloat(totalamout).toFixed(2);
+
+                        }
+
+                        function UpdateTax(billItem) {
+                            debugger;
+                            
+                            var rate1 = parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                            var rate2 = parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate);
+                            var amount = parseFloat(billItem.querySelector("#amount").value);
+                            debugger;
+                            if (!isNaN(rate1)) {
+                                        billItem.querySelector("#taxedAmount1").value  = parseFloat(amount*rate1).toFixed(3);
+                             }
+                            if (!isNaN(rate2)) {
+                                billItem.querySelector("#taxedAmount2").value  = parseFloat(amount*rate2).toFixed(3);
+                            }
+                            
+                             
+                            UpdateTotalAmount();
+                        };
+
+                        function CalculateTax(element) {
+                            debugger;
+                            billItem = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+                            var rate1 = parseFloat(billItem.querySelector("#taxOptions1").selectedOptions[0].dataset.rate);
+                            var rate2 = parseFloat(billItem.querySelector("#taxOptions2").selectedOptions[0].dataset.rate);
+                            var amount = parseFloat(billItem.querySelector("#amount").value);
+                            debugger;
+                            if (!isNaN(rate1)) {
+                                        billItem.querySelector("#taxedAmount1").value  = parseFloat(amount*rate1).toFixed(3);
+                             }
+                            if (!isNaN(rate2)) {
+                                billItem.querySelector("#taxedAmount2").value  = parseFloat(amount*rate2).toFixed(3);
+                            }
+                            
+                             
+                            UpdateTotalAmount();
+                        };
+
+
+
+                        
+                    </script>
+                }
+
+
             </div>
-            <div class="form-group">
-                <label asp-for="Summary" class="control-label"></label>
-                <input asp-for="Summary" class="form-control" />
-                <span asp-validation-for="Summary" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BillTo" class="control-label"></label>
-                <input asp-for="BillTo" class="form-control" />
-                <span asp-validation-for="BillTo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CareOf" class="control-label"></label>
-                <input asp-for="CareOf" class="form-control" />
-                <span asp-validation-for="CareOf" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AddressLine1" class="control-label"></label>
-                <input asp-for="AddressLine1" class="form-control" />
-                <span asp-validation-for="AddressLine1" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AddressLine2" class="control-label"></label>
-                <input asp-for="AddressLine2" class="form-control" />
-                <span asp-validation-for="AddressLine2" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AddressLine3" class="control-label"></label>
-                <input asp-for="AddressLine3" class="form-control" />
-                <span asp-validation-for="AddressLine3" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Province" class="control-label"></label>
-                <input asp-for="Province" class="form-control" />
-                <span asp-validation-for="Province" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Country" class="control-label"></label>
-                <input asp-for="Country" class="form-control" />
-                <span asp-validation-for="Country" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BillNumber" class="control-label"></label>
-                <input asp-for="BillNumber" class="form-control" />
-                <span asp-validation-for="BillNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ponumber" class="control-label"></label>
-                <input asp-for="Ponumber" class="form-control" />
-                <span asp-validation-for="Ponumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Wonumber" class="control-label"></label>
-                <input asp-for="Wonumber" class="form-control" />
-                <span asp-validation-for="Wonumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="InvoiceDate" class="control-label"></label>
-                <input asp-for="InvoiceDate" class="form-control" />
-                <span asp-validation-for="InvoiceDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaymentDueOn" class="control-label"></label>
-                <input asp-for="PaymentDueOn" class="form-control" />
-                <span asp-validation-for="PaymentDueOn" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BillItemId" class="control-label"></label>
-                <input asp-for="BillItemId" class="form-control" />
-                <span asp-validation-for="BillItemId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SubTotal" class="control-label"></label>
-                <input asp-for="SubTotal" class="form-control" />
-                <span asp-validation-for="SubTotal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TaxAmount" class="control-label"></label>
-                <input asp-for="TaxAmount" class="form-control" />
-                <span asp-validation-for="TaxAmount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Total" class="control-label"></label>
-                <input asp-for="Total" class="form-control" />
-                <span asp-validation-for="Total" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Note" class="control-label"></label>
-                <input asp-for="Note" class="form-control" />
-                <span asp-validation-for="Note" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Footer" class="control-label"></label>
-                <input asp-for="Footer" class="form-control" />
-                <span asp-validation-for="Footer" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Documents" class="control-label"></label>
-                <input asp-for="Documents" class="form-control" />
-                <span asp-validation-for="Documents" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VendorId" class="control-label"></label>
-                <input asp-for="VendorId" class="form-control" />
-                <span asp-validation-for="VendorId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="City" class="control-label"></label>
-                <input asp-for="City" class="form-control" />
-                <span asp-validation-for="City" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Zip" class="control-label"></label>
-                <input asp-for="Zip" class="form-control" />
-                <span asp-validation-for="Zip" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BillDate" class="control-label"></label>
-                <input asp-for="BillDate" class="form-control" />
-                <span asp-validation-for="BillDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VendorEmail" class="control-label"></label>
-                <input asp-for="VendorEmail" class="form-control" />
-                <span asp-validation-for="VendorEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ClientEmail" class="control-label"></label>
-                <input asp-for="ClientEmail" class="form-control" />
-                <span asp-validation-for="ClientEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
 

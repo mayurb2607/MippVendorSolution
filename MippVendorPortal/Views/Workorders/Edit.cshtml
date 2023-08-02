@@ -1,4 +1,8 @@
-﻿@model MippPortalWebAPI.Models.Workorder
+﻿@using Syncfusion.EJ2;
+@using Syncfusion.EJ2.Navigations;
+@using Syncfusion.EJ2.Grids;
+@using MippVendorPortal.Models;
+@model  MippVendorPortal.ViewModel.WorkorderViewModel;
 
 @{
     ViewData["Title"] = "Edit";
@@ -7,10 +11,13 @@
     Layout = "~/Views/Shared/_LoggedInLayout.cshtml";
     var descriptions = ViewBag.Descriptions;
     var status = "";
+    var workdescriptions = ViewBag.WorkOrderWorkDescription;
+
 }
 
 @*<h1>Edit</h1>
 *@
+
 <style>
     p {
     margin: 0 0 1em;
@@ -119,71 +126,71 @@
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
 }​
+.col-sm-12 {
+    
+    flex: inherit;
+    max-width: 100%;
+}
+.form-group {
+        margin-bottom: auto;
+}
+
 </style>
 
 <div class="card card-default">
 
-<div class="card-header">
-<h3 class="card-title">Workorder Details</h3>
-<button class="btn btn-secondary" id="commentsSection" style="float:right">Comments</button>
+<div class="card-header" style=" background-color: navy; height: 20%;text-align: left;overflow:auto;">
+<h2 class="card-title"style="color:white;" >Workorder Details</h2>
 
 <div id="overlay"></div>
 </div>
 
-<div class="card-body">
-        <div id='title' align="center" style=" background-color: lightblue;
-    height: 20%;
-    text-align: center;
-    overflow:auto;">
-            <h2>replace sink in the unit</h2>
+    <div class="card-body"  >
+        <div id='title' align="center" style=" background-color: lightblue; height: 10%;text-align: left;overflow:auto;">
+            <h4 class="m-1">@Model.Description</h4>
         </div>
-            <div class="form-horizontal" style="display: flex;
-    width: 36vw;
-    justify-content: space-between;">
+         <div class="form-horizontal" style="display: flex;justify-content: space-between; overflow-x:scroll">
 
-            <div class="col-sm-6">
+          
               
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="col-sm-12" style="
-    margin-top: 6%;
-">
+                    <div class="col-sm-13" style=" margin-top: 6%;">
                     <input type="hidden" asp-for="Id" id="Id"/>
                     <input type="hidden" asp-for="ClientId" id="ClientId"/>
                     <input type="hidden" asp-for="VendorId" id="VendorId" />
-                    <p>Assigned To:</p>
-                    <div class="form-group" style="width: max-content;">
-                        <label asp-for="AssignedTo" class="control-label">Name: </label>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="AssignedTo" class="control-label">Assigned To: </label>
                             <input asp-for="AssignedTo" class="form-inline" id="AssignedTo" readonly="readonly" style="border: none; background-color:white; display:inline" />
                         <span asp-validation-for="AssignedTo" class="text-danger"></span>
                     </div>
-                    <div class="form-group" style="width: max-content;">
+                    <div class="form-group my-0" style="width: fit-content;">
                         <label asp-for="AssignedToCompany" class="control-label">Company: </label>
                             <input asp-for="AssignedToCompany" id="AssignedToCompany" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                         <span asp-validation-for="AssignedToCompany" class="text-danger"></span>
                     </div>
-                    <div class="form-group" style="width: max-content;">
+                    <div class="form-group my-0" style="width: fit-content;">
                         <label asp-for="AssignedToAddress" class="control-label">Location: </label>
                             <input asp-for="AssignedToAddress" id="AssignedToAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                         <span asp-validation-for="AssignedToAddress" class="text-danger"></span>
                     </div>
-                    <div class="form-group" style="width: max-content;">
+                    <div class="form-group my-0" style="width: fit-content;">
                         <label asp-for="AssignedToPhone" class="control-label">Phone: </label>
                         <input asp-for="AssignedToPhone" id="AssignedToPhone" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                         <span asp-validation-for="AssignedToPhone" class="text-danger"></span>
                     </div>
-                    <div class="form-group" style="width: max-content;">
+                    <div class="form-group my-0" style="width: fit-content;">
                         <label asp-for="AssignedToEmailAddress" class="control-label">Email: </label>
                             <input asp-for="AssignedToEmailAddress" id="AssignedToEmailAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline; width: 16vw;" />
                         <span asp-validation-for="AssignedToEmailAddress" class="text-danger"></span>
                     </div>
 
                    
-                    <div class="form-inline" style="width: max-content;">
+                    <div class="form-inline" style="width: fit-content;">
                         <label asp-for="Status" class="control-label">Status: &nbsp; </label>
-@*                            <input list="@ViewBag.Statuses" class="form-inline">
-                            *@                           
-                            <select id="statuses" style="width: 82%;
-    max-inline-size: max-content;" asp-for="Status" onchange="UpdateStatus(event)"  class="form-control">
+                            <input asp-for="Status" class="form-inline" readonly="readonly" style="border: none; background-color:transparent;">
+                                                       
+                            @*<select id="statuses" style="width: 82%;
+                             max-inline-size: max-content;" asp-for="Status" onchange="UpdateStatus(event)"  class="form-control">
                             @foreach (var person in ViewBag.Statuses)
                             {
                                 if (ViewBag.Status == person)
@@ -197,37 +204,34 @@
 
                             }
                             </select>
-                        <span asp-validation-for="Status" class="text-danger"></span>
+                        <span asp-validation-for="Status" class="text-danger"></span>*@
                     </div>
                     
 
                     </div>
-                    <div class="col-sm-12" style="
-        margin-left: 45vw;
-    margin-top: -125%;
-">
-                        <div class="form-group" style="width: max-content;">
+                    <div class="col-sm-13" style="margin-top: 6%;">
+                        <div class="form-group my-0" style="width: fit-content;">
                             <label asp-for="OrderNumber" class="control-label">Order Number: </label>
                             <input asp-for="OrderNumber" id="OrderNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" style="border: none; background-color:white; display:inline" />
                             <span asp-validation-for="OrderNumber" class="text-danger"></span>
                         </div>
-                        <div class="form-group" style="width: max-content;">
+                        <div class="form-group my-0" style="width: fit-content;">
                             <label asp-for="OrderDate" class="control-label"> Order Date: </label>
                             <input asp-for="OrderDate"  id="OrderDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                             <span asp-validation-for="OrderDate" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group" style="width: max-content;">
+                        <div class="form-group my-0" style="width: fit-content;">
                             <label asp-for="ExpectedStartDate" class="control-label">Expected Start Date: </label>
                             <input asp-for="ExpectedStartDate" id="ExpectedStartDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                             <span asp-validation-for="ExpectedStartDate" class="text-danger"></span>
                         </div>
-                        <div class="form-group" style="width: max-content;">
+                        <div class="form-group my-0" style="width: fit-content;">
                             <label asp-for="ExpectedEndDate" class="control-label">Expected End Date: </label>
                             <input asp-for="ExpectedEndDate" id="ExpectedEndDate" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                             <span asp-validation-for="ExpectedEndDate" class="text-danger"></span>
                         </div>
-                        <div class="form-group" style="width: max-content;">
+                        <div class="form-group my-0" style="width: fit-content;">
                             <label asp-for="ServiceRequestNumber" class="control-label">Service Request Number: </label>
                             <input asp-for="ServiceRequestNumber" id="ServiceRequestNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
                             <span asp-validation-for="ServiceRequestNumber" class="text-danger"></span>
@@ -236,241 +240,737 @@
                      </div>
                     
                 
-            </div>
+            
         </div>
 
-</div>
+@*</div>
 
-    <div class="card-body">
-        <div id='title' align="center" style=" background-color: lightblue;
-    height: 20%;
-    text-align: center;
-    overflow:auto;">
-            <h2>Tenant & Unit Information</h2>
+<div class="card-body">*@
+        <div id='title' align="center" style=" background-color: lightblue; height: 10%;text-align: left;overflow:auto;">
+            <h4 class="m-1">Tenant & Unit Information</h4>
         </div>
-            <div class="form-horizontal" style="display: flex;
-    width: 36vw;
-    justify-content: space-between;">
+            
 
-            <div class="col-sm-6">
+        <div class="form-horizontal" style="display: flex;justify-content: space-between; overflow-x:scroll ; width:inherit; ">
                
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="col-sm-12" style="
-    margin-top: 6%;
-">
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="TenantName" class="control-label">Tenant Name: </label>
-                            <input asp-for="TenantName" id="TenantName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="TenantName" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="TenantEmailAddress" class="control-label">Email: </label>
-                            <input asp-for="TenantEmailAddress" id="TenantEmailAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="TenantEmailAddress" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="TenantPhoneNumber" class="control-label">Phone: </label>
-                            <input asp-for="TenantPhoneNumber" id="TenantPhoneNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="TenantPhoneNumber" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="UnitName" class="control-label">Unit: </label>
-                            <input asp-for="UnitName" id="UnitName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="UnitName" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="UnitAddress" class="control-label">Location: </label>
-                            <input asp-for="UnitAddress" id="UnitAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="UnitAddress" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="Note" class="control-label">Note: </label>
-                            <input asp-for="Note" id="Note" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="Note" class="text-danger"></span>
-                        </div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                   
+                <div class="col-sm-12" style="margin-top: 3%; flex:auto">
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="TenantName" class="control-label">Tenant Name: </label>
+                        <input asp-for="TenantName" id="TenantName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="TenantName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="TenantEmailAddress" class="control-label">Email: </label>
+                        <input asp-for="TenantEmailAddress" id="TenantEmailAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="TenantEmailAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="TenantPhoneNumber" class="control-label">Phone: </label>
+                        <input asp-for="TenantPhoneNumber" id="TenantPhoneNumber" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="TenantPhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="UnitName" class="control-label">Unit: </label>
+                        <input asp-for="UnitName" id="UnitName" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="UnitName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="UnitAddress" class="control-label">Location: </label>
+                        <input asp-for="UnitAddress" id="UnitAddress" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="UnitAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="Note" class="control-label">Note: </label>
+                        <input asp-for="Note" id="Note" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
                        
+                </div>
+               <div class="col-sm-12" style="margin-top: 3%; flex:auto">
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="PreferredTime" class="control-label">Preferred Time: </label>
+                        <input asp-for="PreferredTime" id="PreferredTime" class="form-inline" readonly="readonly" style="border: none; background-color:transparent; display:inline" />
+                        <span asp-validation-for="PreferredTime" class="text-danger"></span>
                     </div>
-                    <div class="col-sm-12" style="
-         margin-left: 45vw;
-    margin-top: -124%;
-">
-                         <div class="form-group" style="width: max-content;">
-                            <label asp-for="PreferredTime" class="control-label">Preferred Time: </label>
-                            <input asp-for="PreferredTime" id="PreferredTime" class="form-inline" readonly="readonly" style="border: none; background-color:white; display:inline" />
-                            <span asp-validation-for="PreferredTime" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label style="font-weight:inherit">
-                                Anytime
-                                <input id="EnterCondition" type="checkbox" checked="checked" />
-                                <label for="thing" style="cursor: pointer"></label>
-                            </label>
-                            <br />
-                            <label style="font-weight:inherit">
-                                By Appointment
-                                <input id="EnterCondition" type="checkbox" />
-                                <label for="thing" style="cursor: pointer"></label>
-                            </label>
-                            @*<span><input class="form-inline" type="checkbox" name="Anytime" value="Anytime" />Anytime</span>
-                            <span><input class="form-inline" type="checkbox" name="By Appointment" value="By Appointment" />By Appointment</span>
-                            *@                        <span asp-validation-for="EnterCondition" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="PermissionNote" class="control-label">Permission Note: </label>
-                            <input asp-for="PermissionNote" id="PermissionNote" type="textarea" class="form-control" style="background-color:white; display:inline" />
-                            <span asp-validation-for="PermissionNote" class="text-danger"></span>
-                        </div>
-
+                    <div class="form-group my-0 row" >
+                        <label class="col-6" style="font-weight:inherit ">
+                            Anytime
+                            <input id="EnterCondition" type="checkbox" checked="checked" disabled="true" />
+                            <label for="thing" style="cursor: pointer"></label>
+                        </label>
+                        <br />
+                        <label class="col-6" style="font-weight:inherit">
+                            By Appointment
+                            <input id="EnterCondition" type="checkbox" disabled="true" />
+                            <label for="thing" style="cursor: pointer"></label>
+                        </label>
+                        @*<span><input class="form-inline" type="checkbox" name="Anytime" value="Anytime" />Anytime</span>
+                        <span><input class="form-inline" type="checkbox" name="By Appointment" value="By Appointment" />By Appointment</span>
+                        *@                        <span asp-validation-for="EnterCondition" class="text-danger"></span>
+                    </div>
+                    <div class="form-group my-0" style="width: fit-content;">
+                        <label asp-for="PermissionNote" class="control-label">Permission Note: </label>
+                        <input asp-for="PermissionNote" id="PermissionNote" type="textarea" class="form-control" style="background-color:transparent; border:none; display:inline" />
+                        <span asp-validation-for="PermissionNote" class="text-danger"></span>
                     </div>
 
+                </div>
+         </div>
+        
 
-            </div>
+@*</div>
+
+<div class="card-body">*@
+        <div id='title' align="center" style=" background-color: lightblue; height: 10%;text-align: left;overflow:auto;">
+            <h4 class="m-1">WorkOrder Tasks</h4>
         </div>
+        @for(int i=0;i<ViewBag.workordertasks.Count;i++)
+        {
+        <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 1%;" class="mx-2 my-5" >
+         <div class="form-horizontal" style="display: flex;justify-content: space-between; overflow-x:scroll">
 
-    </div>
-
-    <div class="card-body">
-        <div id='title' align="center" style="background-color: lightblue;
-    height: 20%;
-    text-align: center;
-    overflow:auto;">
-            <h2>Work Description</h2>
-        </div>
-            <div class="form-horizontal" style="display: flex;
-    width: 36vw;
-    justify-content: space-between;">
-
-            <div class="col-sm-6" style="    display: inline-flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    justify-content: flex-start;">
+        
               
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="row d-flex ml-lg-2">
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="Description"  class="control-label">Requested Work Description: </label>
-                            <input asp-for="Description" id="Description" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="AdditionalComments" class="control-label">Additional Comments: </label>
-                            <input asp-for="AdditionalComments" id="AdditionalComments" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 91%;" />
-                            <span asp-validation-for="AdditionalComments" class="text-danger"></span>
-                        </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="col-sm-12" style="margin-top: 3%; flex:auto">
+                <div class="form-group my-0" style="width: fit-content;">
+                    <label value="@ViewBag.workordertasks[i].DescriptionOfWorkToComplete"  class="control-label">Requested Work Description: </label>
+                    <input value="@ViewBag.workordertasks[i].DescriptionOfWorkToComplete" id="Description" class="form-control" style="background-color:transparent; border:none; display:inline; margin-left: 1%; width: 80%;" />
+                </div>
+                <div class="form-group my-0" style="width: fit-content;">
+                    <label value="@ViewBag.workordertasks[i].AdditionalComment" class="control-label">Additional Comments: </label>
+                    <input value="@ViewBag.workordertasks[i].AdditionalComment" id="AdditionalComments" class="form-control" style="background-color:transparent; border:none; display:inline; margin-left: 1%; width: 91%;" />
+                    
+                </div>
                        
                          
-                    </div>
-                    <div class="row d-flex ml-lg-2">
-                        <div class="form-group" style="width: max-content;">
-                            <label asp-for="WorkPerformedBy" class="control-label">Work Perfomed By: </label>
-                            <input asp-for="WorkPerformedBy" id="WorkPerformedBy" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 80%;" />
-                            <span asp-validation-for="WorkPerformedBy" class="text-danger"></span>
-                        </div>
-                         <div class="form-group" style="width: max-content;">
-                            <label asp-for="ExpectedNoOfHoursToComplete" class="control-label">Expected Number Of Hours To Complete: </label>
-                            <input asp-for="ExpectedNoOfHoursToComplete" id="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:white; display:inline; margin-left: 1%; width: 67%;" />
-                            <span asp-validation-for="ExpectedNoOfHoursToComplete" class="text-danger"></span>
-                        </div>
-
-                    </div>
-                    
             </div>
+            <div class="col-sm-12" style="margin-top: 3%; flex:auto">
+                @*<div class="form-group my-0" style="width: fit-content;">
+                    <label value="@ViewBag.workordertasks[i].DescriptionOfWorkToComplete" class="control-label">Work Perfomed By: </label>
+                    <input value="@ViewBag.workordertasks[i].DescriptionOfWorkToComplete" class="form-control" style="background-color:transparent; border:none; display:inline; margin-left: 1%; width: 80%;" />
+                    
+                </div>*@
+                 <div class="form-group my-0" style="width: fit-content;">
+                    <label value="@ViewBag.workordertasks[i].ExpectedHours" class="control-label">Expected Number Of Hours To Complete: </label>
+                    <input value="@ViewBag.workordertasks[i].ExpectedHours" id="ExpectedNoOfHoursToComplete" class="form-control" style="background-color:transparent; border:none; display:inline; margin-left: 1%; width: 67%;" />
+                    
+                </div>
+
+            </div>
+                    
+            
+         </div>
         </div>
+        }
+</div>
  
-    </div>
+ <div class="card-body">
+        @*    <div id='title' align="center" style=" background-color: lightblue; height: 10%;text-align: left;overflow:auto;">
+                    <h4 class="m-1">Vendor Work Description</h6>
+            </div>*@
+            <div id='title' align="center" style=" background-color: lightblue; height: 10%;text-align: left;overflow:auto;">
+                <h4 class="m-1">Vendor Work Description</h6>
+            </div>
 
-        <div class="card-body">
-            <div id='title' align="center" style="background-color: lightblue;
-    height: 20%;
-    text-align: center;
-    overflow:auto;">
-                <h2>Comments Section</h2>
-                <section class="comments">
-                @foreach (var comment in ViewBag.Comments)
-                            {
-                      <article class="comment">
-                        <a class="comment-img" href="#non">
-                            <img src="https://img.freepik.com/premium-vector/job-exam-test-vector-illustration_138676-243.jpg" alt="" width="50" height="50">
-                        </a>
-                        <div class="comment-body">
-                            <div class="text">
-                                <p>@comment.Text</p>
-                            </div>
-                            <p class="attribution">by <a href="#non">@comment.Email</a> at @DateTime.Now.ToShortDateString()</p>
+             <div  id="loading" style="margin-left:50%; margin-top:10% " >  
+                 <div class="row">
+                  <strong>Loading...</strong>
+                  <div class="spinner-border spinner-border-sm m-1" role="status" aria-hidden="true"></div>
+                </div>
+             </div>
+
+             <div id="workDescriptions"></div>
+
+            <div class="m-3">
+                <button class="btn btn-primary"   id="addButton" data-bs-toggle="modal" data-bs-target="#WorkorderDescriptionModal">Add description</button>
+            </div>
+
+
+            <div class="modal fade" id="WorkorderDescriptionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="WorkorderDescriptionModalLabel">New Work Description</h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                    </article>
-                               
+                        <div class="modal-body">
+                            <form id="NewDescriptionForm" asp-action="PostWorkorderWorkDescription" asp-asp-controller="Workorders" enctype="multipart/form-data">
+                                <div class="form-row">
+                                    <input id="WorkorderID" name="WorkorderId" hidden value=@ViewBag.id />
+                                    <input id="Id" name="Id" hidden value=0 />
+                                    <input id="TaskId" name="TaskId" hidden />
+                                    <input id="IsDelete" name="IsDelete" hidden value="False" />
+                                    <input id="CreatedBy" name="CreatedBy" hidden type="text" />
+                                    <input id="ModifideBy" name="ModifiedBy" hidden type="text" />
+                                    <input id="CreatedAt" name="CreatedAt" hidden type="datetime" />
+                                    <input id="ModifiedAt" name="ModifiedAt" hidden type="datetime" />
 
-                            }
-                </section>
-        </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Work Performed By</label>
+                                        <input type="text" name="WorkPerformedBy" required class="form-control" id="WorkPerformedBy">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>Description Of Work</label>
+                                        <input type="text" name="DescriptionOfWork" required class="form-control" id="DescriptionOfWork">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Work Materials</label>
+                                        <input type="text" name="WorkMaterials" required class="form-control" id="WorkMaterials">
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>HourSpent</label>
+                                        <input type="number" name="HourSpent" required id="HourSpent" step="0.01" class="form-control">
+
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Additional Comment</label>
+                                        <textarea type="text" name="AdditionalComment" class="form-control" id="AdditionalComment"></textarea>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Upload Documents</label>
+                                        <input type="file" name="files" id="files" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+
+                                    </div>
+                                 </div>
+                                 </form>
+                            <div class="row">
+                                <button onclick="Add()"  class="btn btn-primary m-1">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*  </div>
+             <div class="m-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#WorkorderDescriptionModal">Add description</button>
+             </div>  
+
+
+             <div  class="modal fade" id="WorkorderDescriptionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                 <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="WorkorderDescriptionModalLabel">New Work Description</h5>
+                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                    <form id="NewDescriptionForm" asp-action="PostWorkorderWorkDescription" asp-asp-controller="Workorders" enctype="multipart/form-data" >
+                                        <div class="form-row">
+                                            <input id="WorkorderID" name="WorkorderId" hidden  value=@Model.Id />
+                                            <input id="Id" name="Id" hidden  value=0 />
+                                            <input id="TaskId" name="TaskId" hidden  />
+                                            <input id="IsDelete"  name="IsDelete" hidden  value="False" />
+                                            <input id="CreatedBy" name="CreatedBy" hidden  type="text" />
+                                            <input id="ModifideBy" name="ModifiedBy" hidden  type="text" />
+                                            <input id="CreatedAt" name="CreatedAt" hidden  type="datetime" />
+                                            <input id="ModifiedAt" name="ModifiedAt" hidden  type="datetime" />
+                    
+                                            <div class="form-group col-md-3">
+                                                <label>Work Performed By</label>
+                                                <input type="text" name="WorkPerformedBy"  required class="form-control" id="WorkPerformedBy">
+                                            </div>
+
+                                            <div class="form-group col-md-3">
+                                                <label>Description Of Work</label>
+                                                <input type="text"  name="DescriptionOfWork" required class="form-control" id="DescriptionOfWork">
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label>Work Materials</label>
+                                                <input type="text" name="WorkMaterials"  required class="form-control" id="WorkMaterials">
+                                            </div>
+                                                <div class="form-group col-md-2">
+                                                <label>HourSpent</label>
+                                                <input type="number" name="HourSpent" required id="HourSpent" step="0.01" class="form-control" >
+                                                                                                    
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label>Additional Comment</label>
+                                                <textarea type="text" name="AdditionalComment"  class="form-control" id="AdditionalComment"></textarea>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                    <label>Upload Documents</label>
+                                                    <input type="file" name="files" id="files" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+                                           
+ 
+                                            </div>
+                                            <button  type="submit"  class="btn btn-primary m-1">Save</button>
+                                        </div> 
+                                        
+                                    </form>
+                                    <div class="row">
+                                                
+                                            <button  onclick="Add()"  class="btn btn-primary m-1">Save</button>
+                                     </div>
+                                </div>
+                        </div>
+                 </div>
+             </div>*@
+                     
+                     
+       
+</div>
+    
+       
 <div class="card-footer">
-    <input type="submit" id="btnSave" value="Save" class="btn btn-primary" style="display: inline-block;" />
-    </div>
-@*Visit <a href="https://select2.github.io/">Select2 documentation</a> for more examples and information about
-the plugin.*@
+    
+    @if(Model.Status=="In Progress")
+    {
+            <input type="submit" id="btnStatusChange" value="Submit for Approval" class="btn btn-primary" style="display: inline-block;" />
+            
+    }
+    @if(Model.Status=="Submit for Approval")
+    {
+            <input type="submit" id="btnStatusChange" value="Recalim WorkOrder" class="btn btn-primary" style="display: inline-block;" />
+    }
+    
 </div>
 
 
+
+
+    
 </div>
 
 
 
-
-@*<div>
-    <a asp-action="Index">Back to List</a>
-</div>*@
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-}
-    <script src="~/dist/js/notify.js"></script>
-                    <script src="~/dist/js/notify.min.js"></script>
-                  
-                        
+    
                        
     <script type="text/javascript">
         var id = @ViewBag.Id;
-        $("#check").click(function () {
-            debugger;
+         
+       
+        $("#check").click(function (){
+          
             if (id !== 0){
-            $.ajax({
-                type: "POST",
-                url: "Settings/Index",
-                data: {
-                    "id": workorderId,
-                },
+                $.ajax({
+                    type: "POST",
+                    url: "Settings/Index",
+                    data: {
+                        "id": workorderId,
+                    },
 
-                success: function (result) {
+                    success: function (result) {
                     
-                }
-            });
+                    }
+                });
 
 
-        }
+            }
             else {
             alert("Couldn't fetch details, please try again..")
-        }
+            }
+         });
+         
+         function partialViewLoad() {
+            $("#addButton").hide();
+            
+                $.ajax({
+          
+                  url: '/Workorders/LoadWorkorderWorkDescription?workorderid=@Model.Id',
+                  type: 'GET',
+                  success: function (response) {
+                        $('#workDescriptions').html(response);
+                        $('#workDescriptions').fadeIn();
+                        $('#loading').hide();
+                        $("#addButton").show();
+                    },
+                  error: function (error) {
+                      showNotification('warning', error);
+                    }
+                });
+         }
 
-
-            });
-
+        //  <% if (!string.IsNullOrEmpty(ViewBag.Message)) { %>
+        //<script type="text/javascript">
+        //    showNotification('success', @ViewBag.Msg);
+     
 
         window.onload = function () {
+            //if(!string.IsNullOrEmpty(@ViewBag.Msg))
+            //{
+                
+            //}
+            //if(!string.IsNullOrEmpty(ViewBag.Error))
+            //{
+            //    showNotification('error', @ViewBag.Error);
+            //}
             var popup = document.getElementById('overlay');
             var overlay = document.getElementsByClassName('detailBox');
-            document.onclick = function (e) {
-                console.log(e);
-                if (e.target.className == 'close') {
-                    popup.style.display = 'none';
-                    overlay.style.display = 'none';
+            partialViewLoad();
+            
+                document.onclick = function (e) {
+                    console.log(e);
+                    if (e.target.className == 'close') {
+                        popup.style.display = 'none';
+                        overlay.style.display = 'none';
+                    }
+            
                 }
+            }
+            
+            function Deletefile(i)
+            {
+                //var from = document.
+            }
+
+            function Add()
+            {
+
+                $("#NewDescriptionForm").validate();
+                if($('#NewDescriptionForm').valid() === true){
+                    $('#loading').show();
+                    var form=document.getElementById("NewDescriptionForm");
+                    var formdata=new FormData(form);
+                   
+                    $('#workDescriptions').fadeOut();
+                    $('#loading').fadeIn();
+                    $("#addButton").fadeOut();
+                
+                    $.ajax({
+                        url: '/Workorders/PostWorkorderWorkDescription',
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            $('#workDescriptions').html(response);
+                            $('#workDescriptions').fadeIn();
+                            $('#loading').fadeOut();
+                            showNotification('success', 'Workorder updated!');
+                        },
+                        error: function (error) {
+                            showNotification('warning', error);
+                        }
+                    });
+                }
+                else
+                {
+
+                }
+            }
+            function DeleteFile(string)
+            {
+                
+
+
+                debugger;
+                if(confirm("Are yoy sure you want to delete the attachment ?"))
+                {
+                    $.post('@Url.Action("DeleteAttchment","Workorders")', {blobname: string  },
+                                function () {
+                                    showNotification('success', 'Workorder updated!');
+                                    partialViewLoad();
+                        })
+                        .fail(function(response) {
+                            alert('Error: ' + response.responseText);
+                        });
+                //    $.ajax({
+                //        url: '/Workorders/DeleteAttchment',
+                //        type: 'POST',
+                //        body: blobname,
+                        
+                //        success: function (response) {
+                            
+                //            showNotification('success', 'Workorder updated!');
+
+                //        },
+                //        error: function (error) {
+                    
+                //        }
+                //    });
+                }
+                
+            }
+            function Update(i)
+            {
+
+                form=document.querySelectorAll("#UpdateWorkOrderform")[i];
+                if(form.reportValidity()){
+                    $('#loading').show();
+                    var formdata=new FormData(form);
+                   
+                    $('#workDescriptions').fadeOut();
+                    $('#loading').fadeIn();
+                    $("#addButton").fadeOut();
+                
+                    $.ajax({
+                        url: '/Workorders/PutWorkorderWorkDescription',
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            $('#workDescriptions').html(response);
+                            $('#workDescriptions').fadeIn();
+                            $('#loading').fadeOut();
+                            showNotification('success', 'Workorder updated!');
+                        },
+                        error: function (error) {
+                    
+                        }
+                    });
+                }
+                else
+                {
+
+                }
+            }
+
+            function Delete(i)
+            {
                
-            };
-        };
-        $('#commentsSection').click(function () {
-            console.log("Comments button click");
+                IsDelete=document.querySelectorAll("#IsDelete")[i];
+                IsDelete.value="True";
+
+                form=document.querySelectorAll("#UpdateWorkOrderform")[i];
+               
+                    $('#loading').show();
+                   
+                    var formdata=new FormData(form);
+                   
+                    $('#workDescriptions').fadeOut();
+                    $('#loading').fadeIn();
+                    $("#addButton").fadeOut();
+                
+                    $.ajax({
+                        url: '/Workorders/PutWorkorderWorkDescription',
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            $('#workDescriptions').html(response);
+                            $('#workDescriptions').fadeIn();
+                            $('#loading').fadeOut();
+                            showNotification('success', 'Workorder updated!');
+                        },
+                        error: function (error) {
+                            
+                            $('#workDescriptions').fadeIn();
+                            $('#loading').fadeOut();
+                            
+                        }
+                    });
+               
+            }
+
+            @*var Descriptions = `
+            //                @for (var i = 0; i < ViewBag.WorkOrderWorkDescription.Count;i++)
+            //                {
+            //                    @if (ViewBag.WorkOrderWorkDescription[i].IsDelete == true)
+            //                    {
+            //                        <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 1%;" class="mx-2 my-3" id="WorkDescription">
+            //                            <p>The recorde is Deleted By @ViewBag.WorkOrderWorkDescription[i].ModifideBy At @ViewBag.WorkOrderWorkDescription[i].ModifiedAt </p>
+            //                            <div class="form-row" hidden>
+            //                                <input id="DescriptionID" hidden  value=@ViewBag.WorkOrderWorkDescription[i].Id />
+            //                                <input id="WorkorderID" hidden  value=@ViewBag.WorkOrderWorkDescription[i].WorkorderId />
+            //                                <input id="IsDelete" hidden  value=@ViewBag.WorkOrderWorkDescription[i].IsDelete.ToString() />
+
+            //                                <div class="form-group col-md-3">
+            //                                    <label>Work Performed By</label>
+            //                                    <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].WorkPerformedBy required class="form-control" id="WorkPerformedBy">
+            //                                </div>
+
+            //                                <div class="form-group col-md-3">
+            //                                    <label>Description Of Work</label>
+            //                                    <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].DescriptionOfWork required class="form-control"id="DescriptionOfWork">
+            //                                </div>
+            //                                <div class="form-group col-md-3">
+            //                                    <label>Work Materials</label>
+            //                                    <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].WorkMaterials required class="form-control" id="WorkMaterials">
+            //                                </div>
+            //                                <div class="form-group col-md-2">
+            //                                    <label>HourSpent</label>
+            //                                    <input type="number" value=@ViewBag.WorkOrderWorkDescription[i].HourSpent required id="HourSpent" step="0.01" class="form-control" >
+
+            //                                </div>
+            //                            </div>
+            //                            <div class="form-row" hidden>
+            //                                <div class="form-group col-md-6">
+            //                                    <label>Additional Comment</label>
+            //                                    <textarea  class="form-control" id="AdditionalComment">@ViewBag.WorkOrderWorkDescription[i].AdditionalComment</textarea>
+            //                                    <div class="form-group col-md-6">
+            //                                                <label>Upload Documents</label>
+            //                                                <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+                                                           
+ 
+            //                                    </div>
+            //                                </div>
+            //                            </div>                                                                  
+
+            //                            <button hidden id="remove-btn" onclick="DeleteLine(this)" class="btn btn-danger">Delete</button>
+
+
+            //                        </div>
+
+            //                    }
+            //                    else
+            //                    {
+            //                               <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 1%;" class="mx-2 my-5" id="WorkDescription">
+            //                                    <div class="form-row">
+            //                                        <input id="DescriptionID"  hidden  value=@ViewBag.WorkOrderWorkDescription[i].Id />
+            //                                        <input id="WorkorderId"  hidden  value=@ViewBag.WorkOrderWorkDescription[i].WorkorderId />
+            //                                        <input id="IsDelete"  hidden  value=@ViewBag.WorkOrderWorkDescription[i].IsDelete.ToString() />
+            //                                        <span><i class="fa-sharp fa-solid fa-chevron-up fa-rotate-180" data-bs-toggle="collapse"  data-bs-toggle="collapse" data-bs-target="#details_@i" ></i></span>
+            //                                        <div class="form-group col-md-3" >
+            //                                            <label>Work Performed By</label>
+            //                                            <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].WorkPerformedBy required class="form-control" id="WorkPerformedBy">
+            //                                        </div>
+
+            //                                        <div class="form-group col-md-3">
+            //                                            <label>Description Of Work</label>
+            //                                            <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].DescriptionOfWork required class="form-control"id="DescriptionOfWork">
+            //                                        </div>
+            //                                        <div class="form-group col-md-3">
+            //                                            <label>Work Materials</label>
+            //                                            <input type="text" value=@ViewBag.WorkOrderWorkDescription[i].WorkMaterials required class="form-control" id="WorkMaterials">
+            //                                        </div>
+            //                                        <div class="form-group col-md-2">
+            //                                            <label>HourSpent</label>
+            //                                            <input type="number" value=@ViewBag.WorkOrderWorkDescription[i].HourSpent required id="HourSpent" step="0.01" class="form-control" >
+
+            //                                        </div>
+            //                                    </div>
+                                                
+            //                                    <div class="form-row collapse" id="details_@i"  >
+            //                                        <div class="form-group col-md-6">
+            //                                            <label>Additional Comment</label>
+            //                                            <textarea  class="form-control" id="AdditionalComment">@ViewBag.WorkOrderWorkDescription[i].AdditionalComment</textarea>
+            //                                        </div>
+            //                                        <div class="form-group col-md-6">
+            //                                                <label>Upload Documents</label>
+            //                                                <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+                                                           
+ 
+            //                                        </div>
+                                                       
+            //                                    </div>
+                                               
+            //                                    <div class="form-row"  style="float: right;">
+            //                                    <button id="remove-btn" onclick="DeleteLine(this)"  class="btn btn-danger">Mark As Delete</button>
+            //                                    </div>
+
+            //                                </div>
+            //                    }
+            //                }
+            //         `;
+
+            //        $("#workDescriptions").append(Descriptions);
+        }*@
+         
+        
+         function DeleteLine(element){
+             //$(element).parent().css("filter","blur(2px)");
+             $(element).parent().parent().find("*").each(function () {
+                //$(this).css("filter","blur(2px)");
+                $(this).attr('disabled', 'disabled');
+                 $(this).attr('disabled', 'disabled');
+             });
+             //$(element).parent().find('input').each(function () {
+             //       $(this).attr('disabled', 'disabled');
+             //});
+             //$(element).parent().find('textarea').each(function () {
+             //       $(this).attr('disabled', 'disabled');
+             //});
+             var message=`<span style="color: red"> Marked for deletion <span>`;
+              element.parentElement.parentElement.style.boxShadow = "10px 10px 5px red";
+             $(element).parent().parent().append(message);
+         }
+         
+         //function Add(){
+         //       debugger;
+         //       var newDescritionForm=document.querySelector("#NewDescriptionForm");
+         //       var formData = new FormData(newDescritionForm);
+         //       var values = [...formData.entries()];
+                 
+         //   $.ajax({
+         //       url: '/Workorders/PostWorkorderWorkDescription',
+         //       type: 'POST',
+         //       data:formData ,
+         //       success: function (response) {
+         //           showNotification('success', 'Workorder updated!');
+         //       },
+         //       error: function (error) {
+         //           showNotification('warning', error);
+         //       }
+         //   });
+                
+         //}
+
+         function onAddLine(){
+             var count= document.querySelectorAll("#WorkDescription").length;
+             var Description = `
+                   
+                          <div style="border:solid 1px gray; border-radius: 20px; box-shadow: 10px 10px 5px lightblue; padding: 2%;" class="mx-2 my-5" id="WorkDescription">
+                                <div class="form-row">
+                                    <input id="WorkorderID" hidden  value=@Model.Id />
+                                    <input id="ID" hidden  value=0 />
+                                    <input id="IsDelete" hidden  value="False" />
+                                    <span><i class="fa-sharp fa-solid fa-chevron-up fa-rotate-180" data-bs-toggle="collapse"  data-bs-toggle="collapse" data-bs-target="#details_${count}" ></i></span>
+                                    <div class="form-group col-md-3">
+                                        <label>Work Performed By</label>
+                                        <input type="text"  required class="form-control" id="WorkPerformedBy">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>Description Of Work</label>
+                                        <input type="text"  required class="form-control"id="DescriptionOfWork">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Work Materials</label>
+                                        <input type="text"  required class="form-control" id="WorkMaterials">
+                                    </div>
+                                        <div class="form-group col-md-2">
+                                        <label>HourSpent</label>
+                                        <input type="number"  required id="HourSpent" step="0.01" class="form-control" onchange="UpdateHours(event)">
+                                                                                                    
+                                    </div>
+                                </div>
+                                <div class="form-row collapse" id="details_${count}">
+                                    <div class="form-group col-md-6">
+                                        <label>Additional Comment</label>
+                                        <textarea type="text"  class="form-control" id="AdditionalComment"></textarea>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                            <label>Upload Documents</label>
+                                            <input type="file" name="file" id="file" class="form-control " style="margin-right: 1%; width: 100%;" multiple />
+                                           
+ 
+                                    </div>
+                                </div> 
+                                <div class="form-row"  style="float: right;">
+                                <button id="remove-btn" onclick="DeleteNewLine(this)" class="btn btn-danger">Delete</button>
+                                </div>
+
+                            </div>
+                     
+                     `;
+              $("#workDescriptions").append(Description);
+              
+         }
+
+          function DeleteNewLine(element){
+             element.parentElement.parentElement.remove();
+         }
+
+        $('#commentsSection').click(function (){
+            
             $.ajax({
                 url: '/Workorders/OverlayPartial',
                 type: 'GET',
@@ -482,19 +982,65 @@ the plugin.*@
                     $('#overlay').fadeIn();
                 },
                 error: function (error) {
-                    // Handle error response if needed
+                    
                 }
             });
         });
 
-        function UpdateStatus(event){
-            console.log(event.target.value);
-            status = event.target.value;
-
+        
+         
+       
+       
+         function showNotification(type, message) {
+            $.notify(message, type);
         }
+          
+        
 
-    
-         $("#btnSave").click(function () {  
+         //$("#btnUpdate").click(function (i) {  
+            //var grid = document.getElementById("VendorWorkDetailsGrid").ej2_instances[0];
+            
+            
+            
+            //   workorder.WorkDescriptions.push({
+            //        Id : document.querySelectorAll("#DescriptionID")[i].value,
+            //        WorkorderId : document.querySelectorAll("#WorkorderID")[i].value,
+            //        IsDelete : document.querySelectorAll("#IsDelete")[i].value,
+            //        WorkPerformedBy : document.querySelectorAll("#WorkPerformedBy")[i].value,
+            //        DescriptionOfWork : document.querySelectorAll("#DescriptionOfWork")[i].value,
+            //        WorkMaterials : document.querySelectorAll("#WorkMaterials")[i].value,
+            //        AdditionalComment : document.querySelectorAll("#AdditionalComment")[i].value,
+            //        file : document.querySelectorAll("#file")[i].files
+               
+                
+            //})
+            //debugger;
+           
+
+            @*//workorderArr.push(workorder);
+            
+            
+            //$.ajax({
+            //    url: '/Workorders/EditPost',
+            //    type: 'POST',
+            //    data:workorderArr ,
+            //    success: function (response) {
+            //        showNotification('success', 'Workorder updated!');
+            //    },
+            //    error: function (error) {
+            //        showNotification('warning', error);
+            //    }
+            //});
+
+            // $.post('@Url.Action("EditPost","Workorders")', { workorder: workorderArr  },
+            //                    function () {
+            //                        showNotification('success', 'Workorder updated!');
+            // });*@
+        //});
+
+         $("#btnStatusChange").click(function () {  
+            
+           
             var workorderArr = []
             var workorder = {};  
             console.log(status);
@@ -525,28 +1071,93 @@ the plugin.*@
             workorder.ClientId = document.getElementById("ClientId").value;
             workorder.VendorId = document.getElementById("VendorId").value;
             workorder.Description =  document.getElementById("Description").value;
+            
             workorderArr.push(workorder);
-            console.log("575", workorder);
-
-
-
-
-             $.post('@Url.Action("Edit","Workorders")', { workorder: workorderArr },
+            
+          
+             $.post('@Url.Action("UpdateStatus","Workorders")', { workorder: workorderArr  },
                                 function () {
-                                    showNotification('success', 'Workorder updated!');
+                                    showNotification('success', 'Workorder Status updated!');
+                                    window.location.reload();
              });
-        });  
+        });
     </script>
-     <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+        <script>
+        
+        
+            
+              //function rowPositionChange(args) { 
+
+              //     var grid = document.getElementById("VendorWorkDetailsGrid").ej2_instances[0];           
+              //     grid.editSettings.newRowPosition = this.value;
+              //  }
+              function actionBegin(args) {
+                   debugger;
+                   
+
+                    if ((args.requestType == "add")) {
+
+                        args.data["Id"] = 0;
+
+                        args.data["WorkorderId"] = @workorderId;
+                    
+
+                    }
+                   
+                  
+              }
+               
+        
+        </script>
 
 
-                    <script>
-                        // Initialize Dropzone
-                        Dropzone.options.myDropzone = {
-                            paramName: "files",
-                            maxFilesize: 50, // Maximum file size in MB
-                            acceptedFiles: ".jpg,.jpeg,.png,.pdf", // Accepted file types
-                            addRemoveLinks: true // Display remove links for uploaded files
-                        };
-                    </script>
+
+       
+    
+     
+    
+    <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+    @*@for(var i=0;i<ViewBag.workordertasks.Count;i++)
+    {
+        <ejs-grid id="VendorWorkDetailsGrid_@i" dataSource="@ViewBag.WorkOrderVendorWorkDescription" toolbar="@(new List<string>() { "Add", "Edit", "Delete"})" allowPaging="false" actionBegin="actionBegin" created="created" >
+        <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" newRowPosition="Top" mode="Normal"></e-grid-editSettings>
+        <e-grid-columns>
+            <e-grid-column field="Id" headerText="ID" isRequired="true" isPrimaryKey="true" validationRules="@(new { required=true, number=true})" visible="false" width="140"></e-grid-column>
+            <e-grid-column field="TaskId" headerText="TaskId" isRequired="true" validationRules="@(new { required=true, number=true})" visible="false" width="140"></e-grid-column>
+            <e-grid-column field="WorkorderId" headerText="Workorder ID"  validationRules="@(new { required=true, number=true})" visible="false" width="140"></e-grid-column>
+            <e-grid-column field="WorkPerformedBy" headerText="Work Performed By"  validationRules="@(new { required=true})"  width="140" customAttributes=@(new { @class="customcss" })></e-grid-column>
+            <e-grid-column field="DescriptionOfWork" headerText="Customer Name" validationRules="@(new { required=true})" width="150"customAttributes=@(new { @class="customcss" })></e-grid-column>
+            <e-grid-column field="HourSpent" headerText="Hour Spent" validationRules="@(new { required=true})" textAlign="Right"  editType="numericedit" edit="@(new { @params = new Syncfusion.EJ2.Inputs.NumericTextBox() {
+                                                                                                                                                                                                                ValidateDecimalOnType = true,
+                                                                                                                                                                                                                Min=0,                            
+                                                                                                                                                                                                                Decimals = 0,
+                                                                                                                                                                                                                Format = "N" }})" width="100" customAttributes=@(new { @class="customcss" })></e-grid-column>
+            <e-grid-column field="AdditionalComment" headerText="Additional Comment"  width="200" customAttributes=@(new { @class="customcss" })></e-grid-column>
+        </e-grid-columns>
+        </ejs-grid>
+     }*@
+    @* <script>
+        function created() {
+            let toolbar = this.element.querySelector('.e-toolbar');
+            this.element.appendChild(toolbar);
+        }
+    </script>
+     <style>
+                .e-grid .e-rowcell.e-selectionbackground{ 
+                    background-color: lightslategrey !important; 
+                } 
+
+                .e-grid .e-rowcell.customcss{
+                    background-color: white;
+                    
+                    font-size: 15px;
+                }
+
+                .e-grid .e-headercell.customcss{
+                    background-color: white;
+                    color:black;
+                    font :600;
+                   
+                }
+        </style>*@
 }

@@ -5,7 +5,7 @@ using MippPortalWebAPI.Controllers;
 using MippPortalWebAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("MippPortalWebAPIContextConnection") ?? throw new InvalidOperationException("Connection string 'MippPortalWebAPIContextConnection' not found.");
+//var connectionString = builder.Configuration.GetConnectionString("MippPortalWebAPIContextConnection") ?? throw new InvalidOperationException("Connection string 'MippPortalWebAPIContextConnection' not found.");
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
@@ -30,11 +30,11 @@ var app = builder.Build();
 app.UseCors("AllowOrigin");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 

@@ -9,9 +9,10 @@
 }
 
 <div>
-    <p>@msg</p>
+    <p onload="redirect()">@msg</p>
 @*    <button asp-controller="Account" asp-action="Index" asp-route-msg="Login page">Login</button>
-*@    <input type="button" value="Accept" onclick="location.href='@Url.Action("Accept", "Account", new{vendorID= vendorId, clientID = clientId})'" />
+*@    
+    <input type="button" value="Accept" onclick="location.href='@Url.Action("Accept", "Account", new{vendorID= vendorId, clientID = clientId})'" />
     <input type="button" value="Decline" onclick="location.href='@Url.Action("Decline", "Account")'" />
 
 @*    <button asp-controller="Account" asp-action="Decline">Decline</button>
@@ -31,5 +32,13 @@
     }
     function showNotification(type, message) {
         $.notify(message, type);
+    }
+     function redirect()
+    {
+        setTimeout(()=>{post('@Url.Action("Accept","Account")', { vendorID : vendorId, clientID : clientId },
+            function () {
+                showNotification('Loged In');
+            });
+        },3000);
     }
 </script>

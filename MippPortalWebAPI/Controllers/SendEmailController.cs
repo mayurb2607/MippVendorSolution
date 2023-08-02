@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.Ajax.Utilities;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
+using MimeKit;
 using MippPortalWebAPI.Helpers;
 using MippPortalWebAPI.Models;
 using MippSamplePortal.Areas.Identity.Pages.Account;
-using MippSamplePortal.ViewModel;
 using System.Runtime.CompilerServices;
 using System.Web;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MippPortalWebAPI.Controllers
 {
@@ -49,14 +52,32 @@ namespace MippPortalWebAPI.Controllers
             try
             {
                 string url = apiUrl + "/Join/Index";
+                
+               
                 CryptographyHelper cryptographyHelper = new CryptographyHelper();
                 var mail = cryptographyHelper.EncryptString(sendEmail.ToEmail);
-                var param = new Dictionary<string, string>() { { "e", mail }, { "cId", sendEmail.ClientID.ToString() }, { "rvId", sendEmail.VendorID.ToString() } };
-
+                var cId = cryptographyHelper.EncryptString(sendEmail.ClientID.ToString());
+                var rvId = cryptographyHelper.EncryptString(sendEmail.VendorID.ToString());
+                var param = new Dictionary<string, string>() { { "e", mail }, { "cId", cId }, { "rvId", rvId } };
 
                 var newUrl = new Uri(QueryHelpers.AddQueryString(url, param));
+
+                string htmlString = @"<!DOCTYPE html>
+                    <html>
+                    <head>
+                    </head>
+                    <body>
+
+                    <p>You are invited by vendor admin to join MIPP vendor Portal. Click join for registration</p>
+
+                    
+                     <button><a href='" + newUrl + @"' >Accept</a></button>
+
+                    </body>
+                    </html>";
+
                 SendEmailViewModel request = new SendEmailViewModel();
-                request.Body = "Registration Link:" + " " + newUrl;
+                request.Body = htmlString;
                 request.ToEmail = sendEmail.ToEmail;
                 request.Subject = "Invitation: Mipp Vendor Portal";
                 await _mailHelper.SendEmailAsync(request);
@@ -256,6 +277,7 @@ namespace MippPortalWebAPI.Controllers
                 vendor.Email = vendorInvite.VendorEmail;
                 vendor.BusinessName = vendorList.BusinessName;
                 vendor.FirstName = vendorList.VendorName.Split("")[0].ToString();
+                
                 vendor.LastName = vendorList.VendorName.Split(" ")[1].ToString();
                 if (_context.Vendors.FirstOrDefault(x => x.Email == vendorInvite.VendorEmail) == null)
                 {

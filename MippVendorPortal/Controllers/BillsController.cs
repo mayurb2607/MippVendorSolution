@@ -14,10 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage;
-using MippPortalWebAPI.Helpers;
-using MippPortalWebAPI.Models;
-using MippSamplePortal.Models;
-using MippSamplePortal.ViewModel;
+
 using MippVendorPortal.Models;
 using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
@@ -26,7 +23,13 @@ using Syncfusion.EJ2.Linq;
 using dotless.Core.Parser.Infrastructure;
 using NuGet.ContentModel;
 using System.ComponentModel.Design;
-
+using Workorder = MippVendorPortal.Models.Workorder;
+using MippVendorPortal.Helpers;
+using Bill = MippVendorPortal.Models.Bill;
+using BillRequest = MippVendorPortal.Helpers.BillRequest;
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.Differencing;
+using Azure;
 
 namespace MippVendorPortal.Controllers
 {
@@ -34,14 +37,14 @@ namespace MippVendorPortal.Controllers
     public class BillsController : Controller
     {
         private readonly MippVendorTestContext _context;
-        private readonly MippPortalWebAPI.Models.MippTestContext _context1;
+        
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _hostEnvironment;
 
-        public BillsController(MippVendorTestContext context, MippPortalWebAPI.Models.MippTestContext context1, IConfiguration configuration, IHostEnvironment hostEnvironment)
+        public BillsController(MippVendorTestContext context, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _context = context;
-            _context1 = context1;
+            //_context1 = context1;
             _configuration = configuration;
             _hostEnvironment = hostEnvironment;
 
@@ -127,11 +130,10 @@ namespace MippVendorPortal.Controllers
                 {
                     var fileName = Path.GetFileName(file.FileName);
                     var filePath = Path.Combine("C:\\MiPP\\MippVendor\\MippVendorPortal", fileName); // Specify the desired directory path
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
+                    var fileStream = new MemoryStream();
+                    
+                     file.CopyTo(fileStream);
+                    
                     //is exists,
                     string connectionString = "DefaultEndpointsProtocol=https;AccountName=mippbills;AccountKey=WV5m77LeyX2X21hEhLov5gZ6rn0RX7goEXxIGK9/ju/7i07oGX+i/P/XI/e4aKFVraPxyjaKwMBl+AStR305aw==;EndpointSuffix=core.windows.net"; // Replace with your Azure Blob Storage connection string
                     string containerName = "mipp-bill-accounts"; // Replace with your container name
@@ -154,7 +156,8 @@ namespace MippVendorPortal.Controllers
                     BlobClient blobClient = containerClient.GetBlobClient(blobName);
 
                     // Open a FileStream to read the file
-                    using (FileStream fileStream = new FileStream(file.FileName, FileMode.Open))
+                    fileStream.Position = 0;
+                    using ( fileStream )
                     {
                         // Upload the file to Azure Blob Storage
                         blobClient.Upload(fileStream, true);
@@ -308,6 +311,7 @@ namespace MippVendorPortal.Controllers
 
         public async Task<IActionResult> Index(int vendorID, int woID)
         {
+            var user = User.Identity.Name;
             try
             {
                 var env = _hostEnvironment.EnvironmentName;
@@ -321,7 +325,7 @@ namespace MippVendorPortal.Controllers
                 else
                 {
                     // Configure services for local environment
-                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
                 }
 
 
@@ -335,16 +339,39 @@ namespace MippVendorPortal.Controllers
                 //settings.BillDate = dt;
                 //settings.DueDate = dt2;
                 IEnumerable<Setting> enumerable = lst;
-                var clientId = _context.VendorClients.FirstOrDefault(x => x.VendorId == vendorID).ClientId;
+                
                 List<string> taxList = new List<string>();
 
 
                 //var taxes = _context1.Taxes.Where(x => x.ClientId == clientId);
               
                 
-                MippPortalWebAPI.Helpers.WorkorderRequest workorderRequest = new MippPortalWebAPI.Helpers.WorkorderRequest();
+                Helpers.WorkorderRequest workorderRequest = new Helpers.WorkorderRequest();
+                var clientId=_context.VendorClients.FirstOrDefault(x=>x.VendorId==vendorID).ClientId;
                 workorderRequest.ClientID = clientId;
-                IEnumerable<MippPortalWebAPI.Models.Tax> taxes = null;
+                workorderRequest.Id=woID;
+                IEnumerable<Models.Tax> taxes = null;
+                var workorder = new Workorder();
+                using (var httpClient1 = new HttpClient())
+                {
+                    StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                    using (var response1 = await httpClient1.PostAsync(apiUrl + "Workorders/GetWorkorder", content1))
+                    {
+                        string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                        try
+                        {
+                            workorder = JsonConvert.DeserializeObject
+                                <Workorder>(apiResponse1);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+
+               
                 using (var httpClient1 = new HttpClient())
                 {
                     StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
@@ -355,7 +382,27 @@ namespace MippVendorPortal.Controllers
                         try
                         {
                             taxes = JsonConvert.DeserializeObject
-                                <IEnumerable<MippPortalWebAPI.Models.Tax>>(apiResponse1);
+                                <IEnumerable<Models.Tax>>(apiResponse1);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+
+                var services = new List<ProductsAndServices>();
+                using (var httpClient = new HttpClient())
+                {
+                    
+
+                    using (var response1 = await httpClient.GetAsync(apiUrl + "Bills/GetProductAndServices?clientID=" + workorderRequest.ClientID))
+                    {
+                        string apiResponse = await response1.Content.ReadAsStringAsync();
+                        try
+                        {
+                            services = JsonConvert.DeserializeObject
+                                <IEnumerable<ProductsAndServices>>(apiResponse).ToList();
                         }
                         catch (Exception ex)
                         {
@@ -364,11 +411,14 @@ namespace MippVendorPortal.Controllers
                     }
                 }
                 ViewBag.taxList = taxes;
-
-
                 ViewBag.woid = woID;
-                var images = GetAllFiles(woID.ToString());
-                ViewBag.ImageUrls = images.Result;
+                ViewBag.services = services;
+                ViewBag.WONumber = workorder.OrderNumber;
+                ViewBag.Clientmail = workorder.TenantEmailAddress;
+                ViewBag.Vendormail = user;
+                ViewBag.CientId = workorder.ClientId;
+                //var images = GetAllFiles(woID.ToString());
+                //ViewBag.ImageUrls = images.Result;
                 return View(enumerable);
             }
             catch (Exception ex)
@@ -381,11 +431,277 @@ namespace MippVendorPortal.Controllers
 
 
 
+        [HttpGet]
+        public async Task<ActionResult<ProductsAndServices>> GetProductAndServiceDetails(int serviceId)
+        {
+            try
+            {
+                var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+                }
+
+                ProductsAndServices details;
+                using (var httpClient = new HttpClient())
+                {
+                    
+
+                    using (var response = await httpClient.GetAsync(apiUrl + "Bills/GetProductAndServiceDetails?serviceId="+ serviceId))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+
+                         details = JsonConvert.DeserializeObject<ProductsAndServices>(apiResponse);
+
+                    }
+                }
+                return Ok(details);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+
+        public async Task<ActionResult> UpdateStatus(int workorderId)
+        {
+            
+            var env = _hostEnvironment.EnvironmentName;
+            string apiUrl = string.Empty;
+            if (env == "Development")
+            {
+                // Configure services for development environment
+                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+            }
+            else
+            {
+                // Configure services for local environment
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+            }
+
+            WorkorderRequest workorderRequest = new WorkorderRequest();
+            workorderRequest.Id = workorderId;
+
+
+            string Msg = "Status Updated";
+
+            Workorder workorder1;
+            using (var httpClient = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync(apiUrl + "Workorders/GetWorkorder", content))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        workorder1 = JsonConvert.DeserializeObject
+                            <Workorder>(apiResponse);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+            }
+            try
+            {
+                if (workorder1.Status == "Approved")
+                {
+                    workorder1.Status = "Bill Created";
+                    workorderRequest.Status = "Bill Created";
+
+
+                }
+                else 
+                {
+                    return BadRequest();
+                }
+                
+
+                
+            }
+            catch
+            {
+                throw;
+            }
+
+            using (var httpClient1 = new HttpClient())
+            {
+                StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient1.PostAsync(apiUrl + "Workorders/UpdateWorkorderStatus", content1))
+                {
+                    if (!response.IsSuccessStatusCode)
+                        return Problem("Could not update Status");
+                }
+            }
+
+            try
+            {
+
+                ViewBag.saveMsg = "Changes saved successfully!!";
+
+                using (var httpClient1 = new HttpClient())
+                {
+                    StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorder1), Encoding.UTF8, "application/json");
+
+                    using (var response1 = await httpClient1.PostAsync(apiUrl + "SendEmail/SendWorkorderStatusUpdateEmail", content1))
+                    {
+                        string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                        //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                        //return true;
+                        if (response1.IsSuccessStatusCode)
+                            return Ok();
+                    }
+                }
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+
+            }
+            ViewBag.Msg = Msg;
+            return Problem("There is somthing wrong");
+
+        }
+
+
+        public async Task<ActionResult> Edit(int billId)
+        {
+            try
+            {
+                var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+                }
+                var billRequest = new BillRequest();
+                var workorderRequest = new WorkorderRequest();
+                var bill = new Bill();
+                IEnumerable<Models.Tax> taxes = null;
+                billRequest.BillId = billId;
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(billRequest), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/GetBillDetails", content))
+                    {
+                        var apiResponse = await response.Content.ReadAsStringAsync();
+                        bill = JsonConvert.DeserializeObject<Bill>(apiResponse);
+                    }
+
+                }
+                workorderRequest.ClientID= bill.ClientId;
+                string status = String.Empty;
+                using (var httpClient = new HttpClient())
+                {
+
+
+                    using (var response = await httpClient.GetAsync(apiUrl + "Workorders/GetWorkorderStatus?workorderId=" + bill.WorderId))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        status =apiResponse;
+
+                    }
+                }
+                if (status == "Approved")
+                {
+                    var billitems =new List<BillItem>();
+                    using (var httpClient = new HttpClient())
+                    {
+                        StringContent content = new StringContent(JsonConvert.SerializeObject(billRequest), Encoding.UTF8, "application/json");
+
+                        using (var response = await httpClient.PostAsync(apiUrl + "Bills/GetBillItems", content))
+                        {
+                            var apiResponse = await response.Content.ReadAsStringAsync();
+                            billitems = JsonConvert.DeserializeObject<List<BillItem>>(apiResponse);
+                        }
+                    }
+
+                    using (var httpClient1 = new HttpClient())
+                    {
+                        StringContent content1 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                        using (var response1 = await httpClient1.PostAsync(apiUrl + "Bills/GetTaxList", content1))
+                        {
+                            string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                            try
+                            {
+                                taxes = JsonConvert.DeserializeObject
+                                    <IEnumerable<Models.Tax>>(apiResponse1);
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+
+                    var services = new List<ProductsAndServices>();
+                    using (var httpClient = new HttpClient())
+                    {
+
+
+                        using (var response1 = await httpClient.GetAsync(apiUrl + "Bills/GetProductAndServices?clientID=" + bill.ClientId))
+                        {
+                            string apiResponse = await response1.Content.ReadAsStringAsync();
+                            try
+                            {
+                                services = JsonConvert.DeserializeObject
+                                    <IEnumerable<ProductsAndServices>>(apiResponse).ToList();
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                    ViewBag.taxList = taxes;
+                    ViewBag.services = services;
+                    ViewBag.BillItems = billitems;
+                    var images = GetAllFiles(bill.WorderId.ToString());
+                    ViewBag.ImageUrls = images.Result;
+                    return View(bill);
+                }
+                else
+                    return RedirectToAction("Bills");
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpGet("Bills")]
         public async Task<IActionResult> Bills(int vendorId, string msg)
         {
-            MippPortalWebAPI.Helpers.WorkorderRequest workorderRequest = new MippPortalWebAPI.Helpers.WorkorderRequest();
+            var user = User.Identity.Name;
+            vendorId = _context.Vendors.FirstOrDefault(x => x.VendorEmail == user).RootVendorId ?? 0;
+            Helpers.WorkorderRequest workorderRequest = new Helpers.WorkorderRequest();
+            var clientId=_context.VendorClients.FirstOrDefault(x=>x.VendorId== vendorId).ClientId;
             workorderRequest.VendorID = vendorId;
+            workorderRequest.ClientID = clientId;
             workorderRequest.Status = "";
             workorderRequest.AdditionalComments = "";
 
@@ -400,148 +716,33 @@ namespace MippVendorPortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
-
-            IEnumerable<MippPortalWebAPI.Models.Bill> bill;
-            using (var httpClient = new HttpClient())
+            try
             {
-                StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
-
-                using (var response = await httpClient.PostAsync(apiUrl + "Bills/GetBills", content))
+                List<Bill> bill = new List<Bill>();
+                using (var httpClient = new HttpClient())
                 {
-                    string apiResponse = await response.Content.ReadAsStringAsync();
-                    try
+
+
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/GetBillsForVendor", content))
                     {
-                        bill = JsonConvert.DeserializeObject<IEnumerable<MippPortalWebAPI.Models.Bill>>(apiResponse);
-                        ViewBag.VendorId = vendorId;
-                        ViewBag.Workorder = bill;
-                        ViewBag.msg = msg;
-
-
-                        ViewData["GridData"] = bill;
-                        ViewBag.GridData = bill;
-
-                        return View(bill);
-
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                }
-            }
-
-
-
-            return View(_context1.Bills);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Insert(string woId, IEnumerable<BillDataViewModel> testArr, IEnumerable<SettingsViewModel> testArrSettings)
-        {
-            MippPortalWebAPI.Models.Bill bill = new MippPortalWebAPI.Models.Bill();
-            var clientID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId;
-            var vendorID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId;
-            MippPortalWebAPI.Helpers.WorkorderRequest workorderRequest = new MippPortalWebAPI.Helpers.WorkorderRequest();
-            workorderRequest.ClientID = clientID;
-            string clientEmail = "";
-
-
-
-            var env = _hostEnvironment.EnvironmentName;
-            string apiUrl = string.Empty;
-            if (env == "Development")
-            {
-                // Configure services for development environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
-                //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
-            }
-            else
-            {
-                // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
-            }
-
-            using (var httpClient2 = new HttpClient())
-            {
-                StringContent content2 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
-
-                using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/GetClientEmail", content2))
-                {
-                    clientEmail = await response2.Content.ReadAsStringAsync();
-                }
-            }
-
-
-            foreach (var item in testArr)
-            {
-                MippPortalWebAPI.Models.BillItem billItem = new MippPortalWebAPI.Models.BillItem();
-                billItem.Name = item.item;
-                billItem.Description = item.description;
-                billItem.Quantity = item.quantity;
-                billItem.Unit = item.unit;
-                billItem.Quantity = item.quantity;
-                billItem.Price = item.price;
-                billItem.Tax = item.tax;
-                billItem.Total = item.total;
-                billItem.Subtotal = item.subtotal;
-                billItem.BillId = "1";
-
-                using (var httpClient1 = new HttpClient())
-                {
-                    StringContent content1 = new StringContent(JsonConvert.SerializeObject(billItem), Encoding.UTF8, "application/json");
-
-                    using (var response1 = await httpClient1.PostAsync(apiUrl + "Bills/AddBillItems", content1))
-                    {
-                        string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                        string apiResponse = await response.Content.ReadAsStringAsync();
                         try
                         {
-                            foreach (var item1 in testArrSettings)
-                            {
-                                string Id = "1";
-                                bill.AddressLine1 = item1.AddressLine1;
-                                bill.AddressLine2 = item1.AddressLine2;
-                                bill.AddressLine3 = item1.City;
-                                bill.City = item1.City;
-                                bill.Province = item1.Province;
-                                bill.Wonumber = woId;
-                                bill.CareOf = item1.CareOf;
-                                bill.BillTo = item1.BusinessName;
-                                bill.BillDate = item1.BillDate;
-                                bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
-                                bill.ClientEmail = clientEmail;
-                                bill.SubTotal = item1.Subtotal;
-                                bill.TaxAmount = item1.Tax;
-                                bill.Total = item1.Total;
-                                bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.BillId == Id).Id.ToString(); ;
-                                bill.Summary = item1.Summary;
-                                bill.Title= item1.Title;
-                                bill.PaymentDueOn = item1.DueDate;
-                                bill.Note = item1.Note;
-                                bill.InvoiceDate = item1.BillDate;
-                                bill.VendorId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId.ToString();
-                                bill.VendorEmail = _context.Vendors.FirstOrDefault(x => x.Id == int.Parse(bill.VendorId)).VendorEmail;
-                                //bill.Documents
-                                bill.Footer = item1.Footer;
+                            bill = JsonConvert.DeserializeObject<List<Models.Bill>>(apiResponse);
+                            ViewBag.VendorId = vendorId;
+                            ViewBag.Workorder = bill;
+                            ViewBag.msg = msg;
 
-                                using (var httpClient2 = new HttpClient())
-                                {
-                                    StringContent content2 = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
 
-                                    using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/AddBill", content2))
-                                    {
-                                        string apiResponse2 = await response2.Content.ReadAsStringAsync();
-                                        try
-                                        { }
-                                        catch { }
+                            ViewData["GridData"] = bill;
+                            ViewBag.GridData = bill;
 
 
 
-
-                                    }
-                                }
-                            }
                         }
                         catch (Exception ex)
                         {
@@ -550,46 +751,309 @@ namespace MippVendorPortal.Controllers
                     }
                 }
 
-
-               
+                return View(bill);
             }
-            workorderRequest.Id = int.Parse(woId);
-            workorderRequest.Status = "Bill Created";
-            using (var httpClient3 = new HttpClient())
+            catch (Exception ex)
             {
-                StringContent content3 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
-
-                using (var response3 = await httpClient3.PostAsync(apiUrl + "Workorders/UpdateWorkorderStatus", content3))
-                {
-                    var apiResponse3 = await response3.Content.ReadAsStringAsync();
-                    if(apiResponse3 == "true")
-                    {
-                        using (var httpClient4 = new HttpClient())
-                        {
-                            StringContent content4 = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
-
-                            using (var response4 = await httpClient4.PostAsync(apiUrl + "SendEmail/SendBillCreatedEmail", content4))
-                            {
-                                string apiResponse4 = await response4.Content.ReadAsStringAsync();
-                                //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
-                                //return true;
-                                if (response4.IsSuccessStatusCode)
-                                    return RedirectToAction("Index", new { rootVendorId = vendorID});
-                            }
-                        }
-                    }
-                }
+                throw ex;
             }
 
-
-
-
-
-            return Ok();
 
         }
 
-        
+
+        [HttpPost]
+        public async Task<IActionResult> Insert(string woId, Models.Bill bill, IEnumerable<Models.BillItem> billItems)
+        {
+            try {
+                var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+                }
+                Bill createdbill;
+
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/AddBill", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        try
+                        {
+                            createdbill= JsonConvert.DeserializeObject<Bill>(apiResponse);
+                        }
+                        catch(Exception ex) 
+                        {
+                            throw ex;
+                        }
+                     }
+                }
+
+                foreach (var item in billItems)
+                {
+                    item.BillId = createdbill.Id;
+                    item.Total = item.Subtotal + item.TaxId1 ?? 0 + item.Tax2 ?? 0;
+                }
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(billItems), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/AddBillItems", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        try
+                        {
+                            createdbill = JsonConvert.DeserializeObject<Bill>(apiResponse);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+            return Ok();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Update(string woId, Models.Bill bill, IEnumerable<Models.BillItem> billItems)
+        {
+            try
+            {
+                var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+                }
+                Bill createdbill;
+
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/UpdateBill", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        try
+                        {
+                            createdbill = JsonConvert.DeserializeObject<Bill>(apiResponse);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+
+                foreach (var item in billItems)
+                {
+                    item.BillId = createdbill.Id;
+                    item.Total = item.Subtotal + item.TaxId1 ?? 0 + item.Tax2 ?? 0;
+                }
+                using (var httpClient = new HttpClient())
+                {
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(billItems), Encoding.UTF8, "application/json");
+
+                    using (var response = await httpClient.PostAsync(apiUrl + "Bills/UpdateBillItems", content))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        try
+                        {
+                            createdbill = JsonConvert.DeserializeObject<Bill>(apiResponse);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return Ok();
+        }
+
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> Insert(string woId, IEnumerable<BillDataViewModel> testArr, IEnumerable<SettingsViewModel> testArrSettings)
+        //{
+        //    Models.Bill bill = new Models.Bill();
+        //    var clientID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId;
+        //    var vendorID = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId;
+        //    Helpers.WorkorderRequest workorderRequest = new Helpers.WorkorderRequest();
+        //    workorderRequest.ClientID = clientID;
+        //    string clientEmail = "";
+
+
+
+        //    var env = _hostEnvironment.EnvironmentName;
+        //    string apiUrl = string.Empty;
+        //    if (env == "Development")
+        //    {
+        //        // Configure services for development environment
+        //        apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+        //        //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+        //    }
+        //    else
+        //    {
+        //        // Configure services for local environment
+        //        apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+        //    }
+
+        //    using (var httpClient2 = new HttpClient())
+        //    {
+        //        StringContent content2 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+        //        using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/GetClientEmail", content2))
+        //        {
+        //            clientEmail = await response2.Content.ReadAsStringAsync();
+        //        }
+        //    }
+
+
+        //    foreach (var item in testArr)
+        //    {
+        //        Models.BillItem billItem = new Models.BillItem();
+        //        billItem.Name = item.item;
+        //        billItem.Description = item.description;
+        //        billItem.Quantity = item.quantity;
+        //        billItem.Unit = item.unit;
+        //        billItem.Quantity = item.quantity;
+        //        billItem.Price = item.price;
+        //        billItem.Tax = item.tax;
+        //        billItem.Total = item.total;
+        //        billItem.Subtotal = item.subtotal;
+        //        billItem.BillId = "1";
+
+        //        using (var httpClient1 = new HttpClient())
+        //        {
+        //            StringContent content1 = new StringContent(JsonConvert.SerializeObject(billItem), Encoding.UTF8, "application/json");
+
+        //            using (var response1 = await httpClient1.PostAsync(apiUrl + "Bills/AddBillItems", content1))
+        //            {
+        //                string apiResponse1 = await response1.Content.ReadAsStringAsync();
+        //                try
+        //                {
+        //                    foreach (var item1 in testArrSettings)
+        //                    {
+        //                        string Id = "1";
+        //                        bill.AddressLine1 = item1.AddressLine1;
+        //                        bill.AddressLine2 = item1.AddressLine2;
+        //                        bill.AddressLine3 = item1.City;
+        //                        bill.City = item1.City;
+        //                        bill.Province = item1.Province;
+        //                        bill.Wonumber = woId;
+        //                        bill.CareOf = item1.CareOf;
+        //                        bill.BillTo = item1.BusinessName;
+        //                        bill.BillDate = item1.BillDate;
+        //                        bill.ClientId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).ClientId.ToString();
+        //                        bill.ClientEmail = clientEmail;
+        //                        bill.SubTotal = item1.Subtotal;
+        //                        bill.TaxAmount = item1.Tax;
+        //                        bill.Total = item1.Total;
+        //                        bill.BillItemId = _context1.BillItems.FirstOrDefault(x => x.BillId == Id).Id.ToString(); ;
+        //                        bill.Summary = item1.Summary;
+        //                        bill.Title= item1.Title;
+        //                        bill.PaymentDueOn = item1.DueDate;
+        //                        bill.Note = item1.Note;
+        //                        bill.InvoiceDate = item1.BillDate;
+        //                        bill.VendorId = _context1.Workorders.FirstOrDefault(x => x.Id == int.Parse(woId)).VendorId.ToString();
+        //                        bill.VendorEmail = _context.Vendors.FirstOrDefault(x => x.Id == int.Parse(bill.VendorId)).VendorEmail;
+        //                        //bill.Documents
+        //                        bill.Footer = item1.Footer;
+
+        //                        using (var httpClient2 = new HttpClient())
+        //                        {
+        //                            StringContent content2 = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
+
+        //                            using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/AddBill", content2))
+        //                            {
+        //                                string apiResponse2 = await response2.Content.ReadAsStringAsync();
+        //                                try
+        //                                { }
+        //                                catch { }
+
+
+
+
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+
+        //                }
+        //            }
+        //        }
+
+
+
+        //    }
+        //    workorderRequest.Id = int.Parse(woId);
+        //    workorderRequest.Status = "Bill Created";
+        //    using (var httpClient3 = new HttpClient())
+        //    {
+        //        StringContent content3 = new StringContent(JsonConvert.SerializeObject(workorderRequest), Encoding.UTF8, "application/json");
+
+        //        using (var response3 = await httpClient3.PostAsync(apiUrl + "Workorders/UpdateWorkorderStatus", content3))
+        //        {
+        //            var apiResponse3 = await response3.Content.ReadAsStringAsync();
+        //            if(apiResponse3 == "true")
+        //            {
+        //                using (var httpClient4 = new HttpClient())
+        //                {
+        //                    StringContent content4 = new StringContent(JsonConvert.SerializeObject(bill), Encoding.UTF8, "application/json");
+
+        //                    using (var response4 = await httpClient4.PostAsync(apiUrl + "SendEmail/SendBillCreatedEmail", content4))
+        //                    {
+        //                        string apiResponse4 = await response4.Content.ReadAsStringAsync();
+        //                        //receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+        //                        //return true;
+        //                        if (response4.IsSuccessStatusCode)
+        //                            return RedirectToAction("Index", new { rootVendorId = vendorID});
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+
+
+
+
+        //    return Ok();
+
+        //}
+
+
         // GET: BillSettings/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -609,12 +1073,12 @@ namespace MippVendorPortal.Controllers
             else
             {
                 // Configure services for local environment
-                apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
             }
             BillRequest billRequest = new BillRequest();
             billRequest.Id = id;
 
-            MippPortalWebAPI.Models.Bill bill = new MippPortalWebAPI.Models.Bill(); 
+            Models.Bill bill = new Models.Bill(); 
             using (var httpClient2 = new HttpClient())
             {
                 StringContent content2 = new StringContent(JsonConvert.SerializeObject(billRequest), Encoding.UTF8, "application/json");
@@ -622,7 +1086,7 @@ namespace MippVendorPortal.Controllers
                 using (var response2 = await httpClient2.PostAsync(apiUrl + "Bills/GetBillDetails", content2))
                 {
                     var apiResponse = await response2.Content.ReadAsStringAsync();
-                    bill = JsonConvert.DeserializeObject<MippPortalWebAPI.Models.Bill>(apiResponse);
+                    bill = JsonConvert.DeserializeObject<Models.Bill>(apiResponse);
                 }
             }
             if(bill != null)

@@ -96,4 +96,14 @@ public partial class Workorder
     public int? ClientId { get; set; }
 
     public int? VendorId { get; set; }
+
+    public bool? IsDelete { get; set; }
+
+    public string? CreatedBy { get; set; }
+
+    public string? ModifideBy { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? ModifiedAt { get; set; }
 }

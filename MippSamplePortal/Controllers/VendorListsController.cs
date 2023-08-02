@@ -15,21 +15,25 @@ namespace MippSamplePortal.Controllers
     {
         private readonly MippTestContext _context;
         private readonly EmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public VendorListsController(MippTestContext context, EmailService emailService)
+        public VendorListsController(MippTestContext context, IConfiguration configuration, EmailService emailService)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         // GET: VendorLists
         public async Task<IActionResult> Index(string email)
         {
+            
             int clientID = (int)_context.Clients.FirstOrDefault(x => x.Email == email).ClientId;
-            ViewData["GridData"] = _context.VendorLists.Where(x => x.ClientId == clientID).ToList();
-            ViewBag.GridData = _context.VendorLists.Where(x => x.ClientId == clientID).ToList();
+            var vendorList = _context.VendorLists.Where(x => x.ClientId == clientID).ToList();
+            ViewBag.GridData = vendorList;
             ViewBag.Email = email;
-            return View(_context.VendorLists.Where(x => x.ClientId == clientID).ToList());
+            ViewBag.Url = _configuration.GetValue<string>("LocalEndpoint");
+            return View(vendorList);
         }
 
         // GET: VendorLists/Details/5
@@ -101,8 +105,17 @@ namespace MippSamplePortal.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(vendorList);
-                await _context.SaveChangesAsync();
-                string email = _context.Clients.FirstOrDefault(x => x.ClientId == vendorList.ClientId).Email;
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch(Exception ex) 
+                { 
+                    throw ex; 
+                }
+                var email = User.Identity.Name;
+
                 return RedirectToAction("Index", new {email = email});
             }
             return View(vendorList);

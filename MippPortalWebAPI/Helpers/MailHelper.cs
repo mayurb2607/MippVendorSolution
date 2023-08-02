@@ -5,7 +5,7 @@ using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using System.IO;
 using System.Net.Mail;
-using MippSamplePortal.ViewModel;
+using MippPortalWebAPI.Models;
 
 namespace MippPortalWebAPI.Helpers
 {
@@ -33,8 +33,10 @@ namespace MippPortalWebAPI.Helpers
 
                 }
             }
-
+            
             var builder = new BodyBuilder();
+            
+            
             builder.HtmlBody = mailRequest.Body;
 
             email.Body = builder.ToMessageBody();

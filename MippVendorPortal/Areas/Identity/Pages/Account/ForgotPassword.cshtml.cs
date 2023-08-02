@@ -14,9 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Hosting;
-using MippPortalWebAPI.Helpers;
-using MippSamplePortal.ViewModel;
+
 using MippVendorPortal.Areas.Identity.Data;
+using MippVendorPortal.ViewModel;
 using Newtonsoft.Json;
 
 namespace MippVendorPortal.Areas.Identity.Pages.Account
@@ -25,13 +25,16 @@ namespace MippVendorPortal.Areas.Identity.Pages.Account
     {
         private readonly UserManager<MippVendorPortalUser> _userManager;
         private readonly IEmailSender _emailSender;
-        private readonly MailHelper _mailHelper;
+        private readonly IConfiguration _configuration;
+        private readonly IHostEnvironment _hostEnvironment;
 
-        public ForgotPasswordModel(UserManager<MippVendorPortalUser> userManager, IEmailSender emailSender, MailHelper mailHelper)
+        public ForgotPasswordModel(UserManager<MippVendorPortalUser> userManager, IEmailSender emailSender , IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _emailSender = emailSender;
-            _mailHelper = mailHelper;
+            _configuration = configuration;
+            _hostEnvironment = hostEnvironment;
+    
         }
 
         /// <summary>
@@ -96,10 +99,34 @@ namespace MippVendorPortal.Areas.Identity.Pages.Account
                 SendEmailViewModel request = new SendEmailViewModel();
                 request.FromEmail = "bhavsarmayur26@gmail.com";
                 request.Cc = new List<string>();
-                request.Body = "Reset password, click here:" + loginModel.CallbackUrl + "<br/>";
+                request.Body = "Reset password, click here: <div> <a href ='" + loginModel.CallbackUrl + "'>Reset Password </a> </div> ";
                 request.ToEmail = loginModel.Email;
                 request.Subject = "Credentials for Vendor Portal";
-                await _mailHelper.SendEmailAsync(request);
+                var env = _hostEnvironment.EnvironmentName;
+                string apiUrl = string.Empty;
+                if (env == "Development")
+                {
+                    // Configure services for development environment
+                    apiUrl = _configuration.GetValue<string>("LocalEnvironmentAPIUrl");
+                    //apiUrl = _configuration.GetValue<string>("DevEnvironmentAPIUrl");
+                }
+                else
+                {
+                    // Configure services for local environment
+                    apiUrl = _configuration.GetValue<string>("ProdEnvironmentAPIUrl");
+                }
+                using (var httpClient1 = new HttpClient())
+                {
+                    StringContent content1 = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+                    using (var response1 = await httpClient1.PostAsync(apiUrl + "SendEmail/Send", content1))
+                    {
+                        string apiResponse1 = await response1.Content.ReadAsStringAsync();
+                        
+                       
+                    }
+                }
+                //await _mailHelper.SendEmailAsync(request);
                 
             }
             catch (Exception ex)

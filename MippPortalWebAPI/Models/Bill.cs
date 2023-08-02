@@ -7,7 +7,7 @@ public partial class Bill
 {
     public int Id { get; set; }
 
-    public string? ClientId { get; set; }
+    public int? ClientId { get; set; }
 
     public string? Title { get; set; }
 
@@ -33,17 +33,17 @@ public partial class Bill
 
     public string? Wonumber { get; set; }
 
-    public string? InvoiceDate { get; set; }
+    public int? WorderId { get; set; }
 
-    public string? PaymentDueOn { get; set; }
+    public DateTime? InvoiceDate { get; set; }
 
-    public string? BillItemId { get; set; }
+    public DateTime? PaymentDueOn { get; set; }
 
-    public string? SubTotal { get; set; }
+    public decimal? SubTotal { get; set; }
 
-    public string? TaxAmount { get; set; }
+    public decimal? TaxAmount { get; set; }
 
-    public string? Total { get; set; }
+    public decimal? Total { get; set; }
 
     public string? Note { get; set; }
 
@@ -57,7 +57,7 @@ public partial class Bill
 
     public string? Zip { get; set; }
 
-    public string? BillDate { get; set; }
+    public DateTime? BillDate { get; set; }
 
     public string? VendorEmail { get; set; }
 

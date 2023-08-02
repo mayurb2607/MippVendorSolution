@@ -1,0 +1,94 @@
+﻿
+@model MippVendorPortal.Models.AcceptInvitationLoginModel
+
+@{
+    ViewData["Title"] = "Index";
+    // var tabHeaderOne = new TabHeader { Text = "Lokalizace" };
+    //var tabHeaderTwo = new TabHeader { Text = "Cenik" };
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var vendorId = ViewBag.VendorId;
+
+}
+
+<div class="row d-flex justify-content-center">
+    <p><h4>UserName @Model.Email Already Exist.Login to accept invitation</h4></p>
+    <div class="col-md-6 col-xs-12">
+        
+        <div class="card">
+           
+                
+            
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Sign in to accept the invitation</p>
+                <form asp-controller="Join" asp-action="Accept" method="post">
+                    <hr />
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                   
+                    <input asp-for="ClientId" class="form-control" hidden="true"/>
+                    <input asp-for="VendorId" class="form-control" hidden="true" />
+                
+
+                    <div class="input-group mb-3">
+                        <input asp-for="Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                              <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                                          <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+
+
+                    <div class="row">
+
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        </div>
+
+                    </div>
+
+                </form>
+               @* <div class="row d-flex">
+                    <p>
+                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                    </p>
+                    <p>
+                        <a asp-page="./Register">Register as a new user</a>
+                    </p>
+                    @*<p>
+                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                    </p>
+                </div>*@
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+
+        if (ViewBag.msg)
+            alert(msg);
+    </script>
+}

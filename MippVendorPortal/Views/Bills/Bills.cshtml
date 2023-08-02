@@ -2,7 +2,7 @@
 @using Syncfusion.EJ2.Navigations;
 @using Syncfusion.EJ2.Grids;
 
-@model IEnumerable<MippPortalWebAPI.Models.Bill>
+@model List<Bill>
 
 @{
     ViewData["Title"] = "Bill List";
@@ -54,11 +54,7 @@
     <script src="~/dist/js/notify.js"></script>
     <script src="~/dist/js/notify.min.js"></script>
     <script>
-        if (@ViewBag.msg != null) {
-            $(document).ready(function () {
-                showNotification('success', @ViewBag.msg);
-            });
-        }
+        
         function showNotification(type, message) {
             $.notify(message, type);
         }
@@ -92,8 +88,8 @@
             var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0].currentViewData[0];
 
             var id = grid.Id;
-
-            var url = document.location.origin + "/BillSettings/Index/" + id;
+            //var workorderid = grid.
+            var url = document.location.origin + "/Bills/Edit?billId=" + id;
             window.location.replace(url);
 
         };

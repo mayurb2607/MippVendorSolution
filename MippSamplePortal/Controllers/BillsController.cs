@@ -27,7 +27,7 @@ namespace MippSamplePortal.Controllers
 
             if(clientID != 0)
             {
-                var bills = _context.Bills.Where(x => x.ClientId == clientID.ToString());
+                var bills = _context.Bills.Where(x => x.ClientId == clientID);
                 ViewBag.Email = email;
                 return View(bills);
             }

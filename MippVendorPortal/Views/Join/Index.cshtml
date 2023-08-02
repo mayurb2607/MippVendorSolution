@@ -17,7 +17,7 @@
                 </p>
                 <form asp-controller="Join" asp-action="Register" method="post">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" asp-for="VendorName" placeholder="Your name here" value="@ViewBag.FullName">
+                        <input type="text" class="form-control" asp-for="VendorName" placeholder="Your name here" value="@ViewBag.FullName" readonly>
                         <div class="input-group-append">
                             <div class="input-group-text" >
                                 <span class="fas fa-id-card"></span>
@@ -25,23 +25,17 @@
                         </div>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Email" asp-for="VendorEmail" value="@ViewBag.Email">
+                        <input type="text" class="form-control" placeholder="Email" asp-for="VendorEmail" value="@ViewBag.Email" readonly>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-envelope"></span>
                             </div>
                         </div>
                     </div>
+                    
+                    
                     <div class="input-group mb-3">
-                        <input type="password" class="form-control" asp-for="VendorPassword" placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" asp-for="VendorCompany" placeholder="Company or Organization" value="@ViewBag.Company">
+                        <input type="text" class="form-control" asp-for="VendorCompany" placeholder="Company or Organization" value="@ViewBag.Company" readonly>
                         <div class="input-group-append">
                             <div class="input-group-text" >
                                 <span class="fas fa-briefcase"></span>
@@ -49,13 +43,38 @@
                         </div>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" asp-for="VendorPhone" placeholder="Phone Number">
+                        <input type="text" class="form-control" asp-for="VendorPhone" placeholder="Phone Number"  readonly>
                         <div class="input-group-append">
                             <div class="input-group-text" >
                                 <span class="fas fa-phone"></span>
                             </div>
                         </div>
                     </div>
+
+                    <div class="input-group mb-3">
+                        <input type="password" id="password" class="form-control" asp-for="VendorPassword" placeholder="Password" required onchange="validatePassword()">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <span id="message" style="color:red"> </span>
+
+
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control" id="ConfirmPassword" placeholder="Confirm Password" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <span id="ConfirmMessage" style="color:red"> </span>
+
+
                     <div class="input-group mb-3" style="display:none">
                         <input type="text" class="form-control" asp-for="ClientId" value="@ViewBag.ClientId">
                         <div class="input-group-append">
@@ -121,20 +140,72 @@
 
 
     <script>
-
+        var PassVal = false;
+        var ConfPass = false;
+        var AgreeTerms = false;
         $("#check").click(function () {
             alert("Congrats! Registration successfull!!")
         });
-        var checkbox = document.querySelector("input[name=terms]");
+        var checkbox = document.getElementById("agreeTerms");
 
         checkbox.addEventListener('change', function () {
             var submitButton = $('#submitButton');
             if (this.checked) {
                 console.log("Checkbox is checked..");
+                AgreeTerms = true;
+                if (AgreeTerms && ConfPass && PassVal)
                 submitButton.prop('disabled', false);
+                
 
             } else {
                 console.log("Checkbox is not checked..");
+                AgreeTerms=false;
+                submitButton.prop('disabled', true);
+            }
+        });
+        
+        function validatePassword()
+        {
+            confirmPass.value=""
+            ConfPass=false;
+            var expression = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{6,20}$/;
+            var pass = document.getElementById("password").value;
+            var submitButton = $('#submitButton');
+            if (pass.match(expression))
+            {
+                document.getElementById("message").innerHTML = "";
+                PassVal=true;
+                if (AgreeTerms && ConfPass && PassVal)
+                    submitButton.prop('disabled', false);
+                
+            }
+            else
+            {
+                document.getElementById("message").innerHTML = "Password restrictions<br>  - At least 6 charactors <br> -  at least 1 capital and 1 small letter<br>   - at least 1 number<br>  - at least 1 spec char";
+                PassVal = false;
+                submitButton.prop('disabled', true);
+                
+
+            }
+        };
+        
+
+
+        var confirmPass = document.getElementById("ConfirmPassword");
+        confirmPass.addEventListener('change', function () {
+
+            var pass = document.getElementById("password").value;
+            var Confpassword = document.getElementById("ConfirmPassword").value;
+            var submitButton = $('#submitButton');
+            if (pass === Confpassword) {
+                document.getElementById("ConfirmMessage").innerHTML = "";
+                ConfPass=true
+                if (AgreeTerms && ConfPass && PassVal)
+                    submitButton.prop('disabled', false);
+            }
+            else {
+                document.getElementById("ConfirmMessage").innerHTML = "Password does'not match";
+                ConfPass = false;
                 submitButton.prop('disabled', true);
             }
         });
